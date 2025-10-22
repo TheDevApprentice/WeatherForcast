@@ -16,11 +16,11 @@ Write-Host "   [OK] Docker est pret" -ForegroundColor Green
 
 # 2. Arrêter et supprimer les anciens containers/volumes
 Write-Host "`n[2/5] Nettoyage des anciens containers..." -ForegroundColor Yellow
-docker-compose.dev down -v 2>$null
+docker-compose down -v 2>$null
 
 # 3. Demarrer le container PostgreSQL
 Write-Host "`n[3/5] Demarrage du container PostgreSQL..." -ForegroundColor Yellow
-docker-compose.dev up -d
+docker-compose up -d
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "   [OK] Container PostgreSQL demarre" -ForegroundColor Green
