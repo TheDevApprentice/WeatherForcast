@@ -147,24 +147,70 @@ namespace infra.Data
             // (les valeurs dynamiques comme DateTime.Now ou Random causent des erreurs)
             // IMPORTANT: Utiliser DateTimeKind.Utc pour PostgreSQL
             
+            // Seed de 3 semaines de prévisions météo (21 jours)
+            var startDate = new DateTime(2025, 10, 22, 0, 0, 0, DateTimeKind.Utc);
+            var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+            
             // Pour les Owned Entities, EF Core nécessite une configuration spéciale pour le seed
             modelBuilder.Entity<WeatherForecast>().HasData(
-                new { Id = 1, Date = new DateTime(2025, 10, 22, 0, 0, 0, DateTimeKind.Utc), Summary = "Cool" },
-                new { Id = 2, Date = new DateTime(2025, 10, 23, 0, 0, 0, DateTimeKind.Utc), Summary = "Mild" },
-                new { Id = 3, Date = new DateTime(2025, 10, 24, 0, 0, 0, DateTimeKind.Utc), Summary = "Hot" },
-                new { Id = 4, Date = new DateTime(2025, 10, 25, 0, 0, 0, DateTimeKind.Utc), Summary = "Freezing" },
-                new { Id = 5, Date = new DateTime(2025, 10, 26, 0, 0, 0, DateTimeKind.Utc), Summary = "Warm" }
+                // Semaine 1
+                new { Id = 1, Date = startDate, Summary = "Cool" },
+                new { Id = 2, Date = startDate.AddDays(1), Summary = "Mild" },
+                new { Id = 3, Date = startDate.AddDays(2), Summary = "Warm" },
+                new { Id = 4, Date = startDate.AddDays(3), Summary = "Hot" },
+                new { Id = 5, Date = startDate.AddDays(4), Summary = "Balmy" },
+                new { Id = 6, Date = startDate.AddDays(5), Summary = "Mild" },
+                new { Id = 7, Date = startDate.AddDays(6), Summary = "Cool" },
+                
+                // Semaine 2
+                new { Id = 8, Date = startDate.AddDays(7), Summary = "Chilly" },
+                new { Id = 9, Date = startDate.AddDays(8), Summary = "Bracing" },
+                new { Id = 10, Date = startDate.AddDays(9), Summary = "Cool" },
+                new { Id = 11, Date = startDate.AddDays(10), Summary = "Mild" },
+                new { Id = 12, Date = startDate.AddDays(11), Summary = "Warm" },
+                new { Id = 13, Date = startDate.AddDays(12), Summary = "Balmy" },
+                new { Id = 14, Date = startDate.AddDays(13), Summary = "Hot" },
+                
+                // Semaine 3
+                new { Id = 15, Date = startDate.AddDays(14), Summary = "Sweltering" },
+                new { Id = 16, Date = startDate.AddDays(15), Summary = "Hot" },
+                new { Id = 17, Date = startDate.AddDays(16), Summary = "Warm" },
+                new { Id = 18, Date = startDate.AddDays(17), Summary = "Mild" },
+                new { Id = 19, Date = startDate.AddDays(18), Summary = "Cool" },
+                new { Id = 20, Date = startDate.AddDays(19), Summary = "Chilly" },
+                new { Id = 21, Date = startDate.AddDays(20), Summary = "Freezing" }
             );
 
             // Seed des Value Objects Temperature (Owned Entity)
             modelBuilder.Entity<WeatherForecast>()
                 .OwnsOne(w => w.Temperature)
                 .HasData(
+                    // Semaine 1 (températures progressives)
                     new { WeatherForecastId = 1, Celsius = 15 },
-                    new { WeatherForecastId = 2, Celsius = 22 },
-                    new { WeatherForecastId = 3, Celsius = 35 },
-                    new { WeatherForecastId = 4, Celsius = -5 },
-                    new { WeatherForecastId = 5, Celsius = 18 }
+                    new { WeatherForecastId = 2, Celsius = 18 },
+                    new { WeatherForecastId = 3, Celsius = 22 },
+                    new { WeatherForecastId = 4, Celsius = 28 },
+                    new { WeatherForecastId = 5, Celsius = 25 },
+                    new { WeatherForecastId = 6, Celsius = 20 },
+                    new { WeatherForecastId = 7, Celsius = 16 },
+                    
+                    // Semaine 2 (températures variables)
+                    new { WeatherForecastId = 8, Celsius = 12 },
+                    new { WeatherForecastId = 9, Celsius = 8 },
+                    new { WeatherForecastId = 10, Celsius = 14 },
+                    new { WeatherForecastId = 11, Celsius = 19 },
+                    new { WeatherForecastId = 12, Celsius = 23 },
+                    new { WeatherForecastId = 13, Celsius = 26 },
+                    new { WeatherForecastId = 14, Celsius = 30 },
+                    
+                    // Semaine 3 (températures décroissantes)
+                    new { WeatherForecastId = 15, Celsius = 35 },
+                    new { WeatherForecastId = 16, Celsius = 32 },
+                    new { WeatherForecastId = 17, Celsius = 27 },
+                    new { WeatherForecastId = 18, Celsius = 21 },
+                    new { WeatherForecastId = 19, Celsius = 17 },
+                    new { WeatherForecastId = 20, Celsius = 10 },
+                    new { WeatherForecastId = 21, Celsius = 2 }
                 );
         }
     }

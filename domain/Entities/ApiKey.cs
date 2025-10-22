@@ -58,6 +58,11 @@ namespace domain.Entities
         public bool IsActive { get; private set; } = true;
 
         /// <summary>
+        /// La clé est-elle révoquée ?
+        /// </summary>
+        public bool IsRevoked => RevokedAt.HasValue;
+
+        /// <summary>
         /// Date de révocation/désactivation
         /// </summary>
         public DateTime? RevokedAt { get; private set; }

@@ -1,0 +1,116 @@
+@model application.ViewModels.Admin.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Créer un utilisateur";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Utilisateurs</a></li>
+            <li class="breadcrumb-item active">Créer</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">➕ Créer un nouvel utilisateur</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <!-- Informations de base -->
+                <h5 class="mb-3">📋 Informations de base</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label">Email *</label>
+                        <input asp-for="Email" class="form-control" placeholder="user@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label">Mot de passe *</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 caractères" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label">Prénom *</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label">Nom *</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Rôles -->
+                <h5 class="mb-3">🛡️ Rôles</h5>
+                <div class="mb-4">
+                    <p class="text-muted">Sélectionnez un ou plusieurs rôles pour cet utilisateur :</p>
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="SelectedRoles" 
+                                   value="@role" id="role_@role" />
+                            <label class="form-check-label" for="role_@role">
+                                <span class="badge bg-@GetRoleBadgeColor(role)">@role</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <hr />
+
+                <!-- Claim personnalisé optionnel -->
+                <h5 class="mb-3">🔑 Claim personnalisé (optionnel)</h5>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="CustomClaimType" class="form-label">Type</label>
+                        <input asp-for="CustomClaimType" class="form-control" placeholder="Ex: department" />
+                        <small class="form-text text-muted">Laissez vide si non nécessaire</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CustomClaimValue" class="form-label">Valeur</label>
+                        <input asp-for="CustomClaimValue" class="form-control" placeholder="Ex: IT" />
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Créer l'utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@functions {
+    string GetRoleBadgeColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "danger",
+            "User" => "primary",
+            "MobileUser" => "info",
+            "ApiConsumer" => "secondary",
+            _ => "dark"
+        };
+    }
+}

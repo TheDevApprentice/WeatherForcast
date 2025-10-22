@@ -127,6 +127,27 @@ namespace domain.Entities
         }
 
         /// <summary>
+        /// Activer le compte (alias pour Reactivate)
+        /// </summary>
+        public void Activate()
+        {
+            if (!IsActive)
+            {
+                IsActive = true;
+                DeactivatedAt = null;
+                DeactivationReason = null;
+            }
+        }
+
+        /// <summary>
+        /// Désactiver le compte (surcharge sans raison pour admin)
+        /// </summary>
+        public void Deactivate()
+        {
+            Deactivate("Désactivé par un administrateur");
+        }
+
+        /// <summary>
         /// Vérifier si l'utilisateur est nouveau (jamais connecté)
         /// </summary>
         public bool IsNewUser() => !LastLoginAt.HasValue;

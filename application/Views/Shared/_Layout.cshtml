@@ -32,6 +32,13 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="ApiKeys" asp-action="Index">🔑 Mes Clés API</a>
                             </li>
+                            
+                            @if (User.HasClaim("permission", "user:manage"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">👑 Admin</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <partial name="_LoginPartial" />

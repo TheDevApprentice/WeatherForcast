@@ -1,0 +1,336 @@
+@model application.ViewModels.Admin.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Détails - {Model.Email}";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Utilisateurs</a></li>
+            <li class="breadcrumb-item active">@Model.Email</li>
+        </ol>
+    </nav>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Informations Générales -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">📋 Informations Générales</h5>
+            <form asp-action="ToggleActive" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-@(Model.IsActive ? "warning" : "success")">
+                    @(Model.IsActive ? "🔴 Désactiver" : "🟢 Activer")
+                </button>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> @Model.Email</p>
+                    <p><strong>Nom complet:</strong> @Model.FullName</p>
+                    <p><strong>Statut:</strong> 
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">🟢 Actif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">🔴 Inactif</span>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Créé le:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy à HH:mm")</p>
+                    <p><strong>Dernière connexion:</strong> 
+                        @if (Model.LastLoginAt.HasValue)
+                        {
+                            @Model.LastLoginAt.Value.ToString("dd/MM/yyyy à HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Jamais</span>
+                        }
+                    </p>
+                    <p>
+                        <strong>Sessions actives:</strong> <span class="badge bg-info">@Model.ActiveSessionsCount</span>
+                        <strong class="ms-3">API Keys actives:</strong> <span class="badge bg-info">@Model.ActiveApiKeysCount</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rôles -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">🛡️ Rôles</h5>
+            <a asp-action="EditRoles" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+                <i class="bi bi-pencil"></i> Gérer les rôles
+            </a>
+        </div>
+        <div class="card-body">
+            @if (Model.Roles.Any())
+            {
+                @foreach (var role in Model.Roles)
+                {
+                    <span class="badge bg-@GetRoleBadgeColor(role) me-2 mb-2" style="font-size: 1rem;">@role</span>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">Aucun rôle assigné</p>
+            }
+        </div>
+    </div>
+
+    <!-- Claims Personnalisés -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🔑 Claims Personnalisés</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Claims.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Valeur</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model.Claims)
+                            {
+                                <tr>
+                                    <td><code>@claim.Type</code></td>
+                                    <td>@claim.Value</td>
+                                    <td>
+                                        <form asp-action="RemoveClaim" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="claimType" value="@claim.Type" />
+                                            <input type="hidden" name="claimValue" value="@claim.Value" />
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('Supprimer ce claim ?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Aucun claim personnalisé</p>
+            }
+
+            <!-- Formulaire Ajouter un Claim -->
+            <hr />
+            <h6>Ajouter un claim</h6>
+            <form asp-action="AddClaim" asp-route-id="@Model.Id" method="post" class="row g-3">
+                @Html.AntiForgeryToken()
+                <div class="col-md-5">
+                    <input type="text" name="claimType" class="form-control" placeholder="Type (ex: department)" required />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="claimValue" class="form-control" placeholder="Valeur (ex: IT)" required />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- API Keys -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🔐 API Keys (@Model.ApiKeys.Count)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.ApiKeys.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Key</th>
+                                <th>Scopes</th>
+                                <th>Statut</th>
+                                <th>Dernière utilisation</th>
+                                <th>Requêtes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var apiKey in Model.ApiKeys)
+                            {
+                                <tr>
+                                    <td><strong>@apiKey.Name</strong></td>
+                                    <td><code>@apiKey.Key</code></td>
+                                    <td><small>@apiKey.Scopes</small></td>
+                                    <td>
+                                        @if (apiKey.IsRevoked)
+                                        {
+                                            <span class="badge bg-danger">🔴 Révoquée</span>
+                                        }
+                                        else if (apiKey.IsExpired)
+                                        {
+                                            <span class="badge bg-warning">⚠️ Expirée</span>
+                                        }
+                                        else if (apiKey.IsActive)
+                                        {
+                                            <span class="badge bg-success">🟢 Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (apiKey.LastUsedAt.HasValue)
+                                        {
+                                            <small>@apiKey.LastUsedAt.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">Jamais</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@apiKey.RequestCount.ToString("N0")</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Aucune API Key</p>
+            }
+        </div>
+    </div>
+
+    <!-- Sessions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">💻 Sessions (@Model.Sessions.Count)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Sessions.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>IP</th>
+                                <th>User Agent</th>
+                                <th>Statut</th>
+                                <th>Expiration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var session in Model.Sessions.OrderByDescending(s => s.CreatedAt))
+                            {
+                                <tr>
+                                    <td>
+                                        @if (session.Type == "Web")
+                                        {
+                                            <span class="badge bg-primary">🌐 Web</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info">📱 Mobile</span>
+                                        }
+                                    </td>
+                                    <td><small>@(session.IpAddress ?? "N/A")</small></td>
+                                    <td><small>@(session.UserAgent ?? "N/A")</small></td>
+                                    <td>
+                                        @if (session.IsRevoked)
+                                        {
+                                            <span class="badge bg-danger">🔴 Révoquée</span>
+                                        }
+                                        else if (session.IsExpired)
+                                        {
+                                            <span class="badge bg-warning">⏰ Expirée</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">🟢 Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@session.ExpiresAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        @if (session.IsActive)
+                                        {
+                                            <form asp-action="RevokeSession" asp-route-sessionId="@session.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@Model.Id" />
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Révoquer cette session ?')">
+                                                    <i class="bi bi-x-circle"></i> Révoquer
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Aucune session</p>
+            }
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
+
+@functions {
+    string GetRoleBadgeColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "danger",
+            "User" => "primary",
+            "MobileUser" => "info",
+            "ApiConsumer" => "secondary",
+            _ => "dark"
+        };
+    }
+}
