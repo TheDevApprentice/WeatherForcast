@@ -1,0 +1,221 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Permet le déclenchement manuel
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_WEB: ${{ github.repository }}/web
+  IMAGE_NAME_API: ${{ github.repository }}/api
+
+jobs:
+  # ========================================
+  # Job 1 : Générer ou Récupérer le Certificat
+  # ========================================
+  certificate:
+    name: Setup Certificate
+    runs-on: ubuntu-latest
+    outputs:
+      thumbprint: ${{ steps.generate.outputs.CERTIFICATE_THUMBPRINT }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      # Option A : Générer un nouveau certificat (première fois)
+      - name: Generate Certificate
+        id: generate
+        if: ${{ !secrets.CERTIFICATE_PFX_BASE64 }}
+        run: |
+          chmod +x ./scripts/generate-certificate.sh
+          export CERTIFICATE_PASSWORD="${{ secrets.CERTIFICATE_PASSWORD }}"
+          ./scripts/generate-certificate.sh
+        
+      # Uploader le certificat comme artifact (pour le réutiliser)
+      - name: Upload Certificate
+        if: ${{ !secrets.CERTIFICATE_PFX_BASE64 }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: certificate
+          path: certificates/
+          retention-days: 90
+      
+      # Option B : Utiliser un certificat existant (stocké dans les secrets)
+      - name: Restore Certificate from Secrets
+        if: ${{ secrets.CERTIFICATE_PFX_BASE64 }}
+        run: |
+          mkdir -p certificates
+          echo "${{ secrets.CERTIFICATE_PFX_BASE64 }}" | base64 -d > certificates/weatherforecast-dataprotection.pfx
+          echo "${{ secrets.CERTIFICATE_THUMBPRINT }}" > certificates/thumbprint.txt
+          echo "CERTIFICATE_THUMBPRINT=${{ secrets.CERTIFICATE_THUMBPRINT }}" >> $GITHUB_OUTPUT
+        id: restore
+
+  # ========================================
+  # Job 2 : Build des Images Docker
+  # ========================================
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: certificate
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        service: [web, api]
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ matrix.service == 'web' && env.IMAGE_NAME_WEB || env.IMAGE_NAME_API }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ========================================
+  # Job 3 : Déploiement sur le Serveur
+  # ========================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [certificate, build]
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_WEB_URL }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Download Certificate
+        uses: actions/download-artifact@v4
+        with:
+          name: certificate
+          path: certificates/
+      
+      # Copier les fichiers sur le serveur via SSH
+      - name: Copy Files to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "docker-compose.yml,.env.example,certificates/"
+          target: "/opt/weatherforecast/"
+      
+      # Configurer et démarrer les services
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/weatherforecast
+            
+            # Créer le fichier .env avec les secrets
+            cat > .env <<EOF
+            ASPNETCORE_ENVIRONMENT=Production
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            DATAPROTECTION_CERTIFICATE_THUMBPRINT=${{ needs.certificate.outputs.thumbprint }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            EOF
+            
+            # Copier le certificat dans le volume Docker
+            docker volume create certificates
+            docker run --rm -v certificates:/certs -v $(pwd)/certificates:/source alpine \
+              cp /source/weatherforecast-dataprotection.pfx /certs/
+            
+            # Pull les nouvelles images
+            docker-compose pull
+            
+            # Démarrer PostgreSQL d'abord (pour les migrations)
+            docker-compose up -d postgres
+            
+            # Attendre que PostgreSQL soit prêt
+            echo "⏳ Attente de PostgreSQL..."
+            for i in {1..30}; do
+              if docker exec weatherforecast-db pg_isready -U weatheruser >/dev/null 2>&1; then
+                echo "✅ PostgreSQL prêt"
+                break
+              fi
+              echo "Attente... ($i/30)"
+              sleep 2
+            done
+            
+            # Appliquer les migrations
+            echo "🔄 Application des migrations..."
+            docker-compose run --rm \
+              -e ConnectionStrings__DefaultConnection="Host=postgres;Database=weatherforecastdb;Username=weatheruser;Password=${{ secrets.POSTGRES_PASSWORD }}" \
+              web dotnet ef database update --project /src/infra --startup-project /src/application
+            
+            if [ $? -eq 0 ]; then
+              echo "✅ Migrations appliquées avec succès"
+            else
+              echo "❌ Échec des migrations"
+              exit 1
+            fi
+            
+            # Démarrer tous les services
+            docker-compose up -d
+            
+            # Vérifier le déploiement
+            docker-compose ps
+            docker-compose logs --tail=50 web
+            docker-compose logs --tail=50 api
+      
+      # Health Check
+      - name: Health Check
+        env:
+          WEB_URL: ${{ vars.PRODUCTION_WEB_URL }}
+          API_URL: ${{ vars.PRODUCTION_API_URL }}
+        run: |
+          sleep 10
+          echo "🔍 Checking Web health: $WEB_URL/health"
+          curl -f $WEB_URL/health || exit 1
+          
+          echo "🔍 Checking API health: $API_URL/health"
+          curl -f $API_URL/health || exit 1
+      
+      - name: Notify Success
+        if: success()
+        env:
+          WEB_URL: ${{ vars.PRODUCTION_WEB_URL }}
+          API_URL: ${{ vars.PRODUCTION_API_URL }}
+        run: |
+          echo "✅ Déploiement réussi !"
+          echo "🌐 Web: $WEB_URL"
+          echo "🔌 API: $API_URL"

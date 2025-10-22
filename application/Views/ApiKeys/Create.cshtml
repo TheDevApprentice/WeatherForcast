@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Générer une Clé API";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="bi bi-plus-circle"></i> Générer une Nouvelle Clé API</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <strong>Qu'est-ce qu'une clé API ?</strong><br>
+                            Une clé API vous permet d'accéder à l'API REST WeatherForecast depuis vos applications externes.
+                            Elle se compose d'un <strong>Client ID</strong> et d'un <strong>Client Secret</strong> (OAuth2 Client Credentials).
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                <strong>Nom de la clé</strong> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   name="name" 
+                                   placeholder="Ex: Mon Application Mobile"
+                                   required 
+                                   maxlength="100">
+                            <div class="form-text">
+                                Donnez un nom descriptif pour identifier facilement cette clé (visible uniquement par vous).
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="expirationDays" class="form-label">
+                                <strong>Expiration</strong> (optionnel)
+                            </label>
+                            <select class="form-select" id="expirationDays" name="expirationDays">
+                                <option value="">Jamais (recommandé)</option>
+                                <option value="30">30 jours</option>
+                                <option value="90">90 jours</option>
+                                <option value="180">180 jours</option>
+                                <option value="365">1 an</option>
+                            </select>
+                            <div class="form-text">
+                                Par défaut, la clé n'expire jamais. Vous pouvez la révoquer manuellement à tout moment.
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <strong>Important :</strong><br>
+                            Le <strong>Client Secret</strong> ne sera affiché qu'<strong>UNE SEULE FOIS</strong> après la création.
+                            Assurez-vous de le copier et de le stocker en lieu sûr (gestionnaire de mots de passe, coffre-fort de secrets, etc.).
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-key-fill"></i> Générer la Clé API
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-book"></i> Comment utiliser votre clé API ?</h5>
+                </div>
+                <div class="card-body">
+                    <p>Une fois générée, utilisez votre clé API avec l'authentification Basic :</p>
+                    
+                    <h6>Exemple avec cURL :</h6>
+                    <pre class="bg-dark text-light p-3 rounded"><code>curl -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET" \
+     https://api.weatherforecast.com/api/weatherforecast</code></pre>
+
+                    <h6>Exemple avec JavaScript (fetch) :</h6>
+                    <pre class="bg-dark text-light p-3 rounded"><code>const clientId = 'YOUR_CLIENT_ID';
+const clientSecret = 'YOUR_CLIENT_SECRET';
+const auth = btoa(`${clientId}:${clientSecret}`);
+
+fetch('https://api.weatherforecast.com/api/weatherforecast', {
+  headers: {
+    'Authorization': `Basic ${auth}`
+  }
+})
+.then(res => res.json())
+.then(data => console.log(data));</code></pre>
+
+                    <h6>Exemple avec Python (requests) :</h6>
+                    <pre class="bg-dark text-light p-3 rounded"><code>import requests
+
+client_id = 'YOUR_CLIENT_ID'
+client_secret = 'YOUR_CLIENT_SECRET'
+
+response = requests.get(
+    'https://api.weatherforecast.com/api/weatherforecast',
+    auth=(client_id, client_secret)
+)
+
+print(response.json())</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

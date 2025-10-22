@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Accès refusé";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Accès refusé</h4>
+                <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+                <hr>
+                <p class="mb-0">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Retour à l'accueil</a>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-secondary">Se connecter</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

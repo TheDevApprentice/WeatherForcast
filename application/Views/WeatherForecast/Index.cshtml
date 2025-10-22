@@ -1,0 +1,206 @@
+@model IEnumerable<domain.Entities.WeatherForecast>
+
+@{
+    ViewData["Title"] = "Prévisions Météo";
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>@ViewData["Title"]</h1>
+            <p class="text-muted">Gérez vos prévisions météorologiques</p>
+        </div>
+        <div>
+            <span id="signalr-status" class="badge bg-secondary">🔄 Connexion...</span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a asp-action="Create" class="btn btn-primary">
+        ➕ Créer une nouvelle prévision
+    </a>
+</div>
+
+<div class="row g-4" id="forecasts-container">
+    @foreach (var item in Model)
+    {
+        <div class="col-12 col-md-6 col-lg-4" data-forecast-id="@item.Id">
+            <div class="card h-100 weather-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">📅 @item.Date.ToString("dd/MM/yyyy")</h5>
+                    </div>
+                    <div>
+                        @if (item.IsHot())
+                        {
+                            <span class="badge bg-danger">🔥 Chaud</span>
+                        }
+                        else if (item.IsCold())
+                        {
+                            <span class="badge bg-info">❄️ Froid</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">☀️ Modéré</span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="weather-summary mb-3">
+                        <h3 class="text-center mb-0">@item.Summary</h3>
+                    </div>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="temp-box">
+                                <div class="temp-value">@item.TemperatureC°</div>
+                                <div class="temp-label">Celsius</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="temp-box">
+                                <div class="temp-value">@item.TemperatureF°</div>
+                                <div class="temp-label">Fahrenheit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                            🔍 Détails
+                        </a>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                                ✏️ Modifier
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                🗑️ Supprimer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-4" role="alert">
+        <h4 class="alert-heading">📭 Aucune prévision</h4>
+        <p>Il n'y a pas encore de prévisions météo. Créez-en une pour commencer !</p>
+    </div>
+}
+
+@section Scripts {
+    <!-- SignalR Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+    
+    <!-- Script temps réel -->
+    <script src="~/js/weatherforecast-realtime.js" asp-append-version="true"></script>
+    
+    <style>
+        /* Animations pour les mises à jour temps réel */
+        .new-row {
+            animation: slideInFromTop 0.5s ease-out, highlightNew 2s ease-out;
+        }
+        
+        .updated-row {
+            animation: highlightUpdate 2s ease-out;
+        }
+        
+        .deleted-row {
+            animation: slideOutToRight 0.5s ease-out forwards;
+        }
+        
+        @@keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @@keyframes slideOutToRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+        
+        @@keyframes highlightNew {
+            0%, 100% {
+                background-color: transparent;
+            }
+            10%, 90% {
+                background-color: rgba(25, 135, 84, 0.2);
+            }
+        }
+        
+        @@keyframes highlightUpdate {
+            0%, 100% {
+                background-color: transparent;
+            }
+            10%, 90% {
+                background-color: rgba(13, 202, 240, 0.2);
+            }
+        }
+        
+        /* Animations pour les cartes */
+        .weather-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .col-12[data-forecast-id].new-row {
+            animation: fadeInScale 0.5s ease-out;
+        }
+        
+        .col-12[data-forecast-id].updated-row .weather-card {
+            animation: pulse 0.5s ease-out;
+        }
+        
+        .col-12[data-forecast-id].deleted-row {
+            animation: fadeOutScale 0.5s ease-out forwards;
+        }
+        
+        @@keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @@keyframes fadeOutScale {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+        
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(13, 202, 240, 0.5);
+            }
+        }
+    </style>
+}

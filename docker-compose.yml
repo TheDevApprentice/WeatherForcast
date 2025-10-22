@@ -1,0 +1,97 @@
+
+services:
+  # Base de données PostgreSQL partagée
+  postgres:
+    image: postgres:16-alpine
+    container_name: weatherforecast-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis pour communication inter-process (Pub/Sub, SignalR Backplane)
+  redis:
+    image: redis:7-alpine
+    container_name: weatherforecast-redis
+    ports:
+      - "6379:6379"
+    environment:
+      # Set a strong password here (dev example)
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    command: [ "sh", "-c", "exec redis-server --appendonly yes --requirepass \"${REDIS_PASSWORD}\"" ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ========================================
+# APPLICATIONS lors du production
+# ========================================
+  # Application Web
+  web:
+    build:
+      context: .
+      dockerfile: application/Dockerfile
+    container_name: weatherforecast-web
+    ports:
+      - "8080:8080"
+    volumes:
+      - web-keys:/app/keys                  # Volume pour les clés Data Protection
+      - certificates:/app/certificates       # Volume pour les certificats
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
+      - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # API REST
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: weatherforecast-api
+    ports:
+      - "7252:8080"
+    volumes:
+      - api-keys:/app/keys                   # Volume pour les clés Data Protection
+      - certificates:/app/certificates        # Volume pour les certificats
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
+      - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
+      - Jwt__Secret=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  web-keys:
+    driver: local
+  api-keys:
+    driver: local
+  certificates:  # ← Volume partagé pour les certificats
+    driver: local
