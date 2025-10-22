@@ -36,62 +36,62 @@ services:
       timeout: 5s
       retries: 5
 
-# ========================================
-# APPLICATIONS lors du production
-# ========================================
-  # Application Web
-  web:
-    build:
-      context: .
-      dockerfile: application/Dockerfile
-    container_name: weatherforecast-web
-    ports:
-      - "8080:8080"
-    volumes:
-      - web-keys:/app/keys                  # Volume pour les clés Data Protection
-      - certificates:/app/certificates       # Volume pour les certificats
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-      - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
-      - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+# # ========================================
+# # APPLICATIONS lors du production
+# # ========================================
+#   # Application Web
+#   web:
+#     build:
+#       context: .
+#       dockerfile: application/Dockerfile
+#     container_name: weatherforecast-web
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - web-keys:/app/keys                  # Volume pour les clés Data Protection
+#       - certificates:/app/certificates       # Volume pour les certificats
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+#       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+#       - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
+#       - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
 
-  # API REST
-  api:
-    build:
-      context: .
-      dockerfile: api/Dockerfile
-    container_name: weatherforecast-api
-    ports:
-      - "7252:8080"
-    volumes:
-      - api-keys:/app/keys                   # Volume pour les clés Data Protection
-      - certificates:/app/certificates        # Volume pour les certificats
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-      - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
-      - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
-      - Jwt__Secret=${JWT_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+#   # API REST
+#   api:
+#     build:
+#       context: .
+#       dockerfile: api/Dockerfile
+#     container_name: weatherforecast-api
+#     ports:
+#       - "7252:8080"
+#     volumes:
+#       - api-keys:/app/keys                   # Volume pour les clés Data Protection
+#       - certificates:/app/certificates        # Volume pour les certificats
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+#       - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+#       - ConnectionStrings__Redis=host.docker.internal:6379,password=${REDIS_PASSWORD}
+#       - DataProtection__CertificateThumbprint=${DATAPROTECTION_CERTIFICATE_THUMBPRINT}
+#       - Jwt__Secret=${JWT_SECRET}
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
 
 volumes:
   postgres-data:
     driver: local
   redis-data:
     driver: local
-  web-keys:
-    driver: local
-  api-keys:
-    driver: local
-  certificates:  # ← Volume partagé pour les certificats
-    driver: local
+  # web-keys:
+  #   driver: local
+  # api-keys:
+  #   driver: local
+  # certificates:  # ← Volume partagé pour les certificats
+  #   driver: local
