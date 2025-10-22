@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using domain.Entities;
 using infra.Data;
-using domain.Interfaces.Repos;
+using domain.Interfaces.Repositories;
 
 namespace infra.Repositories
 {

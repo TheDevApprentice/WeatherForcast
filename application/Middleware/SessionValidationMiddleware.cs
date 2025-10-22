@@ -23,7 +23,7 @@ namespace application.Middleware
 
         public async Task InvokeAsync(
             HttpContext context,
-            IAuthService authService,
+            ISessionManagementService sessionManagementService,
             SignInManager<ApplicationUser> signInManager)
         {
             // Vérifier si l'utilisateur est authentifié
@@ -36,7 +36,7 @@ namespace application.Middleware
                 if (!string.IsNullOrEmpty(userId))
                 {
                     // Récupérer toutes les sessions actives de l'utilisateur
-                    var activeSessions = await authService.GetActiveSessionsAsync(userId);
+                    var activeSessions = await sessionManagementService.GetActiveSessionsAsync(userId);
 
                     // Si l'utilisateur n'a plus de session active
                     if (!activeSessions.Any())

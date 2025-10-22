@@ -97,7 +97,12 @@ namespace application
             }
 
             // 3. Services (Domain - Logique métier)
-            builder.Services.AddScoped<IAuthService, domain.Services.AuthService>();
+            // Services séparés (SRP - Single Responsibility Principle)
+            builder.Services.AddScoped<IUserManagementService, domain.Services.UserManagementService>();
+            builder.Services.AddScoped<ISessionManagementService, domain.Services.SessionManagementService>();
+            builder.Services.AddScoped<IAuthenticationService, domain.Services.AuthenticationService>();
+            
+            // Autres services
             builder.Services.AddScoped<IRateLimitService, domain.Services.RateLimitService>();
             builder.Services.AddScoped<IWeatherForecastService, domain.Services.WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, domain.Services.ApiKeyService>();

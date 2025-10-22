@@ -76,7 +76,12 @@ namespace api
             });
 
             // 4. Services (Domain - Logique métier)
-            builder.Services.AddScoped<IAuthService, domain.Services.AuthService>();
+            // Nouveaux services séparés (SRP)
+            builder.Services.AddScoped<IUserManagementService, domain.Services.UserManagementService>();
+            builder.Services.AddScoped<ISessionManagementService, domain.Services.SessionManagementService>();
+            builder.Services.AddScoped<IAuthenticationService, domain.Services.AuthenticationService>();
+            
+            // Autres services
             builder.Services.AddScoped<IJwtService, domain.Services.JwtService>();
             builder.Services.AddScoped<IRateLimitService, domain.Services.RateLimitService>();
             builder.Services.AddScoped<IWeatherForecastService, domain.Services.WeatherForecastService>();

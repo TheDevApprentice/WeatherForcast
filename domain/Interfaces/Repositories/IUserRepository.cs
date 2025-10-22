@@ -1,6 +1,6 @@
 using domain.Entities;
 
-namespace domain.Interfaces.Repos
+namespace domain.Interfaces.Repositories
 {
     /// <summary>
     /// Repository pour gérer les utilisateurs

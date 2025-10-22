@@ -21,7 +21,7 @@ namespace api.Middleware
 
         public async Task InvokeAsync(
             HttpContext context,
-            IAuthService authService)
+            ISessionManagementService sessionManagementService)
         {
             // Vérifier si l'utilisateur est authentifié
             if (context.User.Identity?.IsAuthenticated == true)
@@ -34,7 +34,7 @@ namespace api.Middleware
                     var token = authHeader.Substring("Bearer ".Length).Trim();
                     
                     // Vérifier si le token existe et est valide dans la DB
-                    var isValid = await authService.IsSessionValidAsync(token);
+                    var isValid = await sessionManagementService.IsValidAsync(token);
                     
                     if (!isValid)
                     {

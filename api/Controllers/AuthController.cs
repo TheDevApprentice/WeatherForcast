@@ -9,18 +9,21 @@ namespace api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IUserManagementService _userManagementService;
+        private readonly IAuthenticationService _authenticationService;
         private readonly IJwtService _jwtService;
         private readonly IRateLimitService _rateLimitService;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            IAuthService authService,
+            IUserManagementService userManagementService,
+            IAuthenticationService authenticationService,
             IJwtService jwtService,
             IRateLimitService rateLimitService,
             ILogger<AuthController> logger)
         {
-            _authService = authService;
+            _userManagementService = userManagementService;
+            _authenticationService = authenticationService;
             _jwtService = jwtService;
             _rateLimitService = rateLimitService;
             _logger = logger;
@@ -168,7 +171,7 @@ namespace api.Controllers
                 return Unauthorized();
             }
 
-            var user = await _authService.GetUserByEmailAsync(email);
+            var user = await _userManagementService.GetByEmailAsync(email);
 
             if (user == null)
             {

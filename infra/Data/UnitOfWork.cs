@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using infra.Repositories;
-using domain.Interfaces.Repos;
 
 namespace infra.Data
 {

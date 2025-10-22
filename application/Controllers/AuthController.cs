@@ -9,16 +9,19 @@ namespace application.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly IAuthService _authService;
+        private readonly IUserManagementService _userManagementService;
+        private readonly ISessionManagementService _sessionManagementService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IRateLimitService _rateLimitService;
 
         public AuthController(
-            IAuthService authService,
+            IUserManagementService userManagementService,
+            ISessionManagementService sessionManagementService,
             SignInManager<ApplicationUser> signInManager,
             IRateLimitService rateLimitService)
         {
-            _authService = authService;
+            _userManagementService = userManagementService;
+            _sessionManagementService = sessionManagementService;
             _signInManager = signInManager;
             _rateLimitService = rateLimitService;
         }
@@ -39,7 +42,7 @@ namespace application.Controllers
         {
             if (ModelState.IsValid)
             {
-                var (success, errors, user) = await _authService.RegisterAsync(
+                var (success, errors, user) = await _userManagementService.RegisterAsync(
                     model.Email,
                     model.Password,
                     model.FirstName,
@@ -90,7 +93,7 @@ namespace application.Controllers
                 if (result.Succeeded)
                 {
                     // Récupérer l'utilisateur
-                    var user = await _authService.GetUserByEmailAsync(model.Email);
+                    var user = await _userManagementService.GetByEmailAsync(model.Email);
                     if (user != null)
                     {
                         // Récupérer les informations de la requête
@@ -107,13 +110,19 @@ namespace application.Controllers
                         // (Le cookie Identity sera créé automatiquement par SignInManager)
                         var sessionToken = user.Id;
                         
-                        // Créer la session Web + mettre à jour LastLoginAt (opération atomique)
-                        await _authService.CreateWebSessionWithLastLoginUpdateAsync(
+                        // Révoquer les anciennes sessions Web
+                        await _sessionManagementService.RevokeAllByUserIdAsync(user.Id);
+                        
+                        // Créer la nouvelle session Web
+                        await _sessionManagementService.CreateWebSessionAsync(
                             user.Id,
                             sessionToken,
                             ipAddress,
                             userAgent,
                             expirationDays: model.RememberMe ? 30 : 7);
+                        
+                        // Mettre à jour LastLoginAt
+                        await _userManagementService.UpdateLastLoginAsync(user.Id);
                     }
                     
                     return RedirectToLocal(returnUrl);
@@ -151,14 +160,14 @@ namespace application.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 // Récupérer toutes les sessions actives
-                var activeSessions = await _authService.GetActiveSessionsAsync(userId);
+                var activeSessions = await _sessionManagementService.GetActiveSessionsAsync(userId);
                 
                 // Filtrer et supprimer uniquement les sessions Web (Type = 1)
                 // La suppression cascade supprimera aussi les UserSessions associées
                 var webSessions = activeSessions.Where(s => s.Type == domain.Entities.SessionType.Web);
                 foreach (var session in webSessions)
                 {
-                    await _authService.DeleteSessionAsync(session.Id);
+                    await _sessionManagementService.DeleteAsync(session.Id);
                 }
             }
 
