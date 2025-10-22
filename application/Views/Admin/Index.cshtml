@@ -12,6 +12,89 @@
         </a>
     </div>
 
+    <!-- Barre de recherche et filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Search" method="get" id="searchForm">
+                <div class="row g-3 align-items-end">
+                    <!-- Recherche textuelle -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label fw-semibold">🔍 Recherche</label>
+                        <input type="text" name="searchTerm" id="searchTerm" class="form-control" 
+                               placeholder="Nom, prénom ou email..." />
+                    </div>
+
+                    <!-- Filtre par statut -->
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label fw-semibold">Statut</label>
+                        <select name="isActive" id="isActive" class="form-select">
+                            <option value="">Tous</option>
+                            <option value="true">🟢 Actif</option>
+                            <option value="false">🔴 Inactif</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtre par rôle -->
+                    <div class="col-lg-2 col-md-6">
+                        <label class="form-label fw-semibold">Rôle</label>
+                        <select name="role" id="role" class="form-select">
+                            <option value="">Tous</option>
+                            <option value="User">User</option>
+                            <option value="MobileUser">MobileUser</option>
+                            <option value="ApiConsumer">ApiConsumer</option>
+                        </select>
+                    </div>
+
+                    <!-- Tri -->
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label fw-semibold">Trier par</label>
+                        <select name="sortBy" id="sortBy" class="form-select">
+                            <option value="CreatedAt">Date création</option>
+                            <option value="LastLoginAt">Dernière connexion</option>
+                            <option value="Email">Email</option>
+                            <option value="FirstName">Prénom</option>
+                        </select>
+                    </div>
+
+                    <!-- Indicateur de chargement -->
+                    <div class="col-lg-2 col-md-12 text-center">
+                        <div id="searchLoading" class="spinner-border text-primary d-none" role="status">
+                            <span class="visually-hidden">Recherche...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtres avancés (collapsible) -->
+                <div class="mt-3">
+                    <a class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" href="#advancedFilters">
+                        <i class="bi bi-funnel"></i> Filtres avancés
+                    </a>
+                </div>
+
+                <div class="collapse mt-3" id="advancedFilters">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Créé après</label>
+                            <input type="date" name="createdAfter" id="createdAfter" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Créé avant</label>
+                            <input type="date" name="createdBefore" id="createdBefore" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Connecté après</label>
+                            <input type="date" name="lastLoginAfter" id="lastLoginAfter" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Connecté avant</label>
+                            <input type="date" name="lastLoginBefore" id="lastLoginBefore" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -43,7 +126,35 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="userTableBody">
+                        <!-- Skeleton loader pendant le chargement -->
+                        <tr class="skeleton-row">
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-buttons"></div></td>
+                        </tr>
+                        <tr class="skeleton-row">
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-buttons"></div></td>
+                        </tr>
+                        <tr class="skeleton-row">
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-text"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-badge"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-text-small"></div></td>
+                            <td><div class="skeleton-buttons"></div></td>
+                        </tr>
                         @foreach (var user in Model)
                         {
                             <tr>
@@ -111,10 +222,11 @@
         </div>
     </div>
 
-    <div class="mt-3">
-        <p class="text-muted">
-            <strong>@Model.Count()</strong> utilisateur(s) au total
+    <div class="mt-3 d-flex justify-content-between align-items-center">
+        <p class="text-muted mb-0">
+            <strong id="totalCount">Chargement...</strong>
         </p>
+        <small class="text-muted">Scroll pour charger plus</small>
     </div>
 </div>
 
@@ -131,3 +243,212 @@
         };
     }
 }
+
+@section Styles {
+<style>
+    /* Skeleton loader animations */
+    @@keyframes skeleton-loading {
+        0% { background-color: #e0e0e0; }
+        50% { background-color: #f0f0f0; }
+        100% { background-color: #e0e0e0; }
+    }
+
+    .skeleton-row {
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-text {
+        height: 16px;
+        width: 80%;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-text-small {
+        height: 14px;
+        width: 60%;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-badge {
+        height: 20px;
+        width: 50px;
+        background-color: #e0e0e0;
+        border-radius: 12px;
+        display: inline-block;
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-buttons {
+        height: 30px;
+        width: 80px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+    }
+</style>
+}
+
+@section Scripts {
+<script>
+    // Recherche dynamique avec pagination (scroll infini)
+    let searchTimeout;
+    const searchDelay = 500;
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMorePages = true;
+    let allUsers = [];
+
+    // Fonction de recherche
+    async function performSearch(resetPage = true) {
+        if (resetPage) {
+            currentPage = 1;
+            allUsers = [];
+            hasMorePages = true;
+        }
+
+        if (isLoading || !hasMorePages) return;
+        isLoading = true;
+
+        const searchTerm = document.getElementById('searchTerm').value;
+        const isActive = document.getElementById('isActive').value;
+        const role = document.getElementById('role').value;
+        const sortBy = document.getElementById('sortBy').value;
+        const createdAfter = document.getElementById('createdAfter')?.value || '';
+        const createdBefore = document.getElementById('createdBefore')?.value || '';
+        const lastLoginAfter = document.getElementById('lastLoginAfter')?.value || '';
+        const lastLoginBefore = document.getElementById('lastLoginBefore')?.value || '';
+
+        const params = new URLSearchParams({
+            searchTerm: searchTerm,
+            isActive: isActive,
+            role: role,
+            sortBy: sortBy,
+            createdAfter: createdAfter,
+            createdBefore: createdBefore,
+            lastLoginAfter: lastLoginAfter,
+            lastLoginBefore: lastLoginBefore,
+            pageNumber: currentPage,
+            pageSize: 20
+        });
+
+        document.getElementById('searchLoading').classList.remove('d-none');
+
+        try {
+            const response = await fetch(`/Admin/Search?${params.toString()}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (resetPage) {
+                    allUsers = data.users;
+                } else {
+                    allUsers = allUsers.concat(data.users);
+                }
+
+                hasMorePages = data.hasNextPage;
+                renderUsers();
+                
+                document.getElementById('totalCount').textContent = 
+                    `${allUsers.length} / ${data.totalCount} utilisateur(s)`;
+            }
+        } catch (error) {
+            console.error('Erreur lors de la recherche:', error);
+        } finally {
+            document.getElementById('searchLoading').classList.add('d-none');
+            isLoading = false;
+        }
+    }
+
+    // Fonction pour encoder le HTML et prévenir les attaques XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Rendu des utilisateurs
+    function renderUsers() {
+        const tbody = document.getElementById('userTableBody');
+        if (!tbody) return;
+
+        // Supprimer les skeleton loaders
+        const skeletonRows = tbody.querySelectorAll('.skeleton-row');
+        skeletonRows.forEach(row => row.remove());
+
+        tbody.innerHTML = allUsers.map(user => `
+            <tr>
+                <td><strong>${escapeHtml(user.email)}</strong></td>
+                <td>${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}</td>
+                <td>
+                    ${user.roles.map(r => `<span class="badge bg-primary me-1">${escapeHtml(r)}</span>`).join('')}
+                    ${user.roles.length === 0 ? '<span class="text-muted">Aucun rôle</span>' : ''}
+                </td>
+                <td>
+                    ${user.isActive 
+                        ? '<span class="badge bg-success">🟢 Actif</span>' 
+                        : '<span class="badge bg-secondary">🔴 Inactif</span>'}
+                </td>
+                <td><small>${escapeHtml(new Date(user.createdAt).toLocaleDateString('fr-FR'))}</small></td>
+                <td>
+                    ${user.lastLoginAt 
+                        ? `<small>${escapeHtml(new Date(user.lastLoginAt).toLocaleString('fr-FR'))}</small>`
+                        : '<small class="text-muted">Jamais</small>'}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="/Admin/Details/${escapeHtml(user.id)}" class="btn btn-sm btn-info" title="Voir les détails">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="/Admin/EditRoles/${escapeHtml(user.id)}" class="btn btn-sm btn-warning" title="Gérer les rôles">
+                            <i class="bi bi-shield-check"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Scroll infini
+    window.addEventListener('scroll', function() {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            if (!isLoading && hasMorePages) {
+                currentPage++;
+                performSearch(false);
+            }
+        }
+    });
+
+    // Événements
+    document.getElementById('searchTerm').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => performSearch(true), searchDelay);
+    });
+
+    document.getElementById('isActive').addEventListener('change', () => performSearch(true));
+    document.getElementById('role').addEventListener('change', () => performSearch(true));
+    document.getElementById('sortBy').addEventListener('change', () => performSearch(true));
+
+    const advancedFilters = ['createdAfter', 'createdBefore', 'lastLoginAfter', 'lastLoginBefore'];
+    advancedFilters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', () => performSearch(true));
+        }
+    });
+
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch(true);
+    });
+
+    // Charger la première page au démarrage
+    performSearch(true);
+</script>
+}
+

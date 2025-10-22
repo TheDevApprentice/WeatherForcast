@@ -1,6 +1,7 @@
 using application.Authorization;
 using application.ViewModels.Admin;
 using domain.Constants;
+using domain.DTOs;
 using domain.Entities;
 using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -43,17 +44,59 @@ namespace application.Controllers
 
         // GET: /Admin
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var users = _userManager.Users.ToList();
+            // Retourner la vue immédiatement sans charger les données
+            // Les données seront chargées en AJAX par le JavaScript
+            return View(new List<UserListViewModel>());
+        }
+
+        // GET: /Admin/Search
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search(
+            string? searchTerm,
+            bool? isActive,
+            string? role,
+            DateTime? createdAfter,
+            DateTime? createdBefore,
+            DateTime? lastLoginAfter,
+            DateTime? lastLoginBefore,
+            string? sortBy,
+            bool sortDescending = true,
+            int pageNumber = 1,
+            int pageSize = 20)
+        {
+            var criteria = new UserSearchCriteria
+            {
+                SearchTerm = searchTerm,
+                IsActive = isActive,
+                Role = role,
+                CreatedAfter = createdAfter,
+                CreatedBefore = createdBefore,
+                LastLoginAfter = lastLoginAfter,
+                LastLoginBefore = lastLoginBefore,
+                SortBy = sortBy,
+                SortDescending = sortDescending,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var pagedResult = await _userManagementService.SearchUsersAsync(criteria);
             var userViewModels = new List<UserListViewModel>();
 
-            foreach (var user in users)
+            foreach (var user in pagedResult.Items)
             {
-                var roles = await _userManager.GetRolesAsync(user);
+                var userRoles = await _userManager.GetRolesAsync(user);
                 var claims = await _userManager.GetClaimsAsync(user);
 
-                if (!roles.Contains("Admin"))
+                // Filtre par rôle si spécifié
+                if (!string.IsNullOrWhiteSpace(role) && !userRoles.Contains(role))
+                {
+                    continue;
+                }
+
+                // Ne pas afficher les admins
+                if (!userRoles.Contains("Admin"))
                 {
                     userViewModels.Add(new UserListViewModel
                     {
@@ -64,14 +107,30 @@ namespace application.Controllers
                         IsActive = user.IsActive,
                         CreatedAt = user.CreatedAt,
                         LastLoginAt = user.LastLoginAt,
-                        Roles = roles.ToList(),
+                        Roles = userRoles.ToList(),
                         ClaimsCount = claims.Count
                     });
                 }
-
             }
 
-            return View(userViewModels.OrderByDescending(u => u.CreatedAt));
+            _logger.LogInformation("Admin searched users: Page {Page}, Total {Total}",
+                pageNumber, pagedResult.TotalCount);
+
+            // Retourner JSON pour AJAX avec pagination
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new
+                {
+                    users = userViewModels,
+                    totalCount = pagedResult.TotalCount,
+                    pageNumber = pagedResult.PageNumber,
+                    pageSize = pagedResult.PageSize,
+                    totalPages = pagedResult.TotalPages,
+                    hasNextPage = pagedResult.HasNextPage
+                });
+            }
+
+            return View("Index", userViewModels);
         }
 
         // GET: /Admin/Details/5

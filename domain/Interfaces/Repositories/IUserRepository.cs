@@ -1,3 +1,4 @@
+using domain.DTOs;
 using domain.Entities;
 
 namespace domain.Interfaces.Repositories
@@ -36,5 +37,10 @@ namespace domain.Interfaces.Repositories
         /// Récupérer les sessions actives d'un utilisateur
         /// </summary>
         Task<IEnumerable<Session>> GetActiveSessionsAsync(string userId);
+        
+        /// <summary>
+        /// Rechercher et filtrer les utilisateurs selon des critères (avec pagination)
+        /// </summary>
+        Task<PagedResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria criteria);
     }
 }

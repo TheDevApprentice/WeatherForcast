@@ -1,3 +1,4 @@
+using domain.DTOs;
 using domain.Entities;
 using domain.Interfaces;
 using domain.Interfaces.Services;
@@ -56,6 +57,11 @@ namespace domain.Services
         {
             await _unitOfWork.Users.UpdateLastLoginAsync(userId);
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<PagedResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria criteria)
+        {
+            return await _unitOfWork.Users.SearchUsersAsync(criteria);
         }
     }
 }

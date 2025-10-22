@@ -12,27 +12,27 @@ namespace domain.Entities
         public string? FirstName { get; private set; }
         public string? LastName { get; private set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        
+
         /// <summary>
         /// Dernière connexion
         /// </summary>
         public DateTime? LastLoginAt { get; private set; }
-        
+
         /// <summary>
         /// Compte actif ?
         /// </summary>
         public bool IsActive { get; private set; } = true;
-        
+
         /// <summary>
         /// Date de désactivation
         /// </summary>
         public DateTime? DeactivatedAt { get; private set; }
-        
+
         /// <summary>
         /// Raison de la désactivation
         /// </summary>
         public string? DeactivationReason { get; private set; }
-        
+
         // Navigation properties
         public ICollection<UserSession> UserSessions { get; set; } = new List<UserSession>();
 
@@ -162,5 +162,19 @@ namespace domain.Entities
 
             return (DateTime.UtcNow - LastLoginAt.Value).TotalDays > days;
         }
+
+        ///// <summary>
+        ///// Méthodes pour le seeding (à utiliser uniquement pour les tests/seeding)
+        ///// ⚠️ NE PAS UTILISER dans le code métier normal
+        ///// </summary>
+        //public void SetCreatedAtForSeeding(DateTime createdAt)
+        //{
+        //    CreatedAt = createdAt;
+        //}
+
+        //public void SetLastLoginAtForSeeding(DateTime? lastLoginAt)
+        //{
+        //    LastLoginAt = lastLoginAt;
+        //}
     }
 }

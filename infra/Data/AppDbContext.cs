@@ -24,6 +24,22 @@ namespace infra.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configuration de ApplicationUser (Identity)
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                // Index pour améliorer les performances de recherche
+                entity.HasIndex(e => e.Email).IsUnique(); // Déjà unique par Identity, mais index explicite
+                entity.HasIndex(e => e.FirstName);
+                entity.HasIndex(e => e.LastName);
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.CreatedAt);
+                entity.HasIndex(e => e.LastLoginAt);
+                
+                // Index composite pour les recherches fréquentes
+                entity.HasIndex(e => new { e.IsActive, e.CreatedAt });
+                entity.HasIndex(e => new { e.FirstName, e.LastName });
+            });
+
             // Configuration de WeatherForecast
             modelBuilder.Entity<WeatherForecast>(entity =>
             {

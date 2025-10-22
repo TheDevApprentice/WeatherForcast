@@ -1,3 +1,4 @@
+using domain.DTOs;
 using domain.Entities;
 
 namespace domain.Interfaces.Services
@@ -31,5 +32,10 @@ namespace domain.Interfaces.Services
         /// Mettre à jour la date de dernière connexion
         /// </summary>
         Task UpdateLastLoginAsync(string userId);
+
+        /// <summary>
+        /// Rechercher et filtrer les utilisateurs (avec pagination)
+        /// </summary>
+        Task<PagedResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria criteria);
     }
 }

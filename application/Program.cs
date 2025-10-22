@@ -256,6 +256,33 @@ namespace application
             // 4. Routing
             app.UseRouting();
 
+            // Security Headers Middleware
+            app.Use(async (context, next) =>
+            {
+                // Protection contre Clickjacking
+                context.Response.Headers.Add("X-Frame-Options", "DENY");
+
+                // Protection contre MIME-type sniffing
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+
+                // Protection XSS du navigateur
+                context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+
+                // Referrer Policy
+                context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+
+                // Content Security Policy (CSP)
+                context.Response.Headers.Add("Content-Security-Policy",
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+                    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+                    "font-src 'self' https://cdn.jsdelivr.net; " +
+                    "img-src 'self' data:; " +
+                    "connect-src 'self';");
+
+                await next();
+            });
+
             // Rate Limiting & Brute Force Protection
             app.UseMiddleware<application.Middleware.RateLimitMiddleware>();
 
@@ -286,9 +313,12 @@ namespace application
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var userManager = services.GetRequiredService<UserManager<domain.Entities.ApplicationUser>>();
                     var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger<infra.Data.RoleSeeder>();
 
-                    var roleSeeder = new infra.Data.RoleSeeder(roleManager, logger);
+                    var roleLogger = loggerFactory.CreateLogger<infra.Data.RoleSeeder>();
+                    //var userLogger = loggerFactory.CreateLogger<infra.Data.UserSeeder>();
+
+                    var roleSeeder = new infra.Data.RoleSeeder(roleManager, roleLogger);
+                    //var userSeeder = new infra.Data.UserSeeder(userManager, userLogger);
 
                     // Créer les rôles avec leurs claims
                     await roleSeeder.SeedRolesAsync();
@@ -296,7 +326,13 @@ namespace application
                     // Créer l'utilisateur admin par défaut
                     await roleSeeder.SeedAdminUserAsync(userManager);
 
-                    Console.WriteLine("✅ Roles and admin user seeded successfully");
+                    //// Créer 100 utilisateurs de test
+                    //await userSeeder.SeedUsersAsync();
+
+                    //// Créer des utilisateurs spécifiques pour les tests
+                    //await userSeeder.SeedTestUsersAsync();
+
+                    Console.WriteLine("✅ Roles, admin user, and 100+ test users seeded successfully");
                 }
                 catch (Exception ex)
                 {

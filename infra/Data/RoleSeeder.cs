@@ -99,8 +99,9 @@ namespace infra.Data
             if (await _roleManager.RoleExistsAsync(roleName))
             {
                 _logger.LogInformation("Role {RoleName} already exists, updating claims...", roleName);
-                
+
                 var role = await _roleManager.FindByNameAsync(roleName);
+
                 if (role != null)
                 {
                     // Supprimer les anciens claims
@@ -109,13 +110,13 @@ namespace infra.Data
                     {
                         await _roleManager.RemoveClaimAsync(role, existingClaim);
                     }
-                    
+
                     // Ajouter les nouveaux claims
                     foreach (var claim in claims)
                     {
                         await _roleManager.AddClaimAsync(role, claim);
                     }
-                    
+
                     _logger.LogInformation("Role {RoleName} claims updated", roleName);
                 }
                 return;
@@ -127,8 +128,8 @@ namespace infra.Data
 
             if (!result.Succeeded)
             {
-                _logger.LogError("Failed to create role {RoleName}: {Errors}", 
-                    roleName, 
+                _logger.LogError("Failed to create role {RoleName}: {Errors}",
+                    roleName,
                     string.Join(", ", result.Errors.Select(e => e.Description)));
                 return;
             }
@@ -141,7 +142,7 @@ namespace infra.Data
                 var claimResult = await _roleManager.AddClaimAsync(newRole, claim);
                 if (!claimResult.Succeeded)
                 {
-                    _logger.LogError("Failed to add claim {ClaimType}:{ClaimValue} to role {RoleName}", 
+                    _logger.LogError("Failed to add claim {ClaimType}:{ClaimValue} to role {RoleName}",
                         claim.Type, claim.Value, roleName);
                 }
             }
@@ -158,15 +159,15 @@ namespace infra.Data
             const string adminPassword = "Admin@123";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            
+
             if (adminUser == null)
             {
                 _logger.LogInformation("Creating default admin user...");
-                
+
                 adminUser = new ApplicationUser(adminEmail, "Admin", "User");
-                
+
                 var result = await userManager.CreateAsync(adminUser, adminPassword);
-                
+
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, AppRoles.Admin);
@@ -174,14 +175,14 @@ namespace infra.Data
                 }
                 else
                 {
-                    _logger.LogError("Failed to create admin user: {Errors}", 
+                    _logger.LogError("Failed to create admin user: {Errors}",
                         string.Join(", ", result.Errors.Select(e => e.Description)));
                 }
             }
             else
             {
                 _logger.LogInformation("Admin user already exists");
-                
+
                 // S'assurer qu'il a le rôle Admin
                 if (!await userManager.IsInRoleAsync(adminUser, AppRoles.Admin))
                 {
