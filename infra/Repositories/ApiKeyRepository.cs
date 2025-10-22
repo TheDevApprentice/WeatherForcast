@@ -43,6 +43,13 @@ namespace infra.Repositories
             return result > 0;
         }
 
+        public async Task<ApiKey?> GetByIdAsync(int id)
+        {
+            return await _context.ApiKeys
+                .Include(k => k.User)
+                .FirstOrDefaultAsync(k => k.Id == id);
+        }
+
         public async Task<bool> RevokeAsync(int id, string userId)
         {
             var apiKey = await _context.ApiKeys
@@ -53,7 +60,8 @@ namespace infra.Repositories
                 return false;
             }
 
-            apiKey.IsActive = false;
+            // Note: Cette méthode est deprecated, utiliser apiKey.Revoke() dans le service
+            apiKey.Revoke("Révoquée via l'ancienne méthode");
             await _context.SaveChangesAsync();
             return true;
         }
@@ -67,8 +75,8 @@ namespace infra.Repositories
                 return false;
             }
 
-            apiKey.RequestCount++;
-            apiKey.LastUsedAt = DateTime.UtcNow;
+            // Note: Cette méthode est deprecated, utiliser apiKey.RecordUsage() dans le service
+            apiKey.RecordUsage();
             await _context.SaveChangesAsync();
             return true;
         }

@@ -2,6 +2,7 @@ using domain.Entities;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.Events.WeatherForecast;
+using domain.ValueObjects;
 using MediatR;
 
 namespace domain.Services
@@ -54,10 +55,10 @@ namespace domain.Services
                 return false;
             }
 
-            // Mettre à jour les propriétés de l'entité trackée (pas de conflit)
-            existingForecast.Date = forecast.Date;
-            existingForecast.TemperatureC = forecast.TemperatureC;
-            existingForecast.Summary = forecast.Summary;
+            // Mettre à jour les propriétés via les méthodes de l'entité
+            existingForecast.UpdateDate(forecast.Date);
+            existingForecast.UpdateTemperature(forecast.Temperature);
+            existingForecast.UpdateSummary(forecast.Summary);
 
             await _unitOfWork.SaveChangesAsync();
             

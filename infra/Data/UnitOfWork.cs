@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using domain.Interfaces;
+using domain.Interfaces.Repositories;
 using infra.Repositories;
 using domain.Interfaces.Repos;
 
@@ -18,6 +19,7 @@ namespace infra.Data
         private IWeatherForecastRepository? _weatherForecasts;
         private IUserRepository? _users;
         private ISessionRepository? _sessions;
+        private IApiKeyRepository? _apiKeys;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -49,6 +51,15 @@ namespace infra.Data
             {
                 _sessions ??= new SessionRepository(_context);
                 return _sessions;
+            }
+        }
+
+        public IApiKeyRepository ApiKeys
+        {
+            get
+            {
+                _apiKeys ??= new ApiKeyRepository(_context);
+                return _apiKeys;
             }
         }
 

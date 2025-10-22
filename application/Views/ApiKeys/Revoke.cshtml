@@ -1,0 +1,121 @@
+@model domain.Entities.ApiKey
+
+@{
+    ViewData["Title"] = "Révoquer la clé API";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Révoquer la clé API
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <strong>⚠️ Attention !</strong> Cette action est irréversible. 
+                        Une fois révoquée, cette clé API ne pourra plus être utilisée.
+                    </div>
+
+                    <h5>Informations de la clé</h5>
+                    <dl class="row">
+                        <dt class="col-sm-3">Nom</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+
+                        <dt class="col-sm-3">Clé</dt>
+                        <dd class="col-sm-9">
+                            <code>@Model.Key</code>
+                        </dd>
+
+                        <dt class="col-sm-3">Créée le</dt>
+                        <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-3">Dernière utilisation</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.LastUsedAt.HasValue)
+                            {
+                                @Model.LastUsedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Jamais utilisée</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Nombre de requêtes</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-info">@Model.RequestCount</span>
+                        </dd>
+
+                        <dt class="col-sm-3">Scopes</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-secondary">@Model.Scopes.ToScopeString()</span>
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <form asp-action="RevokeConfirmed" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="form-group mb-3">
+                            <label for="reason" class="form-label">
+                                Raison de la révocation <span class="text-muted">(optionnel)</span>
+                            </label>
+                            <textarea 
+                                id="reason" 
+                                name="reason" 
+                                class="form-control" 
+                                rows="3" 
+                                placeholder="Ex: Clé compromise, Renouvellement de sécurité, etc."></textarea>
+                            <small class="form-text text-muted">
+                                Cette information sera enregistrée dans l'historique pour traçabilité.
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash-fill"></i> Confirmer la révocation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info pour les futurs admins -->
+            <div class="alert alert-info mt-3" role="alert">
+                <strong>💡 Note :</strong> 
+                @if (User.IsInRole("Admin"))
+                {
+                    <text>En tant qu'administrateur, vous pouvez révoquer n'importe quelle clé. Assurez-vous de spécifier une raison claire.</text>
+                }
+                else
+                {
+                    <text>Vous ne pouvez révoquer que vos propres clés API.</text>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Confirmation avant soumission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const reason = document.getElementById('reason').value;
+            const message = reason 
+                ? `Êtes-vous sûr de vouloir révoquer cette clé ?\n\nRaison : ${reason}`
+                : 'Êtes-vous sûr de vouloir révoquer cette clé ?';
+            
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

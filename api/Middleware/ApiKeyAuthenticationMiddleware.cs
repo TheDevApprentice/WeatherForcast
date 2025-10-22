@@ -102,7 +102,7 @@ namespace api.Middleware
                     new Claim(ClaimTypes.NameIdentifier, apiKey.UserId),
                     new Claim(ClaimTypes.Email, apiKey.User?.Email ?? ""),
                     new Claim("ApiKey", apiKey.Key),
-                    new Claim("Scopes", apiKey.Scopes)
+                    new Claim("Scopes", apiKey.Scopes.ToScopeString())
                 };
 
                 var identity = new ClaimsIdentity(claims, "ApiKey");

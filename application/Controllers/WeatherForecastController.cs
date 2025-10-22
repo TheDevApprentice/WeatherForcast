@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using domain.Entities;
 using domain.Interfaces.Services;
+using domain.ValueObjects;
+using application.ViewModels;
 
 namespace application.Controllers
 {
@@ -62,12 +64,16 @@ namespace application.Controllers
         // POST: /WeatherForecast/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Date,TemperatureC,Summary")] WeatherForecast forecast)
+        public async Task<IActionResult> Create(WeatherForecastViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Mapper le ViewModel vers l'entité avec le Value Object Temperature
+                    var temperature = new Temperature(viewModel.TemperatureC);
+                    var forecast = new WeatherForecast(viewModel.Date, temperature, viewModel.Summary);
+                    
                     await _weatherForecastService.CreateAsync(forecast);
                     
                     _logger.LogInformation("Prévision météo créée avec succès : {Id}", forecast.Id);
@@ -76,6 +82,11 @@ namespace application.Controllers
                     
                     return RedirectToAction(nameof(Index));
                 }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogWarning(ex, "Validation échouée lors de la création");
+                    ModelState.AddModelError("", ex.Message);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erreur lors de la création de la prévision météo");
@@ -83,7 +94,7 @@ namespace application.Controllers
                 }
             }
 
-            return View(forecast);
+            return View(viewModel);
         }
 
         // GET: /WeatherForecast/Edit/5
@@ -96,15 +107,24 @@ namespace application.Controllers
                 return NotFound();
             }
 
-            return View(forecast);
+            // Mapper l'entité vers le ViewModel
+            var viewModel = new WeatherForecastViewModel
+            {
+                Id = forecast.Id,
+                Date = forecast.Date,
+                TemperatureC = forecast.TemperatureC,
+                Summary = forecast.Summary
+            };
+
+            return View(viewModel);
         }
 
         // POST: /WeatherForecast/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,TemperatureC,Summary")] WeatherForecast forecast)
+        public async Task<IActionResult> Edit(int id, WeatherForecastViewModel viewModel)
         {
-            if (id != forecast.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
@@ -113,6 +133,13 @@ namespace application.Controllers
             {
                 try
                 {
+                    // Mapper le ViewModel vers l'entité avec le Value Object Temperature
+                    var temperature = new Temperature(viewModel.TemperatureC);
+                    var forecast = new WeatherForecast(viewModel.Date, temperature, viewModel.Summary)
+                    {
+                        Id = viewModel.Id
+                    };
+                    
                     await _weatherForecastService.UpdateAsync(id, forecast);
                     
                     _logger.LogInformation("Prévision météo mise à jour : {Id}", forecast.Id);
@@ -121,6 +148,11 @@ namespace application.Controllers
                     
                     return RedirectToAction(nameof(Index));
                 }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogWarning(ex, "Validation échouée lors de la mise à jour");
+                    ModelState.AddModelError("", ex.Message);
+                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erreur lors de la mise à jour de la prévision météo");
@@ -128,7 +160,7 @@ namespace application.Controllers
                 }
             }
 
-            return View(forecast);
+            return View(viewModel);
         }
 
         // GET: /WeatherForecast/Delete/5

@@ -1,5 +1,6 @@
 using domain.Entities;
 using domain.Interfaces.Services;
+using domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -95,14 +96,9 @@ namespace api.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Mapper le DTO vers l'entité
-                var forecast = new WeatherForecast
-                {
-                    Date = request.Date,
-                    TemperatureC = request.TemperatureC,
-                    Summary = request.Summary
-                    // ID sera auto-généré par EF Core
-                };
+                // Mapper le DTO vers l'entité avec le Value Object Temperature
+                var temperature = new Temperature(request.TemperatureC);
+                var forecast = new WeatherForecast(request.Date, temperature, request.Summary);
 
                 var createdForecast = await _weatherForecastService.CreateAsync(forecast);
 
@@ -139,13 +135,11 @@ namespace api.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Mapper le DTO vers l'entité
-                var forecast = new WeatherForecast
+                // Mapper le DTO vers l'entité avec le Value Object Temperature
+                var temperature = new Temperature(request.TemperatureC);
+                var forecast = new WeatherForecast(request.Date, temperature, request.Summary)
                 {
-                    Id = id, // ID vient de l'URL
-                    Date = request.Date,
-                    TemperatureC = request.TemperatureC,
-                    Summary = request.Summary
+                    Id = id // ID vient de l'URL
                 };
 
                 var success = await _weatherForecastService.UpdateAsync(id, forecast);

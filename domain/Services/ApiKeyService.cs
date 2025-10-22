@@ -1,6 +1,7 @@
 using domain.Entities;
-using domain.Interfaces.Repositories;
+using domain.Interfaces;
 using domain.Interfaces.Services;
+using domain.ValueObjects;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -8,11 +9,11 @@ namespace domain.Services
 {
     public class ApiKeyService : IApiKeyService
     {
-        private readonly IApiKeyRepository _apiKeyRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ApiKeyService(IApiKeyRepository apiKeyRepository)
+        public ApiKeyService(IUnitOfWork unitOfWork)
         {
-            _apiKeyRepository = apiKeyRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<(ApiKey apiKey, string plainSecret)> GenerateApiKeyAsync(
@@ -29,42 +30,37 @@ namespace domain.Services
             // Hasher le secret
             var secretHash = HashSecret(plainSecret);
 
-            var apiKey = new ApiKey
-            {
-                Name = name,
-                Key = key,
-                SecretHash = secretHash,
-                UserId = userId,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = expirationDays.HasValue
-                    ? DateTime.UtcNow.AddDays(expirationDays.Value)
-                    : null,
-                IsActive = true,
-                Scopes = "read" // Par défaut, lecture seule
-            };
+            // Créer l'API Key avec le constructeur (encapsulation)
+            var expiresAt = expirationDays.HasValue
+                ? DateTime.UtcNow.AddDays(expirationDays.Value)
+                : (DateTime?)null;
 
-            await _apiKeyRepository.CreateAsync(apiKey);
+            var apiKey = new ApiKey(
+                name: name,
+                key: key,
+                secretHash: secretHash,
+                userId: userId,
+                scopes: ApiKeyScopes.ReadWrite, // Par défaut, lecture et écriture
+                expiresAt: expiresAt
+            );
+
+            await _unitOfWork.ApiKeys.CreateAsync(apiKey);
+            // SaveChangesAsync est déjà appelé dans CreateAsync du repository
 
             return (apiKey, plainSecret);
         }
 
         public async Task<(bool isValid, ApiKey? apiKey)> ValidateApiKeyAsync(string key, string secret)
         {
-            var apiKey = await _apiKeyRepository.GetByKeyAsync(key);
+            var apiKey = await _unitOfWork.ApiKeys.GetByKeyAsync(key);
 
             if (apiKey == null)
             {
                 return (false, null);
             }
 
-            // Vérifier si la clé est active
-            if (!apiKey.IsActive)
-            {
-                return (false, null);
-            }
-
-            // Vérifier si la clé est expirée
-            if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
+            // Utiliser la méthode IsValid() de l'entité
+            if (!apiKey.IsValid())
             {
                 return (false, null);
             }
@@ -76,22 +72,44 @@ namespace domain.Services
                 return (false, null);
             }
 
+            // Enregistrer l'utilisation
+            apiKey.RecordUsage();
+            await _unitOfWork.SaveChangesAsync();
+
             return (true, apiKey);
         }
 
         public async Task<IEnumerable<ApiKey>> GetUserApiKeysAsync(string userId)
         {
-            return await _apiKeyRepository.GetByUserIdAsync(userId);
+            return await _unitOfWork.ApiKeys.GetByUserIdAsync(userId);
         }
 
-        public async Task<bool> RevokeApiKeyAsync(int apiKeyId, string userId)
+        public async Task<bool> RevokeApiKeyAsync(int apiKeyId, string userId, string reason)
         {
-            return await _apiKeyRepository.RevokeAsync(apiKeyId, userId);
+            var apiKey = await _unitOfWork.ApiKeys.GetByIdAsync(apiKeyId);
+            
+            if (apiKey == null || apiKey.UserId != userId)
+            {
+                return false;
+            }
+
+            // Utiliser la méthode Revoke() de l'entité (avec traçabilité)
+            apiKey.Revoke(reason);
+            await _unitOfWork.SaveChangesAsync();
+            
+            return true;
         }
 
         public async Task UpdateLastUsedAsync(string key)
         {
-            await _apiKeyRepository.IncrementRequestCountAsync(key);
+            // Cette méthode est maintenant gérée par RecordUsage() dans ValidateApiKeyAsync
+            // On peut la garder pour compatibilité ou la supprimer
+            var apiKey = await _unitOfWork.ApiKeys.GetByKeyAsync(key);
+            if (apiKey != null)
+            {
+                apiKey.RecordUsage();
+                await _unitOfWork.SaveChangesAsync();
+            }
         }
 
         private string GenerateRandomString(int length)

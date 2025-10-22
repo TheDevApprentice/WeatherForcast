@@ -83,10 +83,30 @@ namespace application.Controllers
             }
         }
 
+        // GET: /ApiKeys/Revoke/5
+        public async Task<IActionResult> Revoke(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var apiKey = (await _apiKeyService.GetUserApiKeysAsync(user.Id))
+                .FirstOrDefault(k => k.Id == id);
+
+            if (apiKey == null)
+            {
+                return NotFound();
+            }
+
+            return View(apiKey);
+        }
+
         // POST: /ApiKeys/Revoke/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Revoke(int id)
+        public async Task<IActionResult> RevokeConfirmed(int id, string? reason)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -96,11 +116,17 @@ namespace application.Controllers
 
             try
             {
-                var success = await _apiKeyService.RevokeApiKeyAsync(id, user.Id);
+                // Raison par défaut si non spécifiée
+                var revocationReason = string.IsNullOrWhiteSpace(reason)
+                    ? $"Révoquée par l'utilisateur {user.Email} depuis l'interface web"
+                    : $"{reason} (par {user.Email})";
+
+                var success = await _apiKeyService.RevokeApiKeyAsync(id, user.Id, revocationReason);
                 
                 if (success)
                 {
-                    _logger.LogInformation("Clé API révoquée: {Id} par {Email}", id, user.Email);
+                    _logger.LogInformation("Clé API révoquée: {Id} par {Email}. Raison: {Reason}", 
+                        id, user.Email, revocationReason);
                     TempData["SuccessMessage"] = "Clé API révoquée avec succès";
                 }
                 else

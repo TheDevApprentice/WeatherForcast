@@ -1,4 +1,5 @@
 using domain.Interfaces.Repos;
+using domain.Interfaces.Repositories;
 
 namespace domain.Interfaces
 {
@@ -12,6 +13,7 @@ namespace domain.Interfaces
         IWeatherForecastRepository WeatherForecasts { get; }
         IUserRepository Users { get; }
         ISessionRepository Sessions { get; }
+        IApiKeyRepository ApiKeys { get; }
 
         // Gestion des transactions
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
