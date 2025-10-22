@@ -34,8 +34,21 @@ namespace infra.Data
                     .ValueGeneratedOnAdd(); // IDENTITY(1,1) en SQL Server, SERIAL en PostgreSQL
                 
                 entity.Property(e => e.Date).IsRequired();
-                entity.Property(e => e.TemperatureC).IsRequired();
                 entity.Property(e => e.Summary).HasMaxLength(200);
+
+                // Configuration du Value Object Temperature (Owned Entity)
+                entity.OwnsOne(e => e.Temperature, temperature =>
+                {
+                    // Mapper la propriété Celsius à la colonne TemperatureC
+                    temperature.Property(t => t.Celsius)
+                        .HasColumnName("TemperatureC")
+                        .IsRequired();
+                    
+                    // Les propriétés calculées (Fahrenheit, IsHot, IsCold) ne sont pas mappées
+                    temperature.Ignore(t => t.Fahrenheit);
+                    temperature.Ignore(t => t.IsHot);
+                    temperature.Ignore(t => t.IsCold);
+                });
             });
 
             // Configuration de Session
@@ -95,8 +108,21 @@ namespace infra.Data
                 entity.Property(e => e.Key).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.SecretHash).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.UserId).IsRequired();
-                entity.Property(e => e.Scopes).HasMaxLength(200);
                 entity.Property(e => e.AllowedIpAddress).HasMaxLength(50);
+                entity.Property(e => e.RevocationReason).HasMaxLength(500);
+                
+                // Configuration du Value Object ApiKeyScopes (Owned Entity)
+                entity.OwnsOne(e => e.Scopes, scopes =>
+                {
+                    // Mapper les scopes vers une colonne texte
+                    scopes.Property<string>("_scopesString")
+                        .HasColumnName("Scopes")
+                        .HasMaxLength(200)
+                        .IsRequired();
+                    
+                    // Ignorer les propriétés calculées
+                    scopes.Ignore(s => s.Scopes);
+                });
                 
                 // Relation User ← ApiKey
                 entity.HasOne(e => e.User)
@@ -120,46 +146,26 @@ namespace infra.Data
             // Données statiques pour éviter les problèmes de migration
             // (les valeurs dynamiques comme DateTime.Now ou Random causent des erreurs)
             // IMPORTANT: Utiliser DateTimeKind.Utc pour PostgreSQL
-            var forecasts = new[]
-            {
-                new WeatherForecast
-                {
-                    Id = 1,
-                    Date = new DateTime(2025, 10, 22, 0, 0, 0, DateTimeKind.Utc),
-                    TemperatureC = 15,
-                    Summary = "Cool"
-                },
-                new WeatherForecast
-                {
-                    Id = 2,
-                    Date = new DateTime(2025, 10, 23, 0, 0, 0, DateTimeKind.Utc),
-                    TemperatureC = 22,
-                    Summary = "Mild"
-                },
-                new WeatherForecast
-                {
-                    Id = 3,
-                    Date = new DateTime(2025, 10, 24, 0, 0, 0, DateTimeKind.Utc),
-                    TemperatureC = 35,
-                    Summary = "Hot"
-                },
-                new WeatherForecast
-                {
-                    Id = 4,
-                    Date = new DateTime(2025, 10, 25, 0, 0, 0, DateTimeKind.Utc),
-                    TemperatureC = -5,
-                    Summary = "Freezing"
-                },
-                new WeatherForecast
-                {
-                    Id = 5,
-                    Date = new DateTime(2025, 10, 26, 0, 0, 0, DateTimeKind.Utc),
-                    TemperatureC = 18,
-                    Summary = "Warm"
-                }
-            };
+            
+            // Pour les Owned Entities, EF Core nécessite une configuration spéciale pour le seed
+            modelBuilder.Entity<WeatherForecast>().HasData(
+                new { Id = 1, Date = new DateTime(2025, 10, 22, 0, 0, 0, DateTimeKind.Utc), Summary = "Cool" },
+                new { Id = 2, Date = new DateTime(2025, 10, 23, 0, 0, 0, DateTimeKind.Utc), Summary = "Mild" },
+                new { Id = 3, Date = new DateTime(2025, 10, 24, 0, 0, 0, DateTimeKind.Utc), Summary = "Hot" },
+                new { Id = 4, Date = new DateTime(2025, 10, 25, 0, 0, 0, DateTimeKind.Utc), Summary = "Freezing" },
+                new { Id = 5, Date = new DateTime(2025, 10, 26, 0, 0, 0, DateTimeKind.Utc), Summary = "Warm" }
+            );
 
-            modelBuilder.Entity<WeatherForecast>().HasData(forecasts);
+            // Seed des Value Objects Temperature (Owned Entity)
+            modelBuilder.Entity<WeatherForecast>()
+                .OwnsOne(w => w.Temperature)
+                .HasData(
+                    new { WeatherForecastId = 1, Celsius = 15 },
+                    new { WeatherForecastId = 2, Celsius = 22 },
+                    new { WeatherForecastId = 3, Celsius = 35 },
+                    new { WeatherForecastId = 4, Celsius = -5 },
+                    new { WeatherForecastId = 5, Celsius = 18 }
+                );
         }
     }
 }

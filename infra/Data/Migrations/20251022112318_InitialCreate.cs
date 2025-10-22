@@ -127,6 +127,8 @@ namespace infra.Data.Migrations
                     LastUsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RevocationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Scopes = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     RequestCount = table.Column<long>(type: "bigint", nullable: false),
                     AllowedIpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)

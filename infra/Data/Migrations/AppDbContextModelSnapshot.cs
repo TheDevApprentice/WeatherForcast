@@ -191,10 +191,12 @@ namespace infra.Data.Migrations
                     b.Property<long>("RequestCount")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Scopes")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<string>("RevocationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecretHash")
                         .IsRequired()
@@ -377,9 +379,6 @@ namespace infra.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.ToTable("WeatherForecasts");
@@ -389,36 +388,31 @@ namespace infra.Data.Migrations
                         {
                             Id = 1,
                             Date = new DateTime(2025, 10, 22, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Cool",
-                            TemperatureC = 15
+                            Summary = "Cool"
                         },
                         new
                         {
                             Id = 2,
                             Date = new DateTime(2025, 10, 23, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Mild",
-                            TemperatureC = 22
+                            Summary = "Mild"
                         },
                         new
                         {
                             Id = 3,
                             Date = new DateTime(2025, 10, 24, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Hot",
-                            TemperatureC = 35
+                            Summary = "Hot"
                         },
                         new
                         {
                             Id = 4,
                             Date = new DateTime(2025, 10, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Freezing",
-                            TemperatureC = -5
+                            Summary = "Freezing"
                         },
                         new
                         {
                             Id = 5,
                             Date = new DateTime(2025, 10, 26, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Warm",
-                            TemperatureC = 18
+                            Summary = "Warm"
                         });
                 });
 
@@ -481,6 +475,28 @@ namespace infra.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("domain.ValueObjects.ApiKeyScopes", "Scopes", b1 =>
+                        {
+                            b1.Property<int>("ApiKeyId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("_scopesString")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("Scopes");
+
+                            b1.HasKey("ApiKeyId");
+
+                            b1.ToTable("ApiKeys");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ApiKeyId");
+                        });
+
+                    b.Navigation("Scopes")
+                        .IsRequired();
+
                     b.Navigation("User");
                 });
 
@@ -501,6 +517,56 @@ namespace infra.Data.Migrations
                     b.Navigation("Session");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("domain.Entities.WeatherForecast", b =>
+                {
+                    b.OwnsOne("domain.ValueObjects.Temperature", "Temperature", b1 =>
+                        {
+                            b1.Property<int>("WeatherForecastId")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Celsius")
+                                .HasColumnType("integer")
+                                .HasColumnName("TemperatureC");
+
+                            b1.HasKey("WeatherForecastId");
+
+                            b1.ToTable("WeatherForecasts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WeatherForecastId");
+
+                            b1.HasData(
+                                new
+                                {
+                                    WeatherForecastId = 1,
+                                    Celsius = 15
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 2,
+                                    Celsius = 22
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 3,
+                                    Celsius = 35
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 4,
+                                    Celsius = -5
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 5,
+                                    Celsius = 18
+                                });
+                        });
+
+                    b.Navigation("Temperature")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("domain.Entities.ApplicationUser", b =>
