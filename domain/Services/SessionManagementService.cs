@@ -24,16 +24,8 @@ namespace domain.Services
             string? userAgent = null,
             int expirationDays = 7)
         {
-            var session = new Session
-            {
-                Id = Guid.NewGuid(),
-                Token = cookieId,
-                Type = SessionType.Web,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(expirationDays),
-                IpAddress = ipAddress,
-                UserAgent = userAgent
-            };
+            var expiresAt = DateTime.UtcNow.AddDays(expirationDays);
+            var session = new Session(cookieId, SessionType.Web, expiresAt, ipAddress, userAgent);
 
             await _unitOfWork.Sessions.CreateSessionWithUserAsync(session, userId);
             await _unitOfWork.SaveChangesAsync();
@@ -47,16 +39,8 @@ namespace domain.Services
             string? userAgent = null,
             int expirationHours = 24)
         {
-            var session = new Session
-            {
-                Id = Guid.NewGuid(),
-                Token = jwtToken,
-                Type = SessionType.Api,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddHours(expirationHours),
-                IpAddress = ipAddress,
-                UserAgent = userAgent
-            };
+            var expiresAt = DateTime.UtcNow.AddHours(expirationHours);
+            var session = new Session(jwtToken, SessionType.Api, expiresAt, ipAddress, userAgent);
 
             await _unitOfWork.Sessions.CreateSessionWithUserAsync(session, userId);
             await _unitOfWork.SaveChangesAsync();

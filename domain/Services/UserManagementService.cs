@@ -28,14 +28,8 @@ namespace domain.Services
             string firstName,
             string lastName)
         {
-            var user = new ApplicationUser
-            {
-                UserName = email,
-                Email = email,
-                FirstName = firstName,
-                LastName = lastName,
-                CreatedAt = DateTime.UtcNow
-            };
+            // Utilise le constructeur avec validation
+            var user = new ApplicationUser(email, firstName, lastName);
 
             var result = await _userManager.CreateAsync(user, password);
 

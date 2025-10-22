@@ -71,8 +71,7 @@ namespace infra.Repositories
             var session = await _context.Sessions.FindAsync(sessionId);
             if (session == null) return false;
 
-            session.IsRevoked = true;
-            session.RevokedAt = DateTime.UtcNow;
+            session.Revoke(); // Utilise la méthode de l'entité
             // SaveChanges géré par le UnitOfWork
             return true;
         }
@@ -98,8 +97,7 @@ namespace infra.Repositories
 
             foreach (var session in sessions)
             {
-                session.IsRevoked = true;
-                session.RevokedAt = DateTime.UtcNow;
+                session.Revoke(); // Utilise la méthode de l'entité
             }
             // SaveChanges géré par le UnitOfWork
             return sessions.Count;
@@ -123,8 +121,7 @@ namespace infra.Repositories
 
             foreach (var session in expiredSessions)
             {
-                session.IsRevoked = true;
-                session.RevokedAt = DateTime.UtcNow;
+                session.Revoke("Session expirée - Nettoyage automatique"); // Utilise la méthode de l'entité
             }
             // SaveChanges géré par le UnitOfWork
             return expiredSessions.Count;

@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text;
 using api.DTOs;
 using domain.Interfaces.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace api.Middleware
 {
@@ -14,16 +13,13 @@ namespace api.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ApiKeyAuthenticationMiddleware> _logger;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public ApiKeyAuthenticationMiddleware(
             RequestDelegate next,
-            ILogger<ApiKeyAuthenticationMiddleware> logger,
-            IServiceScopeFactory serviceScopeFactory)
+            ILogger<ApiKeyAuthenticationMiddleware> logger)
         {
             _next = next;
             _logger = logger;
-            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task InvokeAsync(HttpContext context, IApiKeyService apiKeyService)
@@ -71,7 +67,7 @@ namespace api.Middleware
                 var key = credentials[0];
                 var secret = credentials[1];
 
-                // Valider la clé API
+                // Valider la clé API (enregistre automatiquement l'utilisation)
                 var (isValid, apiKey) = await apiKeyService.ValidateApiKeyAsync(key, secret);
 
                 if (!isValid || apiKey == null)
@@ -81,20 +77,8 @@ namespace api.Middleware
                     return;
                 }
 
-                // Mettre à jour LastUsedAt dans un scope séparé (fire-and-forget thread-safe)
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        using var scope = _serviceScopeFactory.CreateScope();
-                        var scopedApiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-                        await scopedApiKeyService.UpdateLastUsedAsync(key);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to update API key last used date: {Key}", key);
-                    }
-                });
+                // NOTE: L'utilisation est déjà enregistrée dans ValidateApiKeyAsync()
+                // Pas besoin d'appeler UpdateLastUsedAsync() ici
                 
                 // Créer les claims pour l'utilisateur
                 var claims = new[]

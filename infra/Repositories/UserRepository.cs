@@ -45,7 +45,7 @@ namespace infra.Repositories
             var user = await _context.Users.FindAsync(userId);
             if (user != null)
             {
-                user.LastLoginAt = DateTime.UtcNow;
+                user.RecordLogin(); // Utilise la méthode de l'entité
                 // SaveChanges géré par le UnitOfWork
             }
         }
@@ -55,7 +55,15 @@ namespace infra.Repositories
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return false;
 
-            user.IsActive = isActive;
+            // Utilise les méthodes de l'entité
+            if (isActive && !user.IsActive)
+            {
+                user.Reactivate();
+            }
+            else if (!isActive && user.IsActive)
+            {
+                user.Deactivate("Désactivé par un administrateur");
+            }
             // SaveChanges géré par le UnitOfWork
             return true;
         }
