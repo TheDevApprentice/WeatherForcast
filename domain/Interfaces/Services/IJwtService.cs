@@ -8,8 +8,8 @@ namespace domain.Interfaces.Services
     public interface IJwtService
     {
         /// <summary>
-        /// Générer un token JWT pour un utilisateur
+        /// Générer un token JWT pour un utilisateur avec ses rôles et claims
         /// </summary>
-        string GenerateToken(ApplicationUser user);
+        Task<string> GenerateTokenAsync(ApplicationUser user);
     }
 }

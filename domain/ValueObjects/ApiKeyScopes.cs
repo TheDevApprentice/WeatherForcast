@@ -1,23 +1,29 @@
+using domain.Constants;
+
 namespace domain.ValueObjects
 {
     /// <summary>
     /// Value Object représentant les scopes (permissions) d'une API Key
+    /// Utilise les mêmes permissions que les Claims pour cohérence
     /// Immutable et avec validation intégrée
     /// </summary>
     public record ApiKeyScopes
     {
+        /// <summary>
+        /// Scopes valides (alignés avec AppClaims)
+        /// </summary>
         private static readonly HashSet<string> ValidScopes = new()
         {
-            "read",
-            "write",
-            "admin"
+            AppClaims.ForecastRead,
+            AppClaims.ForecastWrite,
+            AppClaims.ForecastDelete
         };
 
-        // Backing field pour EF Core
-        private string _scopesString = "read";
+        // Backing field pour EF Core (séparateur: espace)
+        private string _scopesString = AppClaims.ForecastRead;
 
         /// <summary>
-        /// Liste des scopes (ex: "read", "write")
+        /// Liste des scopes (ex: "forecast:read", "forecast:write")
         /// </summary>
         public IReadOnlyList<string> Scopes => _scopesString
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
@@ -27,14 +33,13 @@ namespace domain.ValueObjects
         /// <summary>
         /// Constructeur principal avec validation
         /// </summary>
-        /// <param name="scopes">Liste des scopes séparés par des espaces (ex: "read write")</param>
+        /// <param name="scopes">Liste des scopes séparés par des espaces (ex: "forecast:read forecast:write")</param>
         public ApiKeyScopes(string scopes)
         {
             if (string.IsNullOrWhiteSpace(scopes))
                 throw new ArgumentException("Les scopes ne peuvent pas être vides");
 
             var scopeList = scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                                  .Select(s => s.ToLowerInvariant())
                                   .Distinct()
                                   .ToList();
 
@@ -61,7 +66,7 @@ namespace domain.ValueObjects
         /// </summary>
         private ApiKeyScopes()
         {
-            _scopesString = "read";
+            _scopesString = AppClaims.ForecastRead;
         }
 
         /// <summary>
@@ -69,7 +74,7 @@ namespace domain.ValueObjects
         /// </summary>
         public bool HasScope(string scope)
         {
-            return Scopes.Contains(scope.ToLowerInvariant());
+            return Scopes.Contains(scope);
         }
 
         /// <summary>
@@ -99,17 +104,17 @@ namespace domain.ValueObjects
         /// <summary>
         /// Scope par défaut (lecture seule)
         /// </summary>
-        public static ApiKeyScopes ReadOnly => new("read");
+        public static ApiKeyScopes ReadOnly => new(AppClaims.ForecastRead);
 
         /// <summary>
         /// Scope lecture/écriture
         /// </summary>
-        public static ApiKeyScopes ReadWrite => new("read write");
+        public static ApiKeyScopes ReadWrite => new($"{AppClaims.ForecastRead} {AppClaims.ForecastWrite}");
 
         /// <summary>
-        /// Scope administrateur (tous les droits)
+        /// Scope complet (lecture, écriture, suppression)
         /// </summary>
-        public static ApiKeyScopes Admin => new("read write admin");
+        public static ApiKeyScopes FullAccess => new($"{AppClaims.ForecastRead} {AppClaims.ForecastWrite} {AppClaims.ForecastDelete}");
 
         public override string ToString() => ToScopeString();
     }

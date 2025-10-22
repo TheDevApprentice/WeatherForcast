@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using domain.Entities;
+using domain.Constants;
 using application.ViewModels;
 using domain.Interfaces.Services;
 
@@ -12,17 +13,20 @@ namespace application.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly ISessionManagementService _sessionManagementService;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRateLimitService _rateLimitService;
 
         public AuthController(
             IUserManagementService userManagementService,
             ISessionManagementService sessionManagementService,
             SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
             IRateLimitService rateLimitService)
         {
             _userManagementService = userManagementService;
             _sessionManagementService = sessionManagementService;
             _signInManager = signInManager;
+            _userManager = userManager;
             _rateLimitService = rateLimitService;
         }
 
@@ -50,6 +54,9 @@ namespace application.Controllers
 
                 if (success && user != null)
                 {
+                    // Assigner le rôle "User" par défaut
+                    await _userManager.AddToRoleAsync(user, AppRoles.User);
+                    
                     // Ne pas auto-login après registration
                     // Rediriger vers la page de login
                     TempData["SuccessMessage"] = "Compte créé avec succès. Veuillez vous connecter.";

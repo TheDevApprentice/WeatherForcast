@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using api.DTOs;
 using domain.Interfaces.Services;
+using domain.Constants;
 
 namespace api.Middleware
 {
@@ -81,13 +82,19 @@ namespace api.Middleware
                 // Pas besoin d'appeler UpdateLastUsedAsync() ici
                 
                 // Créer les claims pour l'utilisateur
-                var claims = new[]
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, apiKey.UserId),
                     new Claim(ClaimTypes.Email, apiKey.User?.Email ?? ""),
                     new Claim("ApiKey", apiKey.Key),
-                    new Claim("Scopes", apiKey.Scopes.ToScopeString())
+                    new Claim(AppClaims.AccessType, AppClaims.ApiKeyAccess)
                 };
+
+                // Ajouter les scopes comme claims de permission
+                foreach (var scope in apiKey.Scopes.Scopes)
+                {
+                    claims.Add(new Claim(AppClaims.Permission, scope));
+                }
 
                 var identity = new ClaimsIdentity(claims, "ApiKey");
                 context.User = new ClaimsPrincipal(identity);

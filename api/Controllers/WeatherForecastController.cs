@@ -1,6 +1,7 @@
 using domain.Entities;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
+using domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,8 +30,10 @@ namespace api.Controllers
 
         // GET: api/WeatherForecast
         [HttpGet]
+        [Authorize(Policy = AppClaims.ForecastRead)]
         [ProducesResponseType(typeof(IEnumerable<WeatherForecast>), 200)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<IEnumerable<WeatherForecast>>> GetAll()
         {
@@ -48,8 +51,10 @@ namespace api.Controllers
 
         // GET: api/WeatherForecast/5
         [HttpGet("{id}")]
+        [Authorize(Policy = AppClaims.ForecastRead)]
         [ProducesResponseType(typeof(WeatherForecast), 200)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<WeatherForecast>> GetById(int id)
@@ -83,9 +88,11 @@ namespace api.Controllers
         /// <param name="request">Données de la prévision (sans ID, auto-généré)</param>
         /// <returns>La prévision créée avec son ID</returns>
         [HttpPost]
+        [Authorize(Policy = AppClaims.ForecastWrite)]
         [ProducesResponseType(typeof(WeatherForecast), 201)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 400)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<WeatherForecast>> Create([FromBody] api.DTOs.CreateWeatherForecastRequest request)
         {
@@ -121,9 +128,11 @@ namespace api.Controllers
         /// <param name="request">Nouvelles données (sans ID, passé dans l'URL)</param>
         /// <returns>204 No Content si succès</returns>
         [HttpPut("{id}")]
+        [Authorize(Policy = AppClaims.ForecastWrite)]
         [ProducesResponseType(204)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 400)]
         [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Update(int id, [FromBody] api.DTOs.UpdateWeatherForecastRequest request)
@@ -160,8 +169,14 @@ namespace api.Controllers
             }
         }
 
-        // DELETE: api/WeatherForecast/5 (DÉSACTIVÉ)
+        // DELETE: api/WeatherForecast/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = AppClaims.ForecastDelete)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Delete(int id)
         {
             try

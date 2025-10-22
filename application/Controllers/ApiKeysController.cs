@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using domain.Entities;
 using domain.Interfaces.Services;
+using domain.Constants;
+using application.Authorization;
 
 namespace application.Controllers
 {
@@ -24,6 +26,7 @@ namespace application.Controllers
         }
 
         // GET: /ApiKeys
+        [HasPermission(AppClaims.ApiKeyManage)]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -37,6 +40,7 @@ namespace application.Controllers
         }
 
         // GET: /ApiKeys/Create
+        [HasPermission(AppClaims.ApiKeyManage)]
         public IActionResult Create()
         {
             return View();
@@ -45,6 +49,7 @@ namespace application.Controllers
         // POST: /ApiKeys/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission(AppClaims.ApiKeyManage)]
         public async Task<IActionResult> Create(string name, int? expirationDays)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -84,6 +89,7 @@ namespace application.Controllers
         }
 
         // GET: /ApiKeys/Revoke/5
+        [HasPermission(AppClaims.ApiKeyManage)]
         public async Task<IActionResult> Revoke(int id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -106,6 +112,7 @@ namespace application.Controllers
         // POST: /ApiKeys/Revoke/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission(AppClaims.ApiKeyManage)]
         public async Task<IActionResult> RevokeConfirmed(int id, string? reason)
         {
             var user = await _userManager.GetUserAsync(User);

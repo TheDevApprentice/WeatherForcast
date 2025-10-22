@@ -93,6 +93,18 @@ namespace api
             // Memory Cache pour Rate Limiting
             builder.Services.AddMemoryCache();
 
+            // Authorization - Policies basées sur les permissions
+            builder.Services.AddAuthorization(options =>
+            {
+                // Policies pour les permissions Forecast
+                options.AddPolicy(domain.Constants.AppClaims.ForecastRead,
+                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastRead));
+                options.AddPolicy(domain.Constants.AppClaims.ForecastWrite,
+                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastWrite));
+                options.AddPolicy(domain.Constants.AppClaims.ForecastDelete,
+                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastDelete));
+            });
+
             // 5. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

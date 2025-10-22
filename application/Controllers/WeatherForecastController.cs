@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using domain.Entities;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
+using domain.Constants;
 using application.ViewModels;
+using application.Authorization;
 
 namespace application.Controllers
 {
@@ -28,6 +30,7 @@ namespace application.Controllers
         }
 
         // GET: /WeatherForecast
+        [HasPermission(AppClaims.ForecastRead)]
         public async Task<IActionResult> Index()
         {
             try
@@ -43,6 +46,7 @@ namespace application.Controllers
         }
 
         // GET: /WeatherForecast/Details/5
+        [HasPermission(AppClaims.ForecastRead)]
         public async Task<IActionResult> Details(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
@@ -56,6 +60,7 @@ namespace application.Controllers
         }
 
         // GET: /WeatherForecast/Create
+        [HasPermission(AppClaims.ForecastWrite)]
         public IActionResult Create()
         {
             return View();
@@ -64,6 +69,7 @@ namespace application.Controllers
         // POST: /WeatherForecast/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission(AppClaims.ForecastWrite)]
         public async Task<IActionResult> Create(WeatherForecastViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -98,6 +104,7 @@ namespace application.Controllers
         }
 
         // GET: /WeatherForecast/Edit/5
+        [HasPermission(AppClaims.ForecastWrite)]
         public async Task<IActionResult> Edit(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
@@ -122,6 +129,7 @@ namespace application.Controllers
         // POST: /WeatherForecast/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission(AppClaims.ForecastWrite)]
         public async Task<IActionResult> Edit(int id, WeatherForecastViewModel viewModel)
         {
             if (id != viewModel.Id)
@@ -164,6 +172,7 @@ namespace application.Controllers
         }
 
         // GET: /WeatherForecast/Delete/5
+        [HasPermission(AppClaims.ForecastDelete)]
         public async Task<IActionResult> Delete(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
@@ -179,6 +188,7 @@ namespace application.Controllers
         // POST: /WeatherForecast/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [HasPermission(AppClaims.ForecastDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try

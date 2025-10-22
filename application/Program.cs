@@ -9,7 +9,7 @@ namespace application
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Configuration Npgsql : Convertir automatiquement les DateTime en UTC
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -29,7 +29,7 @@ namespace application
                 Console.WriteLine("[Web] Using PostgreSQL database with DbContext pooling");
 
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
-                    options.UseNpgsql(connectionString), 
+                    options.UseNpgsql(connectionString),
                     poolSize: 128); // Taille du pool (par défaut: 128)
             }
 
@@ -101,17 +101,45 @@ namespace application
             builder.Services.AddScoped<IUserManagementService, domain.Services.UserManagementService>();
             builder.Services.AddScoped<ISessionManagementService, domain.Services.SessionManagementService>();
             builder.Services.AddScoped<IAuthenticationService, domain.Services.AuthenticationService>();
-            
+            builder.Services.AddScoped<IRoleManagementService, domain.Services.RoleManagementService>();
+
             // Autres services
             builder.Services.AddScoped<IRateLimitService, domain.Services.RateLimitService>();
             builder.Services.AddScoped<IWeatherForecastService, domain.Services.WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, domain.Services.ApiKeyService>();
-            
+
             // Repositories
             builder.Services.AddScoped<domain.Interfaces.Repositories.IApiKeyRepository, infra.Repositories.ApiKeyRepository>();
 
             // Memory Cache pour Rate Limiting
             builder.Services.AddMemoryCache();
+
+            // Authorization - Policies basées sur les permissions
+            builder.Services.AddAuthorization(options =>
+            {
+                // Policies pour les permissions Forecast
+                options.AddPolicy(domain.Constants.AppClaims.ForecastRead,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastRead)));
+                options.AddPolicy(domain.Constants.AppClaims.ForecastWrite,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastWrite)));
+                options.AddPolicy(domain.Constants.AppClaims.ForecastDelete,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastDelete)));
+
+                // Policies pour les permissions API Key
+                options.AddPolicy(domain.Constants.AppClaims.ApiKeyManage,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ApiKeyManage)));
+                options.AddPolicy(domain.Constants.AppClaims.ApiKeyViewAll,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ApiKeyViewAll)));
+
+                // Policies pour les permissions User
+                options.AddPolicy(domain.Constants.AppClaims.UserManage,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.UserManage)));
+                options.AddPolicy(domain.Constants.AppClaims.UserViewAll,
+                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.UserViewAll)));
+            });
+
+            // Authorization Handler
+            builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, application.Authorization.PermissionHandler>();
 
             // 4. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -130,19 +158,19 @@ namespace application
             builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp =>
             {
                 var logger = sp.GetRequiredService<ILogger<Program>>();
-                
+
                 var configuration = StackExchange.Redis.ConfigurationOptions.Parse(redisConnectionString!);
                 configuration.AbortOnConnectFail = false; // Ne pas planter si Redis est indisponible
                 configuration.ConnectTimeout = 15000;      // 15 secondes
                 configuration.SyncTimeout = 5000;          // 5 secondes pour les opérations
                 configuration.ConnectRetry = 5;            // 5 tentatives
                 configuration.KeepAlive = 60;              // Keep-alive toutes les 60 secondes
-                
+
                 try
                 {
                     logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
                     var connection = StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
-                    
+
                     // Attendre un peu que la connexion soit établie
                     var attempts = 0;
                     while (!connection.IsConnected && attempts < 10)
@@ -150,7 +178,7 @@ namespace application
                         System.Threading.Thread.Sleep(500);
                         attempts++;
                     }
-                    
+
                     if (connection.IsConnected)
                     {
                         logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
@@ -159,7 +187,7 @@ namespace application
                     {
                         logger.LogWarning("⚠️ Redis : Connexion créée mais pas encore établie. Retry en arrière-plan...");
                     }
-                    
+
                     return connection;
                 }
                 catch (Exception ex)
@@ -246,6 +274,36 @@ namespace application
 
             // 7. SignalR Hub
             app.MapHub<application.Hubs.WeatherForecastHub>("/hubs/weatherforecast");
+
+            // ============================================
+            // SEED DES RÔLES ET UTILISATEUR ADMIN
+            // ============================================
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var userManager = services.GetRequiredService<UserManager<domain.Entities.ApplicationUser>>();
+                    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger<infra.Data.RoleSeeder>();
+
+                    var roleSeeder = new infra.Data.RoleSeeder(roleManager, logger);
+
+                    // Créer les rôles avec leurs claims
+                    await roleSeeder.SeedRolesAsync();
+
+                    // Créer l'utilisateur admin par défaut
+                    await roleSeeder.SeedAdminUserAsync(userManager);
+
+                    Console.WriteLine("✅ Roles and admin user seeded successfully");
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding roles");
+                }
+            }
 
             app.Run();
         }

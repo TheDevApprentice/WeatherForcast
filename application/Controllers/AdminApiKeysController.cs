@@ -3,15 +3,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using domain.Entities;
+using domain.Constants;
+using application.Authorization;
 
 namespace application.Controllers
 {
     /// <summary>
     /// Contrôleur Admin pour gérer TOUTES les clés API
-    /// TODO: Activer [Authorize(Roles = "Admin")] quand les rôles seront implémentés
+    /// Nécessite la permission ApiKeyViewAll (Admin uniquement)
     /// </summary>
-    // [Authorize(Roles = "Admin")]  // À décommenter quand les rôles seront prêts
-    [Authorize]  // Pour l'instant, juste authentifié
+    [Authorize]
+    [HasPermission(AppClaims.ApiKeyViewAll)]
     [Route("Admin/ApiKeys")]
     public class AdminApiKeysController : Controller
     {

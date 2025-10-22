@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using api.DTOs;
 using domain.Interfaces.Services;
+using domain.Constants;
+using domain.Entities;
 
 namespace api.Controllers
 {
@@ -10,32 +13,35 @@ namespace api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserManagementService _userManagementService;
+        private readonly ISessionManagementService _sessionManagementService;
         private readonly IAuthenticationService _authenticationService;
         private readonly IJwtService _jwtService;
         private readonly IRateLimitService _rateLimitService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             IUserManagementService userManagementService,
+            ISessionManagementService sessionManagementService,
             IAuthenticationService authenticationService,
             IJwtService jwtService,
             IRateLimitService rateLimitService,
+            UserManager<ApplicationUser> userManager,
             ILogger<AuthController> logger)
         {
             _userManagementService = userManagementService;
+            _sessionManagementService = sessionManagementService;
             _authenticationService = authenticationService;
             _jwtService = jwtService;
             _rateLimitService = rateLimitService;
+            _userManager = userManager;
             _logger = logger;
         }
 
-        // NOTE: L'inscription se fait via l'application Web, pas via l'API
-        // Pour utiliser l'API, créez un compte sur l'application Web puis générez une clé API
-        
         /// <summary>
-        /// Inscription d'un nouvel utilisateur (DÉSACTIVÉ - Utiliser l'application Web)
+        /// Inscription d'un nouvel utilisateur mobile
         /// </summary>
-        /* [HttpPost("register")]
+        [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(AuthResponse), 200)]
         [ProducesResponseType(400)]
@@ -46,33 +52,35 @@ namespace api.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Générer le token JWT en avance
-            var tempUser = new domain.Entities.ApplicationUser { Email = request.Email };
-            var token = _jwtService.GenerateToken(tempUser);
-
-            // Récupérer les informations de la requête
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-
-            // Enregistrer l'utilisateur ET créer sa session (opération atomique)
-            var (success, errors, user) = await _authService.RegisterWithSessionAsync(
+            // Enregistrer l'utilisateur
+            var (success, errors, user) = await _userManagementService.RegisterAsync(
                 request.Email,
                 request.Password,
                 request.FirstName,
-                request.LastName,
-                token,
-                ipAddress,
-                userAgent,
-                isApiSession: true,
-                expirationHours: 24);
+                request.LastName);
 
             if (!success || user == null)
             {
                 return BadRequest(new { Errors = errors });
             }
 
-            // Regénérer le token avec le vrai user (pour avoir le bon ID)
-            token = _jwtService.GenerateToken(user);
+            // Assigner le rôle MobileUser
+            await _userManager.AddToRoleAsync(user, AppRoles.MobileUser);
+
+            // Générer le token JWT (avec rôles et claims)
+            var token = await _jwtService.GenerateTokenAsync(user);
+
+            // Récupérer les informations de la requête
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+
+            // Créer une session API
+            await _sessionManagementService.CreateApiSessionAsync(
+                user.Id,
+                token,
+                ipAddress,
+                userAgent,
+                expirationHours: 24);
 
             var response = new AuthResponse
             {
@@ -83,15 +91,15 @@ namespace api.Controllers
                 ExpiresAt = DateTime.UtcNow.AddHours(24)
             };
 
-            _logger.LogInformation("Nouvel utilisateur enregistré: {Email}", user.Email);
+            _logger.LogInformation("Nouvel utilisateur mobile enregistré: {Email}", user.Email);
 
             return Ok(response);
-        } */
+        }
 
         /// <summary>
-        /// Connexion d'un utilisateur existant (DÉSACTIVÉ - Utiliser les clés API)
+        /// Connexion d'un utilisateur mobile existant
         /// </summary>
-        /* [HttpPost("login")]
+        [HttpPost("login")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(AuthResponse), 200)]
         [ProducesResponseType(401)]
@@ -106,19 +114,10 @@ namespace api.Controllers
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
-            // Pré-générer le token (on le regénérera avec le vrai user après)
-            var tempUser = new domain.Entities.ApplicationUser { Email = request.Email };
-            var token = _jwtService.GenerateToken(tempUser);
-
-            // Login + créer session + mettre à jour LastLoginAt (opération atomique)
-            var (success, user) = await _authService.LoginWithSessionAsync(
+            // Valider les credentials
+            var (success, user) = await _authenticationService.ValidateCredentialsAsync(
                 request.Email,
-                request.Password,
-                token,
-                ipAddress,
-                userAgent,
-                isApiSession: true,
-                expirationHours: 24);
+                request.Password);
 
             if (!success || user == null)
             {
@@ -137,8 +136,19 @@ namespace api.Controllers
                 await _rateLimitService.ResetFailedAttemptsAsync(ipAddress);
             }
 
-            // Regénérer le token avec le vrai user (pour avoir le bon ID)
-            token = _jwtService.GenerateToken(user);
+            // Mettre à jour LastLoginAt
+            await _userManagementService.UpdateLastLoginAsync(user.Id);
+
+            // Générer le token JWT (avec rôles et claims)
+            var token = await _jwtService.GenerateTokenAsync(user);
+
+            // Créer une session API
+            await _sessionManagementService.CreateApiSessionAsync(
+                user.Id,
+                token,
+                ipAddress,
+                userAgent,
+                expirationHours: 24);
 
             var response = new AuthResponse
             {
@@ -149,10 +159,10 @@ namespace api.Controllers
                 ExpiresAt = DateTime.UtcNow.AddHours(24)
             };
 
-            _logger.LogInformation("Utilisateur connecté: {Email}", user.Email);
+            _logger.LogInformation("Utilisateur mobile connecté: {Email}", user.Email);
 
             return Ok(response);
-        } */
+        }
 
         /// <summary>
         /// Endpoint protégé pour tester l'authentification
