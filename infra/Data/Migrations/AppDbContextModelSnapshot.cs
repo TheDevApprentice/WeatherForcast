@@ -232,6 +232,12 @@ namespace infra.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DeactivatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeactivationReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -286,12 +292,29 @@ namespace infra.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("FirstName");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("LastLoginAt");
+
+                    b.HasIndex("LastName");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("FirstName", "LastName");
+
+                    b.HasIndex("IsActive", "CreatedAt");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -314,6 +337,9 @@ namespace infra.Data.Migrations
 
                     b.Property<bool>("IsRevoked")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("RevocationReason")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("timestamp with time zone");
@@ -400,19 +426,115 @@ namespace infra.Data.Migrations
                         {
                             Id = 3,
                             Date = new DateTime(2025, 10, 24, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Hot"
+                            Summary = "Warm"
                         },
                         new
                         {
                             Id = 4,
                             Date = new DateTime(2025, 10, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Summary = "Freezing"
+                            Summary = "Hot"
                         },
                         new
                         {
                             Id = 5,
                             Date = new DateTime(2025, 10, 26, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Balmy"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Date = new DateTime(2025, 10, 27, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Mild"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Date = new DateTime(2025, 10, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Cool"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Date = new DateTime(2025, 10, 29, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Chilly"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Date = new DateTime(2025, 10, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Bracing"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Date = new DateTime(2025, 10, 31, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Cool"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Date = new DateTime(2025, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Mild"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Date = new DateTime(2025, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
                             Summary = "Warm"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Date = new DateTime(2025, 11, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Balmy"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Date = new DateTime(2025, 11, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Hot"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Date = new DateTime(2025, 11, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Sweltering"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Date = new DateTime(2025, 11, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Hot"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Date = new DateTime(2025, 11, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Warm"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Date = new DateTime(2025, 11, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Mild"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Date = new DateTime(2025, 11, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Cool"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Date = new DateTime(2025, 11, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Chilly"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Date = new DateTime(2025, 11, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Summary = "Freezing"
                         });
                 });
 
@@ -546,22 +668,102 @@ namespace infra.Data.Migrations
                                 new
                                 {
                                     WeatherForecastId = 2,
-                                    Celsius = 22
+                                    Celsius = 18
                                 },
                                 new
                                 {
                                     WeatherForecastId = 3,
-                                    Celsius = 35
+                                    Celsius = 22
                                 },
                                 new
                                 {
                                     WeatherForecastId = 4,
-                                    Celsius = -5
+                                    Celsius = 28
                                 },
                                 new
                                 {
                                     WeatherForecastId = 5,
-                                    Celsius = 18
+                                    Celsius = 25
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 6,
+                                    Celsius = 20
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 7,
+                                    Celsius = 16
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 8,
+                                    Celsius = 12
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 9,
+                                    Celsius = 8
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 10,
+                                    Celsius = 14
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 11,
+                                    Celsius = 19
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 12,
+                                    Celsius = 23
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 13,
+                                    Celsius = 26
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 14,
+                                    Celsius = 30
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 15,
+                                    Celsius = 35
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 16,
+                                    Celsius = 32
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 17,
+                                    Celsius = 27
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 18,
+                                    Celsius = 21
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 19,
+                                    Celsius = 17
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 20,
+                                    Celsius = 10
+                                },
+                                new
+                                {
+                                    WeatherForecastId = 21,
+                                    Celsius = 2
                                 });
                         });
 
