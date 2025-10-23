@@ -46,7 +46,7 @@ namespace domain.Services
             return forecast;
         }
 
-        public async Task<bool> UpdateAsync(int id, WeatherForecast forecast)
+        public async Task<bool> UpdateAsync(int id, DateTime date, Temperature temperature, string? summary)
         {
             var existingForecast = await _unitOfWork.WeatherForecasts.GetByIdAsync(id);
             
@@ -56,9 +56,9 @@ namespace domain.Services
             }
 
             // Mettre à jour les propriétés via les méthodes de l'entité
-            existingForecast.UpdateDate(forecast.Date);
-            existingForecast.UpdateTemperature(forecast.Temperature);
-            existingForecast.UpdateSummary(forecast.Summary);
+            existingForecast.UpdateDate(date);
+            existingForecast.UpdateTemperature(temperature);
+            existingForecast.UpdateSummary(summary);
 
             await _unitOfWork.SaveChangesAsync();
             

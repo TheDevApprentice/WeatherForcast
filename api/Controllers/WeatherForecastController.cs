@@ -145,14 +145,11 @@ namespace api.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Mapper le DTO vers l'entité avec le Value Object Temperature
+                // Créer le Value Object Temperature
                 var temperature = new Temperature(request.TemperatureC);
-                var forecast = new WeatherForecast(request.Date, temperature, request.Summary)
-                {
-                    Id = id // ID vient de l'URL
-                };
 
-                var success = await _weatherForecastService.UpdateAsync(id, forecast);
+                // Appeler le service avec les valeurs individuelles
+                var success = await _weatherForecastService.UpdateAsync(id, request.Date, temperature, request.Summary);
 
                 if (!success)
                 {

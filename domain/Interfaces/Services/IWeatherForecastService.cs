@@ -1,4 +1,5 @@
 using domain.Entities;
+using domain.ValueObjects;
 
 namespace domain.Interfaces.Services
 {
@@ -25,7 +26,7 @@ namespace domain.Interfaces.Services
         /// <summary>
         /// Mettre à jour une prévision existante
         /// </summary>
-        Task<bool> UpdateAsync(int id, WeatherForecast forecast);
+        Task<bool> UpdateAsync(int id, DateTime date, Temperature temperature, string? summary);
 
         /// <summary>
         /// Supprimer une prévision météo

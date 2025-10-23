@@ -59,9 +59,9 @@ namespace api
             .AddDefaultTokenProviders();
 
             // 3. JWT Authentication
-            var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "VotreCleSecreteSuperSecuriseeDeMinimum32Caracteres!";
-            var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "WeatherForecastApi";
-            var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "WeatherForecastClient";
+            var jwtSecret = builder.Configuration["Jwt:Secret"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
 
             builder.Services.AddAuthentication(options =>
             {

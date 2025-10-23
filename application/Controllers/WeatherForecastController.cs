@@ -141,16 +141,13 @@ namespace application.Controllers
             {
                 try
                 {
-                    // Mapper le ViewModel vers l'entité avec le Value Object Temperature
+                    // Créer le Value Object Temperature
                     var temperature = new Temperature(viewModel.TemperatureC);
-                    var forecast = new WeatherForecast(viewModel.Date, temperature, viewModel.Summary)
-                    {
-                        Id = viewModel.Id
-                    };
                     
-                    await _weatherForecastService.UpdateAsync(id, forecast);
+                    // Appeler le service avec les valeurs individuelles
+                    await _weatherForecastService.UpdateAsync(id, viewModel.Date, temperature, viewModel.Summary);
                     
-                    _logger.LogInformation("Prévision météo mise à jour : {Id}", forecast.Id);
+                    _logger.LogInformation("Prévision météo mise à jour : {Id}", id);
                     
                     // La notification SignalR est automatiquement gérée par le SignalRForecastNotificationHandler
                     
