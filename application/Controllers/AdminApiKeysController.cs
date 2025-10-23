@@ -1,10 +1,10 @@
+using application.Authorization;
+using domain.Constants;
+using domain.Entities;
 using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using domain.Entities;
-using domain.Constants;
-using application.Authorization;
 
 namespace application.Controllers
 {
@@ -41,7 +41,7 @@ namespace application.Controllers
 
             // Pour l'instant, récupérer via le premier utilisateur trouvé
             // En production, il faudra un repository qui récupère toutes les clés
-            
+
             TempData["InfoMessage"] = "⚠️ Fonctionnalité Admin en cours de développement. Les rôles ne sont pas encore implémentés.";
             return RedirectToAction("Index", "ApiKeys");
         }
@@ -73,8 +73,8 @@ namespace application.Controllers
 
                 // TODO: Implémenter une méthode RevokeAnyApiKeyAsync qui ne vérifie pas le userId
                 // var success = await _apiKeyService.RevokeAnyApiKeyAsync(id, revocationReason);
-                
-                _logger.LogWarning("Tentative de révocation admin de la clé {Id} par {Email}. Raison: {Reason}", 
+
+                _logger.LogWarning("Tentative de révocation admin de la clé {Id} par {Email}. Raison: {Reason}",
                     id, admin.Email, reason);
 
                 TempData["InfoMessage"] = "⚠️ Fonctionnalité Admin en cours de développement";

@@ -1,6 +1,15 @@
+using application.Authorization;
+using application.BackgroundServices;
+using application.Hubs;
+using application.Middleware;
+using domain.Constants;
+using domain.Entities;
 using domain.Interfaces;
+using domain.Interfaces.Repositories;
 using domain.Interfaces.Services;
+using domain.Services;
 using infra.Data;
+using infra.Repositories;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +43,7 @@ namespace application
             }
 
             // 2. Identity (Authentification)
-            builder.Services.AddIdentity<domain.Entities.ApplicationUser, Microsoft.AspNetCore.Identity.IdentityRole>(options =>
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 // Configuration du mot de passe
                 options.Password.RequireDigit = true;
@@ -98,18 +107,18 @@ namespace application
 
             // 3. Services (Domain - Logique métier)
             // Services séparés (SRP - Single Responsibility Principle)
-            builder.Services.AddScoped<IUserManagementService, domain.Services.UserManagementService>();
-            builder.Services.AddScoped<ISessionManagementService, domain.Services.SessionManagementService>();
-            builder.Services.AddScoped<IAuthenticationService, domain.Services.AuthenticationService>();
-            builder.Services.AddScoped<IRoleManagementService, domain.Services.RoleManagementService>();
+            builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+            builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IRoleManagementService, RoleManagementService>();
 
             // Autres services
-            builder.Services.AddScoped<IRateLimitService, domain.Services.RateLimitService>();
-            builder.Services.AddScoped<IWeatherForecastService, domain.Services.WeatherForecastService>();
-            builder.Services.AddScoped<IApiKeyService, domain.Services.ApiKeyService>();
+            builder.Services.AddScoped<IRateLimitService, RateLimitService>();
+            builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
+            builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 
             // Repositories
-            builder.Services.AddScoped<domain.Interfaces.Repositories.IApiKeyRepository, infra.Repositories.ApiKeyRepository>();
+            builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
             // Memory Cache pour Rate Limiting
             builder.Services.AddMemoryCache();
@@ -118,28 +127,28 @@ namespace application
             builder.Services.AddAuthorization(options =>
             {
                 // Policies pour les permissions Forecast
-                options.AddPolicy(domain.Constants.AppClaims.ForecastRead,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastRead)));
-                options.AddPolicy(domain.Constants.AppClaims.ForecastWrite,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastWrite)));
-                options.AddPolicy(domain.Constants.AppClaims.ForecastDelete,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ForecastDelete)));
+                options.AddPolicy(AppClaims.ForecastRead,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.ForecastRead)));
+                options.AddPolicy(AppClaims.ForecastWrite,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.ForecastWrite)));
+                options.AddPolicy(AppClaims.ForecastDelete,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.ForecastDelete)));
 
                 // Policies pour les permissions API Key
-                options.AddPolicy(domain.Constants.AppClaims.ApiKeyManage,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ApiKeyManage)));
-                options.AddPolicy(domain.Constants.AppClaims.ApiKeyViewAll,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.ApiKeyViewAll)));
+                options.AddPolicy(AppClaims.ApiKeyManage,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.ApiKeyManage)));
+                options.AddPolicy(AppClaims.ApiKeyViewAll,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.ApiKeyViewAll)));
 
                 // Policies pour les permissions User
-                options.AddPolicy(domain.Constants.AppClaims.UserManage,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.UserManage)));
-                options.AddPolicy(domain.Constants.AppClaims.UserViewAll,
-                    policy => policy.Requirements.Add(new application.Authorization.PermissionRequirement(domain.Constants.AppClaims.UserViewAll)));
+                options.AddPolicy(AppClaims.UserManage,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.UserManage)));
+                options.AddPolicy(AppClaims.UserViewAll,
+                    policy => policy.Requirements.Add(new PermissionRequirement(AppClaims.UserViewAll)));
             });
 
             // Authorization Handler
-            builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, application.Authorization.PermissionHandler>();
+            builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, PermissionHandler>();
 
             // 4. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -150,7 +159,7 @@ namespace application
                 // Enregistrer les handlers depuis l'assembly application
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
                 // Enregistrer les events depuis l'assembly domain
-                cfg.RegisterServicesFromAssembly(typeof(domain.Services.WeatherForecastService).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
             });
 
             // 6. Redis pour communication inter-process
@@ -198,7 +207,7 @@ namespace application
             });
 
             // 7. BackgroundService pour écouter les events Redis
-            builder.Services.AddHostedService<application.BackgroundServices.RedisSubscriberService>();
+            builder.Services.AddHostedService<RedisSubscriberService>();
 
             // 8. MVC
             builder.Services.AddControllersWithViews();
@@ -284,13 +293,13 @@ namespace application
             });
 
             // Rate Limiting & Brute Force Protection
-            app.UseMiddleware<application.Middleware.RateLimitMiddleware>();
+            app.UseMiddleware<RateLimitMiddleware>();
 
             // 5. Authentication & Authorization
             app.UseAuthentication();
 
             // Middleware de validation de session (vérifie si la session existe toujours en DB)
-            app.UseMiddleware<application.Middleware.SessionValidationMiddleware>();
+            app.UseMiddleware<SessionValidationMiddleware>();
 
             app.UseAuthorization();
 
@@ -300,7 +309,7 @@ namespace application
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             // 7. SignalR Hub
-            app.MapHub<application.Hubs.WeatherForecastHub>("/hubs/weatherforecast");
+            app.MapHub<WeatherForecastHub>("/hubs/weatherforecast");
 
             // ============================================
             // SEED DES RÔLES ET UTILISATEUR ADMIN
@@ -311,26 +320,18 @@ namespace application
                 try
                 {
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                    var userManager = services.GetRequiredService<UserManager<domain.Entities.ApplicationUser>>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-                    var roleLogger = loggerFactory.CreateLogger<infra.Data.RoleSeeder>();
-                    //var userLogger = loggerFactory.CreateLogger<infra.Data.UserSeeder>();
+                    var roleLogger = loggerFactory.CreateLogger<RoleSeeder>();
 
-                    var roleSeeder = new infra.Data.RoleSeeder(roleManager, roleLogger);
-                    //var userSeeder = new infra.Data.UserSeeder(userManager, userLogger);
+                    var roleSeeder = new RoleSeeder(roleManager, roleLogger);
 
                     // Créer les rôles avec leurs claims
                     await roleSeeder.SeedRolesAsync();
 
                     // Créer l'utilisateur admin par défaut
                     await roleSeeder.SeedAdminUserAsync(userManager);
-
-                    //// Créer 100 utilisateurs de test
-                    //await userSeeder.SeedUsersAsync();
-
-                    //// Créer des utilisateurs spécifiques pour les tests
-                    //await userSeeder.SeedTestUsersAsync();
 
                     Console.WriteLine("✅ Roles, admin user, and 100+ test users seeded successfully");
                 }

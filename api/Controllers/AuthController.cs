@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using api.DTOs;
-using domain.Interfaces.Services;
 using domain.Constants;
 using domain.Entities;
+using domain.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
@@ -170,12 +170,12 @@ namespace api.Controllers
         [HttpGet("me")]
         [Authorize]
         [ProducesResponseType(typeof(AuthResponse), 200)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetCurrentUser()
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            
+
             if (string.IsNullOrEmpty(email))
             {
                 return Unauthorized();

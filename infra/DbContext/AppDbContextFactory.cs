@@ -12,10 +12,10 @@ namespace infra.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            
+
             // Support PostgreSQL (via variable d'environnement) et SQLite
             var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-            
+
             if (!string.IsNullOrEmpty(connectionString))
             {
                 // PostgreSQL (pour les migrations Docker)

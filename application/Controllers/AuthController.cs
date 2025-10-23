@@ -1,10 +1,10 @@
+using application.ViewModels;
+using domain.Constants;
+using domain.Entities;
+using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using domain.Entities;
-using domain.Constants;
-using application.ViewModels;
-using domain.Interfaces.Services;
 
 namespace application.Controllers
 {
@@ -56,7 +56,7 @@ namespace application.Controllers
                 {
                     // Assigner le rôle "User" par défaut
                     await _userManager.AddToRoleAsync(user, AppRoles.User);
-                    
+
                     // Ne pas auto-login après registration
                     // Rediriger vers la page de login
                     TempData["SuccessMessage"] = "Compte créé avec succès. Veuillez vous connecter.";
@@ -106,20 +106,20 @@ namespace application.Controllers
                         // Récupérer les informations de la requête
                         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
                         var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-                        
+
                         // Réinitialiser les tentatives échouées (login réussi)
                         if (!string.IsNullOrEmpty(ipAddress))
                         {
                             await _rateLimitService.ResetFailedAttemptsAsync(ipAddress);
                         }
-                        
+
                         // Utiliser l'ID utilisateur comme token de session
                         // (Le cookie Identity sera créé automatiquement par SignInManager)
                         var sessionToken = user.Id;
-                        
+
                         // Révoquer les anciennes sessions Web
                         await _sessionManagementService.RevokeAllByUserIdAsync(user.Id);
-                        
+
                         // Créer la nouvelle session Web
                         await _sessionManagementService.CreateWebSessionAsync(
                             user.Id,
@@ -127,11 +127,11 @@ namespace application.Controllers
                             ipAddress,
                             userAgent,
                             expirationDays: model.RememberMe ? 30 : 7);
-                        
+
                         // Mettre à jour LastLoginAt
                         await _userManagementService.UpdateLastLoginAsync(user.Id);
                     }
-                    
+
                     return RedirectToLocal(returnUrl);
                 }
 
@@ -168,7 +168,7 @@ namespace application.Controllers
             {
                 // Récupérer toutes les sessions actives
                 var activeSessions = await _sessionManagementService.GetActiveSessionsAsync(userId);
-                
+
                 // Filtrer et supprimer uniquement les sessions Web (Type = 1)
                 // La suppression cascade supprimera aussi les UserSessions associées
                 var webSessions = activeSessions.Where(s => s.Type == domain.Entities.SessionType.Web);
@@ -180,7 +180,7 @@ namespace application.Controllers
 
             // 3. Déconnecter l'utilisateur (supprime le cookie Identity)
             await _signInManager.SignOutAsync();
-            
+
             return RedirectToAction("Index", "Home");
         }
 

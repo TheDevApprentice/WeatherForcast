@@ -1,9 +1,17 @@
+using api.Middleware;
+using domain.Constants;
+using domain.Entities;
 using domain.Interfaces;
+using domain.Interfaces.Repositories;
 using domain.Interfaces.Services;
+using domain.Services;
 using infra.Data;
+using infra.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace api
 {
@@ -29,12 +37,12 @@ namespace api
                 Console.WriteLine("[API] Using PostgreSQL database with DbContext pooling");
 
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
-                    options.UseNpgsql(connectionString), 
+                    options.UseNpgsql(connectionString),
                     poolSize: 128); // Taille du pool (par défaut: 128)
             }
 
             // 2. Identity (Authentification)
-            builder.Services.AddIdentity<domain.Entities.ApplicationUser, Microsoft.AspNetCore.Identity.IdentityRole>(options =>
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 // Configuration du mot de passe
                 options.Password.RequireDigit = true;
@@ -57,12 +65,12 @@ namespace api
 
             builder.Services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -77,18 +85,18 @@ namespace api
 
             // 4. Services (Domain - Logique métier)
             // Nouveaux services séparés (SRP)
-            builder.Services.AddScoped<IUserManagementService, domain.Services.UserManagementService>();
-            builder.Services.AddScoped<ISessionManagementService, domain.Services.SessionManagementService>();
-            builder.Services.AddScoped<IAuthenticationService, domain.Services.AuthenticationService>();
-            
+            builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+            builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
             // Autres services
-            builder.Services.AddScoped<IJwtService, domain.Services.JwtService>();
-            builder.Services.AddScoped<IRateLimitService, domain.Services.RateLimitService>();
-            builder.Services.AddScoped<IWeatherForecastService, domain.Services.WeatherForecastService>();
-            builder.Services.AddScoped<IApiKeyService, domain.Services.ApiKeyService>();
-            
+            builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IRateLimitService, RateLimitService>();
+            builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
+            builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
+
             // Repositories
-            builder.Services.AddScoped<domain.Interfaces.Repositories.IApiKeyRepository, infra.Repositories.ApiKeyRepository>();
+            builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
             // Memory Cache pour Rate Limiting
             builder.Services.AddMemoryCache();
@@ -97,12 +105,12 @@ namespace api
             builder.Services.AddAuthorization(options =>
             {
                 // Policies pour les permissions Forecast
-                options.AddPolicy(domain.Constants.AppClaims.ForecastRead,
-                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastRead));
-                options.AddPolicy(domain.Constants.AppClaims.ForecastWrite,
-                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastWrite));
-                options.AddPolicy(domain.Constants.AppClaims.ForecastDelete,
-                    policy => policy.RequireClaim(domain.Constants.AppClaims.Permission, domain.Constants.AppClaims.ForecastDelete));
+                options.AddPolicy(AppClaims.ForecastRead,
+                    policy => policy.RequireClaim(AppClaims.Permission, AppClaims.ForecastRead));
+                options.AddPolicy(AppClaims.ForecastWrite,
+                    policy => policy.RequireClaim(AppClaims.Permission, AppClaims.ForecastWrite));
+                options.AddPolicy(AppClaims.ForecastDelete,
+                    policy => policy.RequireClaim(AppClaims.Permission, AppClaims.ForecastDelete));
             });
 
             // 5. Unit of Work (Clean Architecture)
@@ -114,7 +122,7 @@ namespace api
                 // Enregistrer les handlers depuis l'assembly api
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
                 // Enregistrer les events depuis l'assembly domain
-                cfg.RegisterServicesFromAssembly(typeof(domain.Services.WeatherForecastService).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
             });
 
             // 7. Redis pour communication inter-process
@@ -122,19 +130,19 @@ namespace api
             builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp =>
             {
                 var logger = sp.GetRequiredService<ILogger<Program>>();
-                
+
                 var configuration = StackExchange.Redis.ConfigurationOptions.Parse(redisConnectionString!);
                 configuration.AbortOnConnectFail = false; // Ne pas planter si Redis est indisponible
                 configuration.ConnectTimeout = 15000;      // 15 secondes
                 configuration.SyncTimeout = 5000;          // 5 secondes pour les opérations
                 configuration.ConnectRetry = 5;            // 5 tentatives
                 configuration.KeepAlive = 60;              // Keep-alive toutes les 60 secondes
-                
+
                 try
                 {
                     logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
                     var connection = StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
-                    
+
                     // Attendre un peu que la connexion soit établie
                     var attempts = 0;
                     while (!connection.IsConnected && attempts < 10)
@@ -142,7 +150,7 @@ namespace api
                         System.Threading.Thread.Sleep(500);
                         attempts++;
                     }
-                    
+
                     if (connection.IsConnected)
                     {
                         logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
@@ -151,7 +159,7 @@ namespace api
                     {
                         logger.LogWarning("⚠️ Redis : Connexion créée mais pas encore établie. Retry en arrière-plan...");
                     }
-                    
+
                     return connection;
                 }
                 catch (Exception ex)
@@ -318,10 +326,10 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
             app.UseCors("AllowWeb");
 
             // Rate Limiting & Brute Force Protection
-            app.UseMiddleware<api.Middleware.RateLimitMiddleware>();
+            app.UseMiddleware<RateLimitMiddleware>();
 
             // 4. API Key Authentication (remplace JWT pour l'API publique)
-            app.UseMiddleware<api.Middleware.ApiKeyAuthenticationMiddleware>();
+            app.UseMiddleware<ApiKeyAuthenticationMiddleware>();
 
             app.UseAuthorization();
 

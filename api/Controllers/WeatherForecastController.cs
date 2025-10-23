@@ -1,7 +1,8 @@
+using api.DTOs;
+using domain.Constants;
 using domain.Entities;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
-using domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,8 +33,8 @@ namespace api.Controllers
         [HttpGet]
         [Authorize(Policy = AppClaims.ForecastRead)]
         [ProducesResponseType(typeof(IEnumerable<WeatherForecast>), 200)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<IEnumerable<WeatherForecast>>> GetAll()
         {
@@ -53,8 +54,8 @@ namespace api.Controllers
         [HttpGet("{id}")]
         [Authorize(Policy = AppClaims.ForecastRead)]
         [ProducesResponseType(typeof(WeatherForecast), 200)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<ActionResult<WeatherForecast>> GetById(int id)
@@ -62,7 +63,7 @@ namespace api.Controllers
             try
             {
                 var forecast = await _weatherForecastService.GetByIdAsync(id);
-                
+
                 if (forecast == null)
                 {
                     return NotFound($"Prévision avec l'ID {id} introuvable");
@@ -80,7 +81,7 @@ namespace api.Controllers
         // NOTE: Les routes POST, PUT et DELETE sont désactivées
         // L'API est en lecture seule pour les utilisateurs externes
         // La gestion des données se fait via l'application Web
-        
+
         // POST: api/WeatherForecast
         /// <summary>
         /// Créer une nouvelle prévision météo
@@ -90,11 +91,11 @@ namespace api.Controllers
         [HttpPost]
         [Authorize(Policy = AppClaims.ForecastWrite)]
         [ProducesResponseType(typeof(WeatherForecast), 201)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 400)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<WeatherForecast>> Create([FromBody] api.DTOs.CreateWeatherForecastRequest request)
+        public async Task<ActionResult<WeatherForecast>> Create([FromBody] CreateWeatherForecastRequest request)
         {
             try
             {
@@ -130,12 +131,12 @@ namespace api.Controllers
         [HttpPut("{id}")]
         [Authorize(Policy = AppClaims.ForecastWrite)]
         [ProducesResponseType(204)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 400)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Update(int id, [FromBody] api.DTOs.UpdateWeatherForecastRequest request)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateWeatherForecastRequest request)
         {
             try
             {
@@ -152,7 +153,7 @@ namespace api.Controllers
                 };
 
                 var success = await _weatherForecastService.UpdateAsync(id, forecast);
-                
+
                 if (!success)
                 {
                     return NotFound($"Prévision avec l'ID {id} introuvable");
@@ -173,8 +174,8 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         [Authorize(Policy = AppClaims.ForecastDelete)]
         [ProducesResponseType(204)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 401)]
-        [ProducesResponseType(typeof(api.DTOs.ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 401)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Delete(int id)
@@ -182,7 +183,7 @@ namespace api.Controllers
             try
             {
                 var success = await _weatherForecastService.DeleteAsync(id);
-                
+
                 if (!success)
                 {
                     return NotFound($"Prévision avec l'ID {id} introuvable");
