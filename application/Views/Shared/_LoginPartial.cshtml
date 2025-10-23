@@ -18,6 +18,12 @@
                 <li><h6 class="dropdown-header">@user?.Email</h6></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
+                    <a class="dropdown-item" asp-controller="ApiKeys" asp-action="Index">
+                        <i class="bi bi-key"></i> Mes Clés API
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
                     <form asp-controller="Auth" asp-action="Logout" method="post">
                         <button type="submit" class="dropdown-item">
                             <i class="bi bi-box-arrow-right"></i> Déconnexion
