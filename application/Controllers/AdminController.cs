@@ -416,7 +416,9 @@ namespace application.Controllers
                 userAgent = s.UserAgent,
                 createdAt = s.CreatedAt,
                 expiresAt = s.ExpiresAt,
-                isActive = s.IsValid() // Utiliser IsValid() au lieu de IsActive
+                isRevoked = s.IsRevoked,
+                isExpired = s.IsExpired(),
+                isActive = s.IsValid() // Session valide = non révoquée ET non expirée
             }));
         }
 

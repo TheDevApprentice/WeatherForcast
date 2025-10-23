@@ -18,7 +18,7 @@ const adminConnection = new signalR.HubConnectionBuilder()
 // Événement : Nouvel utilisateur enregistré
 adminConnection.on("UserRegistered", (data) => {
     console.log("🆕 Nouvel utilisateur enregistré:", data);
-    showAdminNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
+    // showAdminNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
     
     // Mettre à jour la liste des users si on est sur la page users
     const isOnUsersPage = window.location.pathname === "/Admin" || 
@@ -33,7 +33,7 @@ adminConnection.on("UserRegistered", (data) => {
 // Événement : Utilisateur connecté
 adminConnection.on("UserLoggedIn", (data) => {
     console.log("🔐 Utilisateur connecté:", data);
-    showAdminNotification("Connexion", `${data.email} s'est connecté`, "info");
+    // showAdminNotification("Connexion", `${data.email} s'est connecté`, "info");
     
     // Mettre à jour la dernière connexion dans la liste des users
     updateUserLastLogin(data.userId, data.loggedInAt);
@@ -41,14 +41,16 @@ adminConnection.on("UserLoggedIn", (data) => {
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
     if (currentUserId === data.userId) {
-        refreshUserSessions(data.userId);
+        // Rafraîchir avec un petit délai + retry, pour s'assurer que la session est bien persistée
+        setTimeout(() => refreshUserSessions(data.userId), 400);
+        setTimeout(() => refreshUserSessions(data.userId), 1500);
     }
 });
 
 // Événement : Utilisateur déconnecté
 adminConnection.on("UserLoggedOut", (data) => {
     console.log("🚪 Utilisateur déconnecté:", data);
-    showAdminNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
+    // showAdminNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
@@ -61,18 +63,20 @@ adminConnection.on("UserLoggedOut", (data) => {
 adminConnection.on("SessionCreated", (data) => {
     console.log("📱 Nouvelle session créée:", data);
     
-    // Si on est sur la page de détail de cet utilisateur, ajouter la session en temps réel
+    // Si on est sur la page de détail de cet utilisateur, rafraîchir la liste via AJAX
     const currentUserId = getCurrentUserIdFromPage();
     if (currentUserId === data.userId) {
-        addSessionToList(data);
-        showAdminNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
+        // Laisser un délai pour que la DB soit à jour + un retry
+        setTimeout(() => refreshUserSessions(data.userId), 600);
+        setTimeout(() => refreshUserSessions(data.userId), 2000);
+        // showAdminNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
     }
 });
 
 // Événement : API Key créée
 adminConnection.on("ApiKeyCreated", (data) => {
     console.log("🔑 API Key créée:", data);
-    showAdminNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
+    // showAdminNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -84,7 +88,7 @@ adminConnection.on("ApiKeyCreated", (data) => {
 // Événement : API Key révoquée
 adminConnection.on("ApiKeyRevoked", (data) => {
     console.log("🚫 API Key révoquée:", data);
-    showAdminNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
+    // showAdminNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -97,7 +101,7 @@ adminConnection.on("ApiKeyRevoked", (data) => {
 adminConnection.on("UserRoleChanged", (data) => {
     console.log("👤 Rôle utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    showAdminNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
+    // showAdminNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les rôles
     const currentUserId = getCurrentUserIdFromPage();
@@ -110,7 +114,7 @@ adminConnection.on("UserRoleChanged", (data) => {
 adminConnection.on("UserClaimChanged", (data) => {
     console.log("🎫 Claim utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    showAdminNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
+    // showAdminNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les claims
     const currentUserId = getCurrentUserIdFromPage();
@@ -247,31 +251,12 @@ function refreshUserSessions(userId) {
         });
 }
 
-// Ajouter une session à la liste en temps réel
+// Ajouter une session (désormais: délègue au rafraîchissement AJAX pour conserver le layout du tableau)
 function addSessionToList(sessionData) {
-    const sessionsContainer = document.getElementById("user-sessions");
-    if (!sessionsContainer) return;
-
-    const sessionElement = document.createElement("div");
-    sessionElement.className = "list-group-item list-group-item-action session-item-new";
-    sessionElement.innerHTML = `
-        <div class="d-flex w-100 justify-content-between">
-            <h6 class="mb-1">Session ${sessionData.sessionId.substring(0, 8)}...</h6>
-            <small class="text-success">Nouvelle</small>
-        </div>
-        <p class="mb-1">
-            <strong>IP:</strong> ${sessionData.ipAddress || "N/A"}<br>
-            <strong>User Agent:</strong> ${sessionData.userAgent || "N/A"}
-        </p>
-        <small>Créée: ${new Date(sessionData.createdAt).toLocaleString()}</small>
-    `;
-    
-    sessionsContainer.prepend(sessionElement);
-    
-    // Retirer l'effet "nouvelle" après 3 secondes
-    setTimeout(() => {
-        sessionElement.classList.remove("session-item-new");
-    }, 3000);
+    console.warn("addSessionToList() appelé - délégation au refresh AJAX (aucune insertion de carte)", sessionData);
+    const userId = getCurrentUserIdFromPage();
+    if (!userId) return;
+    setTimeout(() => refreshUserSessions(userId), 200);
 }
 
 // Mettre à jour la dernière connexion d'un utilisateur dans la liste
@@ -362,46 +347,68 @@ function updateSessionsTable(sessions) {
     if (!tbody) return;
 
     tbody.innerHTML = "";
+    // Récupérer un éventuel anti-forgery token présent dans la page
+    const antiForgeryInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const antiForgeryField = antiForgeryInput ? `<input type="hidden" name="__RequestVerificationToken" value="${antiForgeryInput.value}" />` : "";
     
     sessions.forEach(session => {
         const row = document.createElement("tr");
         row.className = "session-item-new"; // Effet de surbrillance
         
+        // Colonne 1 : Type
+        const td1 = document.createElement("td");
         const typeIcon = session.type === "Web" ? "🌐 Web" : "📱 Mobile";
         const typeBadge = session.type === "Web" ? "bg-primary" : "bg-info";
+        td1.innerHTML = `<span class="badge ${typeBadge}">${typeIcon}</span>`;
+        row.appendChild(td1);
         
-        const statusBadge = session.isActive 
-            ? '<span class="badge bg-success">🟢 Active</span>' 
-            : '<span class="badge bg-warning">⏰ Expirée</span>';
+        // Colonne 2 : IP
+        const td2 = document.createElement("td");
+        td2.innerHTML = `<small>${session.ipAddress || 'N/A'}</small>`;
+        row.appendChild(td2);
         
+        // Colonne 3 : User Agent
+        const td3 = document.createElement("td");
+        td3.innerHTML = `<small>${session.userAgent || 'N/A'}</small>`;
+        row.appendChild(td3);
+        
+        // Colonne 4 : Statut
+        const td4 = document.createElement("td");
+        if (session.isRevoked) {
+            td4.innerHTML = '<span class="badge bg-danger">🔴 Révoquée</span>';
+        } else if (session.isExpired) {
+            td4.innerHTML = '<span class="badge bg-warning">⏰ Expirée</span>';
+        } else {
+            td4.innerHTML = '<span class="badge bg-success">🟢 Active</span>';
+        }
+        row.appendChild(td4);
+        
+        // Colonne 5 : Expiration
+        const td5 = document.createElement("td");
         const expiresAt = new Date(session.expiresAt);
-        const expiresAtFormatted = expiresAt.toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const day = String(expiresAt.getDate()).padStart(2, '0');
+        const month = String(expiresAt.getMonth() + 1).padStart(2, '0');
+        const year = expiresAt.getFullYear();
+        const hours = String(expiresAt.getHours()).padStart(2, '0');
+        const minutes = String(expiresAt.getMinutes()).padStart(2, '0');
+        td5.innerHTML = `<small>${day}/${month}/${year} ${hours}:${minutes}</small>`;
+        row.appendChild(td5);
         
-        row.innerHTML = `
-            <td><span class="badge ${typeBadge}">${typeIcon}</span></td>
-            <td><small>${session.ipAddress || 'N/A'}</small></td>
-            <td><small>${session.userAgent || 'N/A'}</small></td>
-            <td>${statusBadge}</td>
-            <td><small>${expiresAtFormatted}</small></td>
-            <td>
-                ${session.isActive ? `
-                    <form action="/Admin/RevokeSession" method="post" class="d-inline">
-                        <input type="hidden" name="sessionId" value="${session.id}" />
-                        <input type="hidden" name="userId" value="${window.currentUserId}" />
-                        <button type="submit" class="btn btn-sm btn-danger" 
-                                onclick="return confirm('Êtes-vous sûr de vouloir révoquer cette session ?');">
-                            🚫 Révoquer
-                        </button>
-                    </form>
-                ` : '-'}
-            </td>
-        `;
+        // Colonne 6 : Actions
+        const td6 = document.createElement("td");
+        if (session.isActive) {
+            td6.innerHTML = `
+                <form action="/Admin/RevokeSession/${session.id}" method="post" class="d-inline">
+                    ${antiForgeryField}
+                    <input type="hidden" name="userId" value="${window.currentUserId || ''}" />
+                    <button type="submit" class="btn btn-sm btn-danger" 
+                            onclick="return confirm('Révoquer cette session ?');">
+                        <i class="bi bi-x-circle"></i> Révoquer
+                    </button>
+                </form>
+            `;
+        }
+        row.appendChild(td6);
         
         tbody.appendChild(row);
         
