@@ -71,8 +71,8 @@
                                 }
                             </p>
                             <p>
-                                <strong>Sessions actives:</strong> <span class="badge bg-info">@Model.ActiveSessionsCount</span>
-                                <strong class="ms-3">API Keys actives:</strong> <span class="badge bg-info">@Model.ActiveApiKeysCount</span>
+                                <strong>Sessions actives:</strong> <span id="sessions-count" class="badge bg-info">@Model.ActiveSessionsCount</span>
+                                <strong class="ms-3">API Keys actives:</strong> <span id="apikeys-count" class="badge bg-info">@Model.ActiveApiKeysCount</span>
                             </p>
                         </div>
                     </div>
@@ -191,7 +191,7 @@
                                 <th>Requêtes</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="user-apikeys">
                             @foreach (var apiKey in Model.ApiKeys)
                             {
                                 <tr>
@@ -262,7 +262,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="user-sessions">
                             @foreach (var session in Model.Sessions.OrderByDescending(s => s.CreatedAt))
                             {
                                 <tr>

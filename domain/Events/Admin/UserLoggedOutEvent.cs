@@ -11,11 +11,11 @@ namespace domain.Events.Admin
         public string Email { get; }
         public DateTime LoggedOutAt { get; }
 
-        public UserLoggedOutEvent(string userId, string email)
+        public UserLoggedOutEvent(string userId, string email, DateTime timeLogout)
         {
             UserId = userId;
             Email = email;
-            LoggedOutAt = DateTime.UtcNow;
+            LoggedOutAt = timeLogout;
         }
     }
 }

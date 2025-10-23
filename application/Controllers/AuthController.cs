@@ -1,7 +1,9 @@
 using application.ViewModels;
 using domain.Constants;
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,19 +17,22 @@ namespace application.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRateLimitService _rateLimitService;
+        private readonly IPublisher _publisher;
 
         public AuthController(
             IUserManagementService userManagementService,
             ISessionManagementService sessionManagementService,
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            IRateLimitService rateLimitService)
+            IRateLimitService rateLimitService,
+            IPublisher publisher)
         {
             _userManagementService = userManagementService;
             _sessionManagementService = sessionManagementService;
             _signInManager = signInManager;
             _userManager = userManager;
             _rateLimitService = rateLimitService;
+            _publisher = publisher;
         }
 
         // GET: /Auth/Register
@@ -178,7 +183,21 @@ namespace application.Controllers
                 }
             }
 
-            // 3. Déconnecter l'utilisateur (supprime le cookie Identity)
+            // 3. Publier l'événement de déconnexion
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    await _publisher.Publish(new UserLoggedOutEvent(
+                        userId,
+                        user.Email ?? "Unknown",
+                        DateTime.UtcNow
+                    ));
+                }
+            }
+
+            // 4. Déconnecter l'utilisateur (supprime le cookie Identity)
             await _signInManager.SignOutAsync();
 
             return RedirectToAction("Index", "Home");

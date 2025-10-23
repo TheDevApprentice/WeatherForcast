@@ -395,5 +395,50 @@ namespace application.Controllers
             TempData["SuccessMessage"] = "Session révoquée avec succès.";
             return RedirectToAction(nameof(Details), new { id = userId });
         }
+
+        // ============================================
+        // ENDPOINTS AJAX POUR MISES À JOUR TEMPS RÉEL
+        // ============================================
+
+        /// <summary>
+        /// Récupérer les sessions d'un utilisateur (AJAX)
+        /// </summary>
+        [HttpGet("GetUserSessions")]
+        public async Task<IActionResult> GetUserSessions(string userId)
+        {
+            var sessions = await _sessionManagementService.GetActiveSessionsAsync(userId);
+
+            return Json(sessions.Select(s => new
+            {
+                id = s.Id,
+                type = s.Type.ToString(),
+                ipAddress = s.IpAddress,
+                userAgent = s.UserAgent,
+                createdAt = s.CreatedAt,
+                expiresAt = s.ExpiresAt,
+                isActive = s.IsValid() // Utiliser IsValid() au lieu de IsActive
+            }));
+        }
+
+        /// <summary>
+        /// Récupérer les API Keys d'un utilisateur (AJAX)
+        /// </summary>
+        [HttpGet("GetUserApiKeys")]
+        public async Task<IActionResult> GetUserApiKeys(string userId)
+        {
+            var apiKeys = await _apiKeyService.GetUserApiKeysAsync(userId);
+
+            return Json(apiKeys.Select(k => new
+            {
+                id = k.Id,
+                name = k.Name,
+                key = k.Key,
+                scopes = string.Join(", ", k.Scopes),
+                isRevoked = k.IsRevoked,
+                isExpired = k.ExpiresAt.HasValue && k.ExpiresAt.Value < DateTime.UtcNow,
+                lastUsedAt = k.LastUsedAt,
+                requestCount = k.RequestCount
+            }));
+        }
     }
 }
