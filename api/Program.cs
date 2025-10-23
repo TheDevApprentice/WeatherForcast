@@ -98,8 +98,12 @@ namespace api
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
-            // Memory Cache pour Rate Limiting
-            builder.Services.AddMemoryCache();
+            // Redis Distributed Cache pour Rate Limiting (support multi-serveurs)
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                options.InstanceName = "WeatherForecastApi:";
+            });
 
             // Authorization - Policies basées sur les permissions
             builder.Services.AddAuthorization(options =>

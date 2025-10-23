@@ -1,16 +1,17 @@
 using domain.Interfaces.Services;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace domain.Services
 {
     /// <summary>
-    /// Service de rate limiting avec cache en mémoire
-    /// Pour production: utiliser Redis pour distribution multi-serveurs
+    /// Service de rate limiting avec Redis (IDistributedCache)
+    /// Support multi-serveurs et clustering
     /// </summary>
     public class RateLimitService : IRateLimitService
     {
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly ILogger<RateLimitService> _logger;
 
         // Configuration brute force
@@ -18,14 +19,14 @@ namespace domain.Services
         private const int BLOCK_DURATION_MINUTES = 15;
 
         public RateLimitService(
-            IMemoryCache cache,
+            IDistributedCache cache,
             ILogger<RateLimitService> logger)
         {
             _cache = cache;
             _logger = logger;
         }
 
-        public Task<bool> IsRateLimitExceededAsync(
+        public async Task<bool> IsRateLimitExceededAsync(
             string ipAddress,
             string endpoint,
             int maxRequests,
@@ -33,37 +34,48 @@ namespace domain.Services
         {
             var key = $"ratelimit:{ipAddress}:{endpoint}";
 
-            if (!_cache.TryGetValue(key, out int requestCount))
+            var countStr = await _cache.GetStringAsync(key);
+            
+            if (string.IsNullOrEmpty(countStr))
             {
                 // Première requête dans la fenêtre
-                _cache.Set(key, 1, window);
-                return Task.FromResult(false);
+                await _cache.SetStringAsync(key, "1", new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = window
+                });
+                return false;
             }
+
+            var requestCount = int.Parse(countStr);
 
             if (requestCount >= maxRequests)
             {
                 _logger.LogWarning(
                     "Rate limit exceeded for IP {IpAddress} on {Endpoint}. Count: {Count}/{Max}",
                     ipAddress, endpoint, requestCount, maxRequests);
-                return Task.FromResult(true);
+                return true;
             }
 
             // Incrémenter le compteur
-            _cache.Set(key, requestCount + 1, window);
-            return Task.FromResult(false);
+            await _cache.SetStringAsync(key, (requestCount + 1).ToString(), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = window
+            });
+            return false;
         }
 
-        public Task RecordFailedLoginAttemptAsync(string ipAddress, string email)
+        public async Task RecordFailedLoginAttemptAsync(string ipAddress, string email)
         {
             var key = $"failedlogin:{ipAddress}";
 
-            if (!_cache.TryGetValue(key, out int failedAttempts))
-            {
-                failedAttempts = 0;
-            }
+            var countStr = await _cache.GetStringAsync(key);
+            var failedAttempts = string.IsNullOrEmpty(countStr) ? 0 : int.Parse(countStr);
 
             failedAttempts++;
-            _cache.Set(key, failedAttempts, TimeSpan.FromMinutes(30));
+            await _cache.SetStringAsync(key, failedAttempts.ToString(), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            });
 
             _logger.LogWarning(
                 "Failed login attempt {Attempt}/{Max} from IP {IpAddress} for email {Email}",
@@ -74,84 +86,90 @@ namespace domain.Services
             {
                 var blockKey = $"blocked:{ipAddress}";
                 var blockUntil = DateTime.UtcNow.AddMinutes(BLOCK_DURATION_MINUTES);
-                _cache.Set(blockKey, blockUntil, TimeSpan.FromMinutes(BLOCK_DURATION_MINUTES));
+                await _cache.SetStringAsync(blockKey, blockUntil.ToString("O"), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(BLOCK_DURATION_MINUTES)
+                });
 
                 _logger.LogError(
                     "IP {IpAddress} blocked for {Duration} minutes due to {Attempts} failed login attempts",
                     ipAddress, BLOCK_DURATION_MINUTES, failedAttempts);
             }
-
-            return Task.CompletedTask;
         }
 
-        public Task<bool> IsIpBlockedAsync(string ipAddress)
+        public async Task<bool> IsIpBlockedAsync(string ipAddress)
         {
             var key = $"blocked:{ipAddress}";
 
-            if (_cache.TryGetValue(key, out DateTime blockUntil))
+            var blockUntilStr = await _cache.GetStringAsync(key);
+            
+            if (!string.IsNullOrEmpty(blockUntilStr))
             {
+                var blockUntil = DateTime.Parse(blockUntilStr);
+                
                 if (DateTime.UtcNow < blockUntil)
                 {
-                    return Task.FromResult(true);
+                    return true;
                 }
 
                 // Le blocage a expiré, nettoyer
-                _cache.Remove(key);
+                await _cache.RemoveAsync(key);
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
-        public Task<TimeSpan?> GetBlockTimeRemainingAsync(string ipAddress)
+        public async Task<TimeSpan?> GetBlockTimeRemainingAsync(string ipAddress)
         {
             var key = $"blocked:{ipAddress}";
 
-            if (_cache.TryGetValue(key, out DateTime blockUntil))
+            var blockUntilStr = await _cache.GetStringAsync(key);
+            
+            if (!string.IsNullOrEmpty(blockUntilStr))
             {
+                var blockUntil = DateTime.Parse(blockUntilStr);
                 var remaining = blockUntil - DateTime.UtcNow;
+                
                 if (remaining > TimeSpan.Zero)
                 {
-                    return Task.FromResult<TimeSpan?>(remaining);
+                    return remaining;
                 }
             }
 
-            return Task.FromResult<TimeSpan?>(null);
+            return null;
         }
 
-        public Task ResetFailedAttemptsAsync(string ipAddress)
+        public async Task ResetFailedAttemptsAsync(string ipAddress)
         {
             var key = $"failedlogin:{ipAddress}";
-            _cache.Remove(key);
+            await _cache.RemoveAsync(key);
 
             _logger.LogInformation("Reset failed login attempts for IP {IpAddress}", ipAddress);
-
-            return Task.CompletedTask;
         }
 
-        public Task BlockIpAsync(string ipAddress, TimeSpan duration, string reason)
+        public async Task BlockIpAsync(string ipAddress, TimeSpan duration, string reason)
         {
             var key = $"blocked:{ipAddress}";
             var blockUntil = DateTime.UtcNow.Add(duration);
-            _cache.Set(key, blockUntil, duration);
+            await _cache.SetStringAsync(key, blockUntil.ToString("O"), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = duration
+            });
 
             _logger.LogWarning(
                 "IP {IpAddress} manually blocked for {Duration}. Reason: {Reason}",
                 ipAddress, duration, reason);
-
-            return Task.CompletedTask;
         }
 
-        public Task UnblockIpAsync(string ipAddress)
+        public async Task UnblockIpAsync(string ipAddress)
         {
             var blockKey = $"blocked:{ipAddress}";
             var failedKey = $"failedlogin:{ipAddress}";
 
-            _cache.Remove(blockKey);
-            _cache.Remove(failedKey);
+            await _cache.RemoveAsync(blockKey);
+            await _cache.RemoveAsync(failedKey);
 
             _logger.LogInformation("IP {IpAddress} unblocked", ipAddress);
-
-            return Task.CompletedTask;
         }
     }
 }
