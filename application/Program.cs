@@ -118,7 +118,7 @@ namespace application
             }
 
             // 3. Event Bus (remplace MediatR)
-            builder.Services.AddEventBus(typeof(Program).Assembly, typeof(WeatherForecastService).Assembly);
+            builder.Services.AddEventBus(typeof(Program).Assembly);
 
             // 4. Services (Domain - Logique métier)
             // Services séparés (SRP - Single Responsibility Principle)

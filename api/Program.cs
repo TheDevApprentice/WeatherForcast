@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using shared.Messaging;
 using shared.Hubs;
+using shared.Messaging;
 
 namespace api
 {
@@ -104,7 +104,7 @@ namespace api
             });
 
             // 4. Event Bus (remplace MediatR) - enregistre automatiquement les handlers
-            builder.Services.AddEventBus(typeof(Program).Assembly, typeof(WeatherForecastService).Assembly);
+            builder.Services.AddEventBus(typeof(Program).Assembly);
 
             // 5. Services (Domain - Logique métier)
             // Nouveaux services séparés (SRP)
