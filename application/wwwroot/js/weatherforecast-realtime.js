@@ -54,6 +54,13 @@ connection.onreconnecting((error) => {
 
 connection.onreconnected((connectionId) => {
     console.log("✅ Reconnecté au hub SignalR:", connectionId);
+    
+    // Mettre à jour le ConnectionId dans le cookie après reconnexion
+    if (connectionId) {
+        document.cookie = `SignalR-ConnectionId=${connectionId}; path=/; SameSite=Strict; Secure`;
+        console.log("📌 ConnectionId mis à jour:", connectionId);
+    }
+    
     updateConnectionStatus("connected");
 });
 
@@ -67,6 +74,14 @@ async function startConnection() {
     try {
         await connection.start();
         console.log("✅ Connecté au hub SignalR WeatherForecast");
+        
+        // Stocker le ConnectionId dans un cookie pour l'exclure des notifications
+        const connectionId = connection.connectionId;
+        if (connectionId) {
+            document.cookie = `SignalR-ConnectionId=${connectionId}; path=/; SameSite=Strict; Secure`;
+            console.log("📌 ConnectionId stocké:", connectionId);
+        }
+        
         updateConnectionStatus("connected");
     } catch (err) {
         console.error("❌ Erreur de connexion SignalR:", err);

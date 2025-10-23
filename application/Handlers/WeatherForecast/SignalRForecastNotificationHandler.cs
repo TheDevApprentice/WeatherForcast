@@ -31,14 +31,19 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastCreatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 [SignalR] Broadcasting ForecastCreated: ID={Id}, TriggeredBy={User}",
+                "📢 [SignalR] Broadcasting ForecastCreated: ID={Id}, TriggeredBy={User}, ExcludedConnectionId={ConnectionId}",
                 notification.Forecast.Id,
-                notification.TriggeredBy ?? "System");
+                notification.TriggeredBy ?? "System",
+                notification.ExcludedConnectionId ?? "None");
 
             try
             {
-                await _hubContext.Clients.All
-                    .SendAsync("ForecastCreated", notification.Forecast, cancellationToken);
+                // Si un ConnectionId est fourni, exclure l'émetteur du broadcast
+                var clients = string.IsNullOrEmpty(notification.ExcludedConnectionId)
+                    ? _hubContext.Clients.All
+                    : _hubContext.Clients.AllExcept(notification.ExcludedConnectionId);
+
+                await clients.SendAsync("ForecastCreated", notification.Forecast, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -53,13 +58,18 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastUpdatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 [SignalR] Broadcasting ForecastUpdated: ID={Id}",
-                notification.Forecast.Id);
+                "📢 [SignalR] Broadcasting ForecastUpdated: ID={Id}, ExcludedConnectionId={ConnectionId}",
+                notification.Forecast.Id,
+                notification.ExcludedConnectionId ?? "None");
 
             try
             {
-                await _hubContext.Clients.All
-                    .SendAsync("ForecastUpdated", notification.Forecast, cancellationToken);
+                // Si un ConnectionId est fourni, exclure l'émetteur du broadcast
+                var clients = string.IsNullOrEmpty(notification.ExcludedConnectionId)
+                    ? _hubContext.Clients.All
+                    : _hubContext.Clients.AllExcept(notification.ExcludedConnectionId);
+
+                await clients.SendAsync("ForecastUpdated", notification.Forecast, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -73,13 +83,18 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastDeletedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 [SignalR] Broadcasting ForecastDeleted: ID={Id}",
-                notification.Id);
+                "📢 [SignalR] Broadcasting ForecastDeleted: ID={Id}, ExcludedConnectionId={ConnectionId}",
+                notification.Id,
+                notification.ExcludedConnectionId ?? "None");
 
             try
             {
-                await _hubContext.Clients.All
-                    .SendAsync("ForecastDeleted", notification.Id, cancellationToken);
+                // Si un ConnectionId est fourni, exclure l'émetteur du broadcast
+                var clients = string.IsNullOrEmpty(notification.ExcludedConnectionId)
+                    ? _hubContext.Clients.All
+                    : _hubContext.Clients.AllExcept(notification.ExcludedConnectionId);
+
+                await clients.SendAsync("ForecastDeleted", notification.Id, cancellationToken);
             }
             catch (Exception ex)
             {

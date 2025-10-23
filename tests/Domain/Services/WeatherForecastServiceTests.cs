@@ -17,6 +17,7 @@ namespace tests.Domain.Services
         private Mock<IUnitOfWork> _mockUnitOfWork;
         private Mock<IPublisher> _mockPublisher;
         private Mock<IWeatherForecastRepository> _mockRepository;
+        private Mock<ISignalRConnectionService> _mockConnectionService;
         private WeatherForecastService _service;
 
         [SetUp]
@@ -25,11 +26,18 @@ namespace tests.Domain.Services
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockPublisher = new Mock<IPublisher>();
             _mockRepository = new Mock<IWeatherForecastRepository>();
+            _mockConnectionService = new Mock<ISignalRConnectionService>();
 
             // Setup UnitOfWork to return the mock repository
             _mockUnitOfWork.Setup(u => u.WeatherForecasts).Returns(_mockRepository.Object);
+            
+            // Setup ConnectionService to return null by default (no ConnectionId in tests)
+            _mockConnectionService.Setup(c => c.GetCurrentConnectionId()).Returns((string?)null);
 
-            _service = new WeatherForecastService(_mockUnitOfWork.Object, _mockPublisher.Object);
+            _service = new WeatherForecastService(
+                _mockUnitOfWork.Object, 
+                _mockPublisher.Object,
+                _mockConnectionService.Object);
         }
 
         [Test]

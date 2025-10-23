@@ -30,6 +30,7 @@ namespace tests.Application.Handlers
 
             _mockHubContext.Setup(h => h.Clients).Returns(_mockClients.Object);
             _mockClients.Setup(c => c.All).Returns(_mockClientProxy.Object);
+            _mockClients.Setup(c => c.AllExcept(It.IsAny<string>())).Returns(_mockClientProxy.Object);
 
             _handler = new SignalRForecastNotificationHandler(_mockHubContext.Object, _mockLogger.Object);
         }
@@ -167,6 +168,66 @@ namespace tests.Application.Handlers
                 ),
                 Times.Exactly(10)
             );
+        }
+
+        [Test]
+        public async Task Handle_ForecastCreatedEvent_WithExcludedConnectionId_ShouldUseAllExcept()
+        {
+            // Arrange
+            var forecast = new WeatherForecast(DateTime.UtcNow, new Temperature(25), "Sunny");
+            var excludedConnectionId = "connection-123";
+            var notification = new ForecastCreatedEvent(forecast, "TestUser", excludedConnectionId);
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _mockClients.Verify(c => c.AllExcept(excludedConnectionId), Times.Once);
+            _mockClients.Verify(c => c.All, Times.Never);
+        }
+
+        [Test]
+        public async Task Handle_ForecastCreatedEvent_WithoutExcludedConnectionId_ShouldUseAll()
+        {
+            // Arrange
+            var forecast = new WeatherForecast(DateTime.UtcNow, new Temperature(25), "Sunny");
+            var notification = new ForecastCreatedEvent(forecast, "TestUser", excludedConnectionId: null);
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _mockClients.Verify(c => c.All, Times.Once);
+            _mockClients.Verify(c => c.AllExcept(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task Handle_ForecastUpdatedEvent_WithExcludedConnectionId_ShouldUseAllExcept()
+        {
+            // Arrange
+            var forecast = new WeatherForecast(DateTime.UtcNow, new Temperature(30), "Hot");
+            var excludedConnectionId = "connection-456";
+            var notification = new ForecastUpdatedEvent(forecast, excludedConnectionId: excludedConnectionId);
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _mockClients.Verify(c => c.AllExcept(excludedConnectionId), Times.Once);
+        }
+
+        [Test]
+        public async Task Handle_ForecastDeletedEvent_WithExcludedConnectionId_ShouldUseAllExcept()
+        {
+            // Arrange
+            var excludedConnectionId = "connection-789";
+            var notification = new ForecastDeletedEvent(42, excludedConnectionId: excludedConnectionId);
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _mockClients.Verify(c => c.AllExcept(excludedConnectionId), Times.Once);
         }
     }
 }

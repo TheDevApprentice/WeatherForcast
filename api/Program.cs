@@ -90,10 +90,12 @@ namespace api
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             // Autres services
+            builder.Services.AddHttpContextAccessor(); // Nécessaire pour SignalRConnectionService
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IRateLimitService, RateLimitService>();
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
+            builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();

@@ -10,14 +10,17 @@ namespace domain.Events.WeatherForecast
     {
         public Entities.WeatherForecast Forecast { get; }
         public string? TriggeredBy { get; }
+        public string? ExcludedConnectionId { get; }
         public DateTime Timestamp { get; }
 
         public ForecastUpdatedEvent(
             Entities.WeatherForecast forecast, 
-            string? triggeredBy = null)
+            string? triggeredBy = null,
+            string? excludedConnectionId = null)
         {
             Forecast = forecast;
             TriggeredBy = triggeredBy;
+            ExcludedConnectionId = excludedConnectionId;
             Timestamp = DateTime.UtcNow;
         }
     }
