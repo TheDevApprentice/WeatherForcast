@@ -80,79 +80,85 @@ namespace infra.Repositories
 
         public async Task<PagedResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria criteria)
         {
-            var query = _context.Users.AsQueryable();
+            var query = _context.Users.AsNoTracking().AsQueryable();
 
-            // Recherche textuelle (nom, prénom, email)
+            // Recherche textuelle optimisée (nom, prénom, email)
+            // Utilisation de EF.Functions.Like pour meilleure performance SQL
             if (!string.IsNullOrWhiteSpace(criteria.SearchTerm))
             {
-                var searchTerm = criteria.SearchTerm.ToLower();
+                var searchTerm = criteria.SearchTerm.Trim();
                 query = query.Where(u =>
-                    u.Email!.ToLower().Contains(searchTerm) ||
-                    u.FirstName.ToLower().Contains(searchTerm) ||
-                    u.LastName.ToLower().Contains(searchTerm));
+                    EF.Functions.Like(u.Email!, $"%{searchTerm}%") ||
+                    EF.Functions.Like(u.FirstName, $"%{searchTerm}%") ||
+                    EF.Functions.Like(u.LastName, $"%{searchTerm}%"));
             }
 
-            // Filtre par statut actif/inactif
-            if (criteria.IsActive.HasValue)
+            // Filtres optimisés avec switch expression
+            query = criteria.IsActive switch
             {
-                query = query.Where(u => u.IsActive == criteria.IsActive.Value);
-            }
+                true => query.Where(u => u.IsActive),
+                false => query.Where(u => !u.IsActive),
+                _ => query
+            };
 
-            // Filtre par date de création
-            if (criteria.CreatedAfter.HasValue)
+            // Filtre par date de création (range optimisé)
+            if (criteria.CreatedAfter.HasValue && criteria.CreatedBefore.HasValue)
+            {
+                query = query.Where(u => u.CreatedAt >= criteria.CreatedAfter.Value 
+                                      && u.CreatedAt <= criteria.CreatedBefore.Value);
+            }
+            else if (criteria.CreatedAfter.HasValue)
             {
                 query = query.Where(u => u.CreatedAt >= criteria.CreatedAfter.Value);
             }
-
-            if (criteria.CreatedBefore.HasValue)
+            else if (criteria.CreatedBefore.HasValue)
             {
                 query = query.Where(u => u.CreatedAt <= criteria.CreatedBefore.Value);
             }
 
-            // Filtre par dernière connexion
-            if (criteria.LastLoginAfter.HasValue)
+            // Filtre par dernière connexion (range optimisé)
+            if (criteria.LastLoginAfter.HasValue && criteria.LastLoginBefore.HasValue)
+            {
+                query = query.Where(u => u.LastLoginAt >= criteria.LastLoginAfter.Value 
+                                      && u.LastLoginAt <= criteria.LastLoginBefore.Value);
+            }
+            else if (criteria.LastLoginAfter.HasValue)
             {
                 query = query.Where(u => u.LastLoginAt >= criteria.LastLoginAfter.Value);
             }
-
-            if (criteria.LastLoginBefore.HasValue)
+            else if (criteria.LastLoginBefore.HasValue)
             {
                 query = query.Where(u => u.LastLoginAt <= criteria.LastLoginBefore.Value);
             }
 
-            // Compter le total AVANT la pagination
-            var totalCount = await query.CountAsync();
-
-            // Tri
-            query = criteria.SortBy?.ToLower() switch
+            // Tri optimisé avec switch expression
+            query = (criteria.SortBy?.ToLowerInvariant(), criteria.SortDescending) switch
             {
-                "email" => criteria.SortDescending
-                    ? query.OrderByDescending(u => u.Email)
-                    : query.OrderBy(u => u.Email),
-                "firstname" => criteria.SortDescending
-                    ? query.OrderByDescending(u => u.FirstName)
-                    : query.OrderBy(u => u.FirstName),
-                "lastname" => criteria.SortDescending
-                    ? query.OrderByDescending(u => u.LastName)
-                    : query.OrderBy(u => u.LastName),
-                "lastloginat" => criteria.SortDescending
-                    ? query.OrderByDescending(u => u.LastLoginAt)
-                    : query.OrderBy(u => u.LastLoginAt),
-                _ => criteria.SortDescending
-                    ? query.OrderByDescending(u => u.CreatedAt)
-                    : query.OrderBy(u => u.CreatedAt)
+                ("email", true) => query.OrderByDescending(u => u.Email),
+                ("email", false) => query.OrderBy(u => u.Email),
+                ("firstname", true) => query.OrderByDescending(u => u.FirstName),
+                ("firstname", false) => query.OrderBy(u => u.FirstName),
+                ("lastname", true) => query.OrderByDescending(u => u.LastName),
+                ("lastname", false) => query.OrderBy(u => u.LastName),
+                ("lastloginat", true) => query.OrderByDescending(u => u.LastLoginAt),
+                ("lastloginat", false) => query.OrderBy(u => u.LastLoginAt),
+                (_, true) => query.OrderByDescending(u => u.CreatedAt),
+                _ => query.OrderBy(u => u.CreatedAt)
             };
 
-            // Pagination
-            var items = await query
+            // Optimisation: Exécuter Count et données en parallèle
+            var countTask = query.CountAsync();
+            var itemsTask = query
                 .Skip((criteria.PageNumber - 1) * criteria.PageSize)
                 .Take(criteria.PageSize)
                 .ToListAsync();
 
+            await Task.WhenAll(countTask, itemsTask);
+
             return new PagedResult<ApplicationUser>
             {
-                Items = items,
-                TotalCount = totalCount,
+                Items = itemsTask.Result,
+                TotalCount = countTask.Result,
                 PageNumber = criteria.PageNumber,
                 PageSize = criteria.PageSize
             };
