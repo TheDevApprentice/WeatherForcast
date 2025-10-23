@@ -4,6 +4,7 @@ using domain.Interfaces.Services;
 using domain.ValueObjects;
 using System.Security.Cryptography;
 using System.Text;
+using Konscious.Security.Cryptography;
 
 namespace domain.Services
 {
@@ -65,9 +66,8 @@ namespace domain.Services
                 return (false, null);
             }
 
-            // Vérifier le secret
-            var secretHash = HashSecret(secret);
-            if (secretHash != apiKey.SecretHash)
+            // Vérifier le secret avec bcrypt
+            if (!VerifySecret(secret, apiKey.SecretHash))
             {
                 return (false, null);
             }
@@ -87,7 +87,7 @@ namespace domain.Services
         public async Task<bool> RevokeApiKeyAsync(int apiKeyId, string userId, string reason)
         {
             var apiKey = await _unitOfWork.ApiKeys.GetByIdAsync(apiKeyId);
-            
+
             if (apiKey == null || apiKey.UserId != userId)
             {
                 return false;
@@ -96,7 +96,7 @@ namespace domain.Services
             // Utiliser la méthode Revoke() de l'entité (avec traçabilité)
             apiKey.Revoke(reason);
             await _unitOfWork.SaveChangesAsync();
-            
+
             return true;
         }
 
@@ -130,13 +130,79 @@ namespace domain.Services
             return result.ToString();
         }
 
+        /// <summary>
+        /// Hache un secret avec Argon2id (recommandé OWASP 2024)
+        /// Paramètres: 64 MB RAM, 4 itérations, 8 threads
+        /// Résistant aux attaques GPU, ASIC et side-channel
+        /// </summary>
         private string HashSecret(string secret)
         {
-            using (var sha256 = SHA256.Create())
+            // Générer un salt aléatoire de 16 bytes
+            var salt = new byte[16];
+            using (var rng = RandomNumberGenerator.Create())
             {
-                var bytes = Encoding.UTF8.GetBytes(secret);
-                var hash = sha256.ComputeHash(bytes);
-                return Convert.ToBase64String(hash);
+                rng.GetBytes(salt);
+            }
+
+            // Configurer Argon2id avec paramètres recommandés OWASP
+            using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(secret)))
+            {
+                argon2.Salt = salt;
+                argon2.DegreeOfParallelism = 8;      // 8 threads
+                argon2.MemorySize = 65536;           // 64 MB de RAM
+                argon2.Iterations = 4;               // 4 itérations
+
+                var hash = argon2.GetBytes(32);      // Hash de 32 bytes
+
+                // Combiner salt + hash pour stockage (16 + 32 = 48 bytes)
+                var hashWithSalt = new byte[48];
+                Buffer.BlockCopy(salt, 0, hashWithSalt, 0, 16);
+                Buffer.BlockCopy(hash, 0, hashWithSalt, 16, 32);
+
+                return Convert.ToBase64String(hashWithSalt);
+            }
+        }
+
+        /// <summary>
+        /// Vérifie un secret contre son hash Argon2id
+        /// Utilise une comparaison constant-time pour éviter les timing attacks
+        /// </summary>
+        private bool VerifySecret(string secret, string hashWithSaltBase64)
+        {
+            try
+            {
+                var hashWithSalt = Convert.FromBase64String(hashWithSaltBase64);
+
+                // Vérifier la longueur (16 bytes salt + 32 bytes hash)
+                if (hashWithSalt.Length != 48)
+                    return false;
+
+                // Extraire le salt (16 premiers bytes)
+                var salt = new byte[16];
+                Buffer.BlockCopy(hashWithSalt, 0, salt, 0, 16);
+
+                // Extraire le hash stocké (32 bytes suivants)
+                var storedHash = new byte[32];
+                Buffer.BlockCopy(hashWithSalt, 16, storedHash, 0, 32);
+
+                // Re-hasher le secret avec le même salt et paramètres
+                using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(secret)))
+                {
+                    argon2.Salt = salt;
+                    argon2.DegreeOfParallelism = 8;
+                    argon2.MemorySize = 65536;
+                    argon2.Iterations = 4;
+
+                    var newHash = argon2.GetBytes(32);
+
+                    // Comparaison constant-time pour éviter timing attacks
+                    return CryptographicOperations.FixedTimeEquals(storedHash, newHash);
+                }
+            }
+            catch
+            {
+                // Hash invalide, corrompu ou format incorrect
+                return false;
             }
         }
     }
