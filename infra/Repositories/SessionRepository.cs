@@ -28,13 +28,8 @@ namespace infra.Repositories
         {
             await _context.Sessions.AddAsync(session);
 
-            var userSession = new UserSession
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                SessionId = session.Id,
-                CreatedAt = DateTime.UtcNow
-            };
+            // Utiliser le constructeur public de UserSession
+            var userSession = new UserSession(userId, session.Id);
 
             await _context.UserSessions.AddAsync(userSession);
             // SaveChanges géré par le UnitOfWork

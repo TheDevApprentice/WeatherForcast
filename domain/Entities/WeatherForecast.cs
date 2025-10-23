@@ -11,12 +11,12 @@ namespace domain.Entities
         /// <summary>
         /// Identifiant unique
         /// </summary>
-        public int Id { get; set; }
+        public int Id { get; internal set; }
 
         /// <summary>
         /// Date de la prévision
         /// </summary>
-        public DateTime Date { get; set; }
+        public DateTime Date { get; private set; }
 
         /// <summary>
         /// Température (Value Object)
@@ -27,7 +27,7 @@ namespace domain.Entities
         /// <summary>
         /// Résumé de la météo (Sunny, Rainy, etc.)
         /// </summary>
-        public string? Summary { get; set; }
+        public string? Summary { get; private set; }
 
         /// <summary>
         /// Constructeur parameterless pour EF Core
