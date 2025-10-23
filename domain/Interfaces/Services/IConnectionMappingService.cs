@@ -1,4 +1,4 @@
-namespace shared.Services
+namespace domain.Services
 {
     /// <summary>
     /// Service pour mapper les utilisateurs à leurs ConnectionIds SignalR

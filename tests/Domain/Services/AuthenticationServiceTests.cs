@@ -2,6 +2,8 @@ using domain.Entities;
 using domain.Interfaces.Services;
 using domain.Services;
 using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 
@@ -14,6 +16,8 @@ namespace tests.Domain.Services
         private Mock<IUserManagementService> _mockUserManagementService;
         private Mock<ISessionManagementService> _mockSessionManagementService;
         private Mock<UserManager<ApplicationUser>> _mockUserManager;
+        private Mock<IPublisher> _mockPublisher;
+        private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
         private AuthenticationService _service;
 
         [SetUp]
@@ -35,11 +39,16 @@ namespace tests.Domain.Services
 
             _mockUserManagementService = new Mock<IUserManagementService>();
             _mockSessionManagementService = new Mock<ISessionManagementService>();
+            _mockPublisher = new Mock<IPublisher>();
+            _mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 
             _service = new AuthenticationService(
                 _mockSignInManager.Object,
                 _mockUserManagementService.Object,
-                _mockSessionManagementService.Object);
+                _mockSessionManagementService.Object,
+                _mockPublisher.Object,
+                _mockHttpContextAccessor.Object
+                );
         }
 
         [Test]

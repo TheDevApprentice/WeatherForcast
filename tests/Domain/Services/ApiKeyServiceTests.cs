@@ -4,6 +4,8 @@ using domain.Interfaces.Repositories;
 using domain.Services;
 using domain.ValueObjects;
 using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Moq;
 
 namespace tests.Domain.Services
@@ -13,6 +15,8 @@ namespace tests.Domain.Services
     {
         private Mock<IUnitOfWork> _mockUnitOfWork;
         private Mock<IApiKeyRepository> _mockRepository;
+        private Mock<IPublisher> _mockPublisher;
+        private Mock<UserManager<ApplicationUser>> _mockUserManager;
         private ApiKeyService _service;
 
         [SetUp]
@@ -20,10 +24,18 @@ namespace tests.Domain.Services
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockRepository = new Mock<IApiKeyRepository>();
+            _mockPublisher = new Mock<IPublisher>();
+            
+            var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+            _mockUserManager = new Mock<UserManager<ApplicationUser>>(
+                userStoreMock.Object, null, null, null, null, null, null, null, null);
 
             _mockUnitOfWork.Setup(u => u.ApiKeys).Returns(_mockRepository.Object);
 
-            _service = new ApiKeyService(_mockUnitOfWork.Object);
+            _service = new ApiKeyService(
+                _mockUnitOfWork.Object,
+                _mockPublisher.Object,
+                _mockUserManager.Object);
         }
 
         [Test]

@@ -1,7 +1,10 @@
 using domain.DTOs;
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces;
 using domain.Interfaces.Services;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace domain.Services
@@ -14,13 +17,19 @@ namespace domain.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPublisher _publisher;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserManagementService(
             UserManager<ApplicationUser> userManager,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IPublisher publisher,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
+            _publisher = publisher;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<(bool Success, string[] Errors, ApplicationUser? User)> RegisterAsync(
@@ -36,6 +45,15 @@ namespace domain.Services
 
             if (result.Succeeded)
             {
+                // Publier l'événement UserRegistered
+                var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+                await _publisher.Publish(new UserRegisteredEvent(
+                    userId: user.Id,
+                    email: user.Email!,
+                    userName: user.UserName,
+                    ipAddress: ipAddress
+                ));
+
                 return (true, Array.Empty<string>(), user);
             }
 

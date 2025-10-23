@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/web.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -46,6 +47,18 @@
             </div>
         </nav>
     </header>
+    
+    <!-- Conteneur de notifications admin (visible uniquement pour les admins) -->
+    @if (User.Identity?.IsAuthenticated == true && User.HasClaim("permission", "user:manage"))
+    {
+        <div id="admin-notifications" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+        <div id="admin-connection-status" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9998;">
+            <span class="badge bg-secondary">
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Connexion...
+            </span>
+        </div>
+    }
     
     <main role="main" class="fade-in-up">
         <div class="container py-4">

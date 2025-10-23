@@ -116,7 +116,16 @@ namespace application
                 Console.WriteLine($"[Development] Data Protection keys stored in: {keysDirectory}");
             }
 
-            // 3. Services (Domain - Logique métier)
+            // 3. MediatR pour les Domain Events (doit être enregistré AVANT les services)
+            builder.Services.AddMediatR(cfg =>
+            {
+                // Enregistrer les handlers depuis l'assembly application
+                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+                // Enregistrer les events depuis l'assembly domain
+                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
+            });
+
+            // 4. Services (Domain - Logique métier)
             // Services séparés (SRP - Single Responsibility Principle)
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();
             builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
@@ -129,7 +138,7 @@ namespace application
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
-            builder.Services.AddScoped<shared.Services.IConnectionMappingService, infrastructure.Services.RedisConnectionMappingService>();
+            builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
@@ -168,17 +177,8 @@ namespace application
             // Authorization Handler
             builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, PermissionHandler>();
 
-            // 4. Unit of Work (Clean Architecture)
+            // 5. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            // 5. MediatR pour les Domain Events (notifications temps réel, audit logs, etc.)
-            builder.Services.AddMediatR(cfg =>
-            {
-                // Enregistrer les handlers depuis l'assembly application
-                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-                // Enregistrer les events depuis l'assembly domain
-                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
-            });
 
             // 6. Redis pour communication inter-process
             var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
@@ -329,8 +329,9 @@ namespace application
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            // 7. SignalR Hub
+            // 7. SignalR Hubs
             app.MapHub<WeatherForecastHub>("/hubs/weatherforecast");
+            app.MapHub<AdminHub>("/hubs/admin"); // Hub pour les notifications admin
 
             // ============================================
             // SEED DES RÔLES ET UTILISATEUR ADMIN

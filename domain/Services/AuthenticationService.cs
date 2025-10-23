@@ -1,5 +1,8 @@
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces.Services;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace domain.Services
@@ -13,15 +16,21 @@ namespace domain.Services
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserManagementService _userManagementService;
         private readonly ISessionManagementService _sessionManagementService;
+        private readonly IPublisher _publisher;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthenticationService(
             SignInManager<ApplicationUser> signInManager,
             IUserManagementService userManagementService,
-            ISessionManagementService sessionManagementService)
+            ISessionManagementService sessionManagementService,
+            IPublisher publisher,
+            IHttpContextAccessor httpContextAccessor)
         {
             _signInManager = signInManager;
             _userManagementService = userManagementService;
             _sessionManagementService = sessionManagementService;
+            _publisher = publisher;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<(bool Success, ApplicationUser? User)> ValidateCredentialsAsync(
@@ -116,6 +125,15 @@ namespace domain.Services
 
             // 4. Mettre à jour LastLoginAt
             await _userManagementService.UpdateLastLoginAsync(user.Id);
+
+            // 5. Publier l'événement UserLoggedIn
+            await _publisher.Publish(new UserLoggedInEvent(
+                userId: user.Id,
+                email: user.Email!,
+                userName: user.UserName,
+                ipAddress: ipAddress,
+                userAgent: userAgent
+            ));
 
             return (true, user);
         }

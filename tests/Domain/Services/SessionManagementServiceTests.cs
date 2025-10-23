@@ -3,6 +3,8 @@ using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using domain.Services;
 using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Moq;
 
 namespace tests.Domain.Services
@@ -12,6 +14,8 @@ namespace tests.Domain.Services
     {
         private Mock<IUnitOfWork> _mockUnitOfWork;
         private Mock<ISessionRepository> _mockSessionRepository;
+        private Mock<IPublisher> _mockPublisher;
+        private Mock<UserManager<ApplicationUser>> _mockUserManager;
         private SessionManagementService _service;
 
         [SetUp]
@@ -19,10 +23,18 @@ namespace tests.Domain.Services
         {
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockSessionRepository = new Mock<ISessionRepository>();
+            _mockPublisher = new Mock<IPublisher>();
+            
+            var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+            _mockUserManager = new Mock<UserManager<ApplicationUser>>(
+                userStoreMock.Object, null, null, null, null, null, null, null, null);
 
             _mockUnitOfWork.Setup(u => u.Sessions).Returns(_mockSessionRepository.Object);
 
-            _service = new SessionManagementService(_mockUnitOfWork.Object);
+            _service = new SessionManagementService(
+                _mockUnitOfWork.Object,
+                _mockPublisher.Object,
+                _mockUserManager.Object);
         }
 
         [Test]

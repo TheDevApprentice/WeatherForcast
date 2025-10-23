@@ -1,6 +1,9 @@
 using domain.Constants;
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces.Services;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -13,13 +16,19 @@ namespace domain.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IPublisher _publisher;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RoleManagementService(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IPublisher publisher,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _publisher = publisher;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> AssignRoleAsync(string userId, string roleName)
@@ -31,6 +40,20 @@ namespace domain.Services
                 return false;
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
+            
+            if (result.Succeeded)
+            {
+                // Publier l'événement UserRoleChanged
+                var changedBy = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+                await _publisher.Publish(new UserRoleChangedEvent(
+                    userId: user.Id,
+                    email: user.Email!,
+                    roleName: roleName,
+                    isAdded: true,
+                    changedBy: changedBy
+                ));
+            }
+            
             return result.Succeeded;
         }
 
@@ -40,6 +63,20 @@ namespace domain.Services
             if (user == null) return false;
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+            
+            if (result.Succeeded)
+            {
+                // Publier l'événement UserRoleChanged
+                var changedBy = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+                await _publisher.Publish(new UserRoleChangedEvent(
+                    userId: user.Id,
+                    email: user.Email!,
+                    roleName: roleName,
+                    isAdded: false,
+                    changedBy: changedBy
+                ));
+            }
+            
             return result.Succeeded;
         }
 
@@ -66,6 +103,21 @@ namespace domain.Services
 
             var claim = new Claim(claimType, claimValue);
             var result = await _userManager.AddClaimAsync(user, claim);
+            
+            if (result.Succeeded)
+            {
+                // Publier l'événement UserClaimChanged
+                var changedBy = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+                await _publisher.Publish(new UserClaimChangedEvent(
+                    userId: user.Id,
+                    email: user.Email!,
+                    claimType: claimType,
+                    claimValue: claimValue,
+                    isAdded: true,
+                    changedBy: changedBy
+                ));
+            }
+            
             return result.Succeeded;
         }
 
@@ -76,6 +128,21 @@ namespace domain.Services
 
             var claim = new Claim(claimType, claimValue);
             var result = await _userManager.RemoveClaimAsync(user, claim);
+            
+            if (result.Succeeded)
+            {
+                // Publier l'événement UserClaimChanged
+                var changedBy = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+                await _publisher.Publish(new UserClaimChangedEvent(
+                    userId: user.Id,
+                    email: user.Email!,
+                    claimType: claimType,
+                    claimValue: claimValue,
+                    isAdded: false,
+                    changedBy: changedBy
+                ));
+            }
+            
             return result.Succeeded;
         }
 

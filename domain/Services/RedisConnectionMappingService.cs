@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
-using shared.Services;
 
-namespace infrastructure.Services
+namespace domain.Services
 {
     /// <summary>
     /// Implémentation Redis du service de mapping des connexions SignalR
@@ -24,7 +23,7 @@ namespace infrastructure.Services
         public async Task AddConnectionAsync(string userId, string connectionId)
         {
             var key = $"{KeyPrefix}{userId}{KeySuffix}";
-            
+
             await _cache.SetStringAsync(
                 key,
                 connectionId,

@@ -1,7 +1,7 @@
+using domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using shared.Services;
 using System.Security.Claims;
 
 namespace shared.Hubs
@@ -28,7 +28,7 @@ namespace shared.Hubs
             var userName = Context.User?.Identity?.Name ?? "Anonymous";
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
-            
+
             _logger.LogInformation(
                 "Client connecté au WeatherForecastHub: {UserName} (UserId: {UserId}, ConnectionId: {ConnectionId})",
                 userName, userId, connectionId);
@@ -48,7 +48,7 @@ namespace shared.Hubs
             var userName = Context.User?.Identity?.Name ?? "Anonymous";
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
-            
+
             _logger.LogInformation(
                 "Client déconnecté du WeatherForecastHub: {UserName} (UserId: {UserId}, ConnectionId: {ConnectionId})",
                 userName, userId, connectionId);

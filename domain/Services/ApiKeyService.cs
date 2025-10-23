@@ -1,20 +1,30 @@
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
 using System.Security.Cryptography;
 using System.Text;
 using Konscious.Security.Cryptography;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 
 namespace domain.Services
 {
     public class ApiKeyService : IApiKeyService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPublisher _publisher;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ApiKeyService(IUnitOfWork unitOfWork)
+        public ApiKeyService(
+            IUnitOfWork unitOfWork,
+            IPublisher publisher,
+            UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _publisher = publisher;
+            _userManager = userManager;
         }
 
         public async Task<(ApiKey apiKey, string plainSecret)> GenerateApiKeyAsync(
@@ -47,6 +57,19 @@ namespace domain.Services
 
             await _unitOfWork.ApiKeys.CreateAsync(apiKey);
             await _unitOfWork.SaveChangesAsync();
+
+            // Publier l'événement ApiKeyCreated
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _publisher.Publish(new ApiKeyCreatedEvent(
+                    apiKeyId: apiKey.Id,
+                    userId: userId,
+                    email: user.Email!,
+                    keyName: name,
+                    expiresAt: expiresAt
+                ));
+            }
 
             return (apiKey, plainSecret);
         }
@@ -96,6 +119,19 @@ namespace domain.Services
             // Utiliser la méthode Revoke() de l'entité (avec traçabilité)
             apiKey.Revoke(reason);
             await _unitOfWork.SaveChangesAsync();
+
+            // Publier l'événement ApiKeyRevoked
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _publisher.Publish(new ApiKeyRevokedEvent(
+                    apiKeyId: apiKey.Id,
+                    userId: userId,
+                    email: user.Email!,
+                    keyName: apiKey.Name,
+                    revokedBy: user.Email
+                ));
+            }
 
             return true;
         }

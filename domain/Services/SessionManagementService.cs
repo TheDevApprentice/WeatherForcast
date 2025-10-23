@@ -1,6 +1,9 @@
 using domain.Entities;
+using domain.Events.Admin;
 using domain.Interfaces;
 using domain.Interfaces.Services;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 
 namespace domain.Services
 {
@@ -11,10 +14,17 @@ namespace domain.Services
     public class SessionManagementService : ISessionManagementService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPublisher _publisher;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SessionManagementService(IUnitOfWork unitOfWork)
+        public SessionManagementService(
+            IUnitOfWork unitOfWork,
+            IPublisher publisher,
+            UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _publisher = publisher;
+            _userManager = userManager;
         }
 
         public async Task<Session> CreateWebSessionAsync(
@@ -29,6 +39,21 @@ namespace domain.Services
 
             await _unitOfWork.Sessions.CreateSessionWithUserAsync(session, userId);
             await _unitOfWork.SaveChangesAsync();
+
+            // Publier l'événement SessionCreated
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _publisher.Publish(new SessionCreatedEvent(
+                    sessionId: session.Id.ToString(),
+                    userId: userId,
+                    email: user.Email!,
+                    expiresAt: expiresAt,
+                    ipAddress: ipAddress,
+                    userAgent: userAgent
+                ));
+            }
+
             return session;
         }
 
@@ -44,6 +69,21 @@ namespace domain.Services
 
             await _unitOfWork.Sessions.CreateSessionWithUserAsync(session, userId);
             await _unitOfWork.SaveChangesAsync();
+
+            // Publier l'événement SessionCreated
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _publisher.Publish(new SessionCreatedEvent(
+                    sessionId: session.Id.ToString(),
+                    userId: userId,
+                    email: user.Email!,
+                    expiresAt: expiresAt,
+                    ipAddress: ipAddress,
+                    userAgent: userAgent
+                ));
+            }
+
             return session;
         }
 
