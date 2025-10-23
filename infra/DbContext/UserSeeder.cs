@@ -1,93 +1,129 @@
 using domain.Constants;
 using domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace infra.Data
 {
     /// <summary>
-    /// Seed de 200 utilisateurs de test pour tester les performances
+    /// Seed optimisé avec traitement parallèle pour créer rapidement des utilisateurs de test
     /// </summary>
     public class UserSeeder
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<UserSeeder> _logger;
 
         public UserSeeder(
-            UserManager<ApplicationUser> userManager,
+            IServiceProvider serviceProvider,
             ILogger<UserSeeder> logger)
         {
-            _userManager = userManager;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
         /// <summary>
-        /// Créer 200 utilisateurs de test
+        /// Créer des utilisateurs de test en parallèle ULTRA-OPTIMISÉ (pour 1000+ utilisateurs)
         /// </summary>
         public async Task SeedTestUsersAsync(int count = 200)
         {
-            _logger.LogInformation("Starting seeding {Count} test users...", count);
+            var stopwatch = Stopwatch.StartNew();
+            //_logger.LogInformation("🚀 Starting ULTRA-FAST parallel seeding of {Count} test users...", count);
 
-            var random = new Random();
             var firstNames = new[] { "Jean", "Marie", "Pierre", "Sophie", "Luc", "Emma", "Thomas", "Julie", "Nicolas", "Laura", "Alexandre", "Camille", "Antoine", "Sarah", "Maxime", "Léa", "Hugo", "Chloé", "Lucas", "Manon" };
             var lastNames = new[] { "Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel", "Garcia", "David", "Bertrand", "Roux", "Vincent", "Fournier" };
             var roles = new[] { AppRoles.User, AppRoles.ApiConsumer, AppRoles.MobileUser };
 
-            int created = 0;
-            int skipped = 0;
+            var createdCounter = new ConcurrentBag<bool>();
+            var skippedCounter = new ConcurrentBag<bool>();
 
-            for (int i = 1; i <= count; i++)
+            // OPTIMISATION CLÉS:
+            // 1. Batch plus grand (100 au lieu de 50) = moins de synchronisation
+            // 2. MaxDegreeOfParallelism basé sur les cores CPU
+            // 3. Pas de vérification d'existence (on assume DB vide)
+            const int batchSize = 100;
+            var maxParallelism = Environment.ProcessorCount * 2; // 2x le nombre de cores
+            var batches = (int)Math.Ceiling(count / (double)batchSize);
+
+            //_logger.LogInformation("⚙️ Configuration: {Batches} batches of {BatchSize}, {Parallelism} max parallelism", 
+            //    batches, batchSize, maxParallelism);
+
+            for (int batchIndex = 0; batchIndex < batches; batchIndex++)
             {
-                var firstName = firstNames[random.Next(firstNames.Length)];
-                var lastName = lastNames[random.Next(lastNames.Length)];
-                var email = $"user{i}@test.com";
+                var start = batchIndex * batchSize + 1;
+                var end = Math.Min((batchIndex + 1) * batchSize, count);
 
-                // Vérifier si l'utilisateur existe déjà
-                var existingUser = await _userManager.FindByEmailAsync(email);
-                if (existingUser != null)
-                {
-                    skipped++;
-                    continue;
-                }
+                //_logger.LogInformation("⚡ Processing batch {Batch}/{Total} ({Start}-{End})...", 
+                //    batchIndex + 1, batches, start, end);
 
-                // Créer l'utilisateur
-                var user = new ApplicationUser(email, firstName, lastName);
+                // Utiliser Parallel.ForEachAsync pour un contrôle optimal du parallélisme
+                var userIndices = Enumerable.Range(start, end - start + 1);
 
-                var result = await _userManager.CreateAsync(user, "Test@123");
-
-                if (result.Succeeded)
-                {
-                    // Assigner un rôle aléatoire
-                    var role = roles[random.Next(roles.Length)];
-                    await _userManager.AddToRoleAsync(user, role);
-
-                    // Simuler des dates de création variées (derniers 2 ans)
-                    var daysAgo = random.Next(0, 730);
-                    // Note: On ne peut pas modifier CreatedAt directement car c'est private set
-                    // C'est normal pour l'encapsulation
-
-                    // Simuler des connexions pour certains utilisateurs
-                    if (random.Next(100) > 30) // 70% ont déjà connecté
+                await Parallel.ForEachAsync(userIndices,
+                    new ParallelOptions { MaxDegreeOfParallelism = maxParallelism },
+                    async (userIndex, cancellationToken) =>
                     {
-                        user.RecordLogin();
-                    }
+                        try
+                        {
+                            // Chaque tâche a son propre scope
+                            using var scope = _serviceProvider.CreateScope();
+                            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                            var random = new Random(Guid.NewGuid().GetHashCode());
 
-                    created++;
+                            var firstName = firstNames[random.Next(firstNames.Length)];
+                            var lastName = lastNames[random.Next(lastNames.Length)];
+                            var email = $"user{userIndex}@test.com";
 
-                    if (created % 50 == 0)
-                    {
-                        _logger.LogInformation("Created {Created}/{Total} test users...", created, count);
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("Failed to create user {Email}: {Errors}",
-                        email,
-                        string.Join(", ", result.Errors.Select(e => e.Description)));
-                }
+                            // OPTIMISATION: Skip la vérification d'existence pour la vitesse
+                            // (on assume que la DB est vide ou qu'on veut recréer)
+
+                            // Créer l'utilisateur
+                            var user = new ApplicationUser(email, firstName, lastName);
+                            var result = await userManager.CreateAsync(user, "Test@123");
+
+                            if (result.Succeeded)
+                            {
+                                // Assigner un rôle aléatoire
+                                var role = roles[random.Next(roles.Length)];
+                                await userManager.AddToRoleAsync(user, role);
+
+                                // Simuler des connexions pour certains utilisateurs (70%)
+                                if (random.Next(100) > 30)
+                                {
+                                    user.RecordLogin();
+                                    await userManager.UpdateAsync(user);
+                                }
+
+                                createdCounter.Add(true);
+                            }
+                            else
+                            {
+                                // Si l'utilisateur existe déjà, on le compte comme skipped
+                                if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
+                                {
+                                    skippedCounter.Add(true);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Error creating user{Index}", userIndex);
+                        }
+                    });
+
+                var created = createdCounter.Count;
+                var skipped = skippedCounter.Count;
+
+                //_logger.LogInformation("✅ Batch {Batch}/{Total} completed - Total: {Created} created, {Skipped} skipped ({Rate:F0} users/sec)", 
+                //    batchIndex + 1, batches, created, skipped, created / stopwatch.Elapsed.TotalSeconds);
             }
 
-            _logger.LogInformation("Test user seeding completed: {Created} created, {Skipped} skipped", created, skipped);
+            stopwatch.Stop();
+            var rate = createdCounter.Count / stopwatch.Elapsed.TotalSeconds;
+            _logger.LogInformation("🎉 ULTRA-FAST seeding completed in {Elapsed:F2}s: {Created} created, {Skipped} skipped ({Rate:F0} users/sec)",
+                stopwatch.Elapsed.TotalSeconds, createdCounter.Count, skippedCounter.Count, rate);
         }
     }
 }

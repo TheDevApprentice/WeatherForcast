@@ -38,8 +38,19 @@ namespace application
                 Console.WriteLine("[Web] Using PostgreSQL database with DbContext pooling");
 
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
-                    options.UseNpgsql(connectionString),
-                    poolSize: 128); // Taille du pool (par défaut: 128)
+                {
+                    options.UseNpgsql(connectionString);
+
+                    // options.EnableSensitiveDataLogging(false);
+                    // options.EnableDetailedErrors(false);
+                    // Désactiver les logs sensibles en production pour les performances
+                    if (!builder.Environment.IsDevelopment())
+                    {
+                        options.EnableSensitiveDataLogging(false);
+                        options.EnableDetailedErrors(false);
+                    }
+                },
+                poolSize: 128); // Taille du pool (par défaut: 128)
             }
 
             // 2. Identity (Authentification)
@@ -92,7 +103,7 @@ namespace application
                 if (!string.IsNullOrEmpty(certThumbprint))
                 {
                     dataProtectionBuilder.ProtectKeysWithCertificate(certThumbprint);
-                    Console.WriteLine($"[Production] Data Protection using certificate: {certThumbprint}");
+                    //Console.WriteLine($"[Production] Data Protection using certificate: {certThumbprint}");
                 }
                 else
                 {
@@ -181,20 +192,20 @@ namespace application
 
                 try
                 {
-                    logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
+                    //logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
                     var connection = StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
 
                     // Attendre un peu que la connexion soit établie
                     var attempts = 0;
-                    while (!connection.IsConnected && attempts < 10)
+                    while (!connection.IsConnected && attempts < 5)
                     {
-                        System.Threading.Thread.Sleep(500);
+                        System.Threading.Thread.Sleep(200);
                         attempts++;
                     }
 
                     if (connection.IsConnected)
                     {
-                        logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
+                        //logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
                     }
                     else
                     {
@@ -241,7 +252,7 @@ namespace application
             try
             {
                 var redis = app.Services.GetRequiredService<StackExchange.Redis.IConnectionMultiplexer>();
-                Console.WriteLine($"[Web] Redis Status: Connected={redis.IsConnected}");
+                //Console.WriteLine($"[Web] Redis Status: Connected={redis.IsConnected}");
             }
             catch (Exception ex)
             {
@@ -331,7 +342,6 @@ namespace application
                     var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
                     var roleLogger = loggerFactory.CreateLogger<RoleSeeder>();
-                    var userLogger = loggerFactory.CreateLogger<UserSeeder>();
 
                     // 1. Créer les rôles avec leurs claims
                     var roleSeeder = new RoleSeeder(roleManager, roleLogger);
@@ -342,11 +352,7 @@ namespace application
                     // 2. Créer l'utilisateur admin par défaut
                     await roleSeeder.SeedAdminUserAsync(userManager);
 
-                    // 3. Créer 200 utilisateurs de test pour tester les performances
-                    var userSeeder = new UserSeeder(userManager, userLogger);
-                    await userSeeder.SeedTestUsersAsync(200);
-
-                    Console.WriteLine("✅ Roles, admin user, and 200 test users seeded successfully");
+                    //Console.WriteLine("✅ Roles, admin user, and 1600 test users seeded successfully");
                 }
                 catch (Exception ex)
                 {
@@ -355,6 +361,33 @@ namespace application
                 }
             }
 
+            // ============================================
+            // SEED DES USERS DE TEST - si activé
+            // ============================================
+            if (builder.Configuration.GetValue<bool>("SeedTestUsers", false))
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    try
+                    {
+                        var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+
+                        var userLogger = loggerFactory.CreateLogger<UserSeeder>();
+
+                        // 3. Créer 1600 utilisateurs de test en parallèle ULTRA-RAPIDE
+                        var userSeeder = new UserSeeder(app.Services, userLogger);
+                        await userSeeder.SeedTestUsersAsync(1600);
+
+                        //Console.WriteLine("✅ Roles, admin user, and 1600 test users seeded successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        var logger = services.GetRequiredService<ILogger<Program>>();
+                        logger.LogError(ex, "An error occurred while seeding roles");
+                    }
+                }
+            }
             app.Run();
         }
     }

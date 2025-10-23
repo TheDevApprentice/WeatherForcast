@@ -34,7 +34,7 @@ namespace api
             if (!string.IsNullOrEmpty(connectionString))
             {
                 // PostgreSQL (Docker ou production) avec Connection Pooling
-                Console.WriteLine("[API] Using PostgreSQL database with DbContext pooling");
+                //Console.WriteLine("[API] Using PostgreSQL database with DbContext pooling");
 
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
                     options.UseNpgsql(connectionString),
@@ -144,7 +144,7 @@ namespace api
 
                 try
                 {
-                    logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
+                    //logger.LogInformation("🔄 Connexion à Redis: {Endpoint}...", redisConnectionString);
                     var connection = StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
 
                     // Attendre un peu que la connexion soit établie
@@ -157,7 +157,7 @@ namespace api
 
                     if (connection.IsConnected)
                     {
-                        logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
+                        //logger.LogInformation("✅ Connecté à Redis: {Endpoint}", redisConnectionString);
                     }
                     else
                     {
