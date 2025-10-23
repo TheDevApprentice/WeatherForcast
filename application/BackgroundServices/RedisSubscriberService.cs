@@ -1,8 +1,8 @@
+using domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using shared.Hubs;
 using StackExchange.Redis;
 using System.Text.Json;
-using application.Hubs;
-using domain.Entities;
 
 namespace application.BackgroundServices
 {
@@ -39,10 +39,10 @@ namespace application.BackgroundServices
             if (!_redis.IsConnected)
             {
                 _logger.LogWarning("⚠️ Redis non connecté au démarrage. Attente de la connexion...");
-                
+
                 // Attendre un peu que la connexion s'établisse
                 await Task.Delay(2000, stoppingToken);
-                
+
                 if (!_redis.IsConnected)
                 {
                     _logger.LogError("❌ Redis non connecté. Le service ne pourra pas recevoir les events de l'API.");

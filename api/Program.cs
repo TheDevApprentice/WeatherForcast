@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using shared.Hubs;
 
 namespace api
 {
@@ -81,6 +82,24 @@ namespace api
                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                         System.Text.Encoding.UTF8.GetBytes(jwtSecret))
                 };
+
+                // Configuration pour SignalR : permettre JWT dans la query string
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // SignalR envoie le token dans la query string pour les WebSockets
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && 
+                            path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             // 4. Services (Domain - Logique métier)
@@ -96,6 +115,7 @@ namespace api
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
+            builder.Services.AddScoped<shared.Services.IConnectionMappingService, infrastructure.Services.RedisConnectionMappingService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
@@ -122,7 +142,13 @@ namespace api
             // 5. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // 6. MediatR pour les Domain Events
+            // 6. SignalR pour les notifications temps réel
+            builder.Services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+            });
+
+            // 7. MediatR pour les Domain Events
             builder.Services.AddMediatR(cfg =>
             {
                 // Enregistrer les handlers depuis l'assembly api
@@ -131,7 +157,7 @@ namespace api
                 cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
             });
 
-            // 7. Redis pour communication inter-process
+            // 8. Redis pour communication inter-process
             var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
             builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp =>
             {
@@ -344,6 +370,8 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
 
             // 5. Map Controllers
             app.MapControllers();
+
+            app.MapHub<WeatherForecastHub>("/hubs/weatherforecast");
 
             app.Run();
         }

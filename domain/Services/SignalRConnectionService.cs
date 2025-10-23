@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Http;
+using shared.Services;
+using System.Security.Claims;
 
 namespace domain.Services
 {
@@ -14,15 +16,20 @@ namespace domain.Services
     public class SignalRConnectionService : ISignalRConnectionService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConnectionMappingService _connectionMapping;
 
-        public SignalRConnectionService(IHttpContextAccessor httpContextAccessor)
+        public SignalRConnectionService(
+            IHttpContextAccessor httpContextAccessor,
+            IConnectionMappingService connectionMapping)
         {
             _httpContextAccessor = httpContextAccessor;
+            _connectionMapping = connectionMapping;
         }
 
         /// <summary>
-        /// Récupère le ConnectionId SignalR stocké dans les items de la requête HTTP
-        /// Retourne null si aucun ConnectionId n'est trouvé (ex: appel depuis l'API)
+        /// Récupère le ConnectionId SignalR de l'utilisateur actuel
+        /// Méthode 1 (Web) : Cookie "SignalR-ConnectionId"
+        /// Méthode 2 (Mobile/API) : Mapping Redis userId → connectionId
         /// </summary>
         public string? GetCurrentConnectionId()
         {
@@ -30,11 +37,18 @@ namespace domain.Services
             if (httpContext == null)
                 return null;
 
-            // Le ConnectionId est stocké par le client JavaScript dans un cookie ou header
-            // Pour simplifier, on va le stocker dans un cookie nommé "SignalR-ConnectionId"
+            // Méthode 1 : Cookie (Web uniquement)
             if (httpContext.Request.Cookies.TryGetValue("SignalR-ConnectionId", out var connectionId))
             {
                 return connectionId;
+            }
+
+            // Méthode 2 : Redis mapping (Mobile/API)
+            var userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Récupérer le ConnectionId depuis Redis (synchrone pour simplicité)
+                return _connectionMapping.GetConnectionIdAsync(userId).GetAwaiter().GetResult();
             }
 
             return null;

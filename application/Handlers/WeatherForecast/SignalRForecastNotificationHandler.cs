@@ -1,7 +1,7 @@
+using domain.Events.WeatherForecast;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using application.Hubs;
-using domain.Events.WeatherForecast;
+using shared.Hubs;
 
 namespace application.Handlers.WeatherForecast
 {

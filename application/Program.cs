@@ -1,6 +1,5 @@
 using application.Authorization;
 using application.BackgroundServices;
-using application.Hubs;
 using application.Middleware;
 using domain.Constants;
 using domain.Entities;
@@ -13,6 +12,7 @@ using infra.Repositories;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using shared.Hubs;
 
 namespace application
 {
@@ -129,6 +129,7 @@ namespace application
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
+            builder.Services.AddScoped<shared.Services.IConnectionMappingService, infrastructure.Services.RedisConnectionMappingService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
