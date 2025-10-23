@@ -12,7 +12,7 @@ using infra.Data;
 namespace infra.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251023164001_InitialCreate")]
+    [Migration("20251023215211_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
