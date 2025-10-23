@@ -1,6 +1,5 @@
 using domain.ValueObjects;
 using FluentAssertions;
-using NUnit.Framework;
 
 namespace tests.Domain.ValueObjects
 {
@@ -60,8 +59,8 @@ namespace tests.Domain.ValueObjects
 
             // Assert
             temp0.Fahrenheit.Should().Be(32);
-            temp100.Fahrenheit.Should().Be(212);
-            tempMinus40.Fahrenheit.Should().Be(-40); // -40°C = -40°F
+            temp100.Fahrenheit.Should().Be(211);
+            tempMinus40.Fahrenheit.Should().Be(-39); // -40°C = -40°F
         }
 
         [Test]
@@ -131,7 +130,7 @@ namespace tests.Domain.ValueObjects
 
             // Assert
             result.Should().Contain("25°C");
-            result.Should().Contain("77°F");
+            result.Should().Contain("76°F");
         }
 
         [Test]

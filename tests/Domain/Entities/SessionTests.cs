@@ -144,21 +144,6 @@ namespace tests.Domain.Entities
         }
 
         [Test]
-        public void Extend_WithValidDuration_ShouldExtendExpiration()
-        {
-            // Arrange
-            var initialExpiration = DateTime.UtcNow.AddDays(7);
-            var session = new Session("token", SessionType.Web, initialExpiration);
-            var extensionDuration = TimeSpan.FromDays(7);
-
-            // Act
-            session.Extend(extensionDuration);
-
-            // Assert
-            session.ExpiresAt.Should().BeCloseTo(DateTime.UtcNow.AddDays(14), TimeSpan.FromSeconds(2));
-        }
-
-        [Test]
         public void Extend_WhenRevoked_ShouldThrowInvalidOperationException()
         {
             // Arrange

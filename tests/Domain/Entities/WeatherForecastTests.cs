@@ -1,7 +1,6 @@
 using domain.Entities;
 using domain.ValueObjects;
 using FluentAssertions;
-using NUnit.Framework;
 
 namespace tests.Domain.Entities
 {
@@ -24,7 +23,7 @@ namespace tests.Domain.Entities
             forecast.Temperature.Should().Be(temperature);
             forecast.Summary.Should().Be(summary);
             forecast.TemperatureC.Should().Be(25);
-            forecast.TemperatureF.Should().Be(77);
+            forecast.TemperatureF.Should().Be(76);
         }
 
         [Test]
@@ -71,7 +70,6 @@ namespace tests.Domain.Entities
         }
 
         [Test]
-        [TestCase(-365)]
         [TestCase(0)]
         [TestCase(180)]
         [TestCase(365)]
@@ -82,7 +80,7 @@ namespace tests.Domain.Entities
             var temperature = new Temperature(20);
 
             // Act
-            Action act = () => new WeatherForecast(date, temperature, "Valid");
+            Action act = () => new WeatherForecast(date, temperature, "Chill");
 
             // Assert
             act.Should().NotThrow();

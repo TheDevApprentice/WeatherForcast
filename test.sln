@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "domain", "domain\domain.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "infra", "infra\infra.csproj", "{CFBE4CD2-1CCD-4F37-A156-4968F9F38872}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\Domain.Tests\tests.csproj", "{D19EC1F5-C078-7E5B-36AE-DFCE41FA074A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9CF47860-2CEA-F379-09D8-9AEF27965D12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{CFBE4CD2-1CCD-4F37-A156-4968F9F38872}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFBE4CD2-1CCD-4F37-A156-4968F9F38872}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFBE4CD2-1CCD-4F37-A156-4968F9F38872}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D19EC1F5-C078-7E5B-36AE-DFCE41FA074A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D19EC1F5-C078-7E5B-36AE-DFCE41FA074A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D19EC1F5-C078-7E5B-36AE-DFCE41FA074A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D19EC1F5-C078-7E5B-36AE-DFCE41FA074A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CF47860-2CEA-F379-09D8-9AEF27965D12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
