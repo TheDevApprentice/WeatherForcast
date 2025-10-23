@@ -1,9 +1,9 @@
 using application.ViewModels;
 using domain.Constants;
 using domain.Entities;
+using domain.Events;
 using domain.Events.Admin;
 using domain.Interfaces.Services;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

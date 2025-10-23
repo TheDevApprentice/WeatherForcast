@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace domain.Events.WeatherForecast
 {
     /// <summary>
@@ -13,7 +11,7 @@ namespace domain.Events.WeatherForecast
         public DateTime Timestamp { get; }
 
         public ForecastDeletedEvent(
-            int id, 
+            int id,
             string? triggeredBy = null,
             string? excludedConnectionId = null)
         {

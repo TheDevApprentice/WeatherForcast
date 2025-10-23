@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using shared.Hubs;
+using shared.Messaging;
 
 namespace application
 {
@@ -116,14 +117,8 @@ namespace application
                 Console.WriteLine($"[Development] Data Protection keys stored in: {keysDirectory}");
             }
 
-            // 3. MediatR pour les Domain Events (doit être enregistré AVANT les services)
-            builder.Services.AddMediatR(cfg =>
-            {
-                // Enregistrer les handlers depuis l'assembly application
-                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-                // Enregistrer les events depuis l'assembly domain
-                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
-            });
+            // 3. Event Bus (remplace MediatR)
+            builder.Services.AddEventBus(typeof(Program).Assembly, typeof(WeatherForecastService).Assembly);
 
             // 4. Services (Domain - Logique métier)
             // Services séparés (SRP - Single Responsibility Principle)

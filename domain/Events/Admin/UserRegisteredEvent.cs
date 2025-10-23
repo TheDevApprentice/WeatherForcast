@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace domain.Events.Admin
 {
     /// <summary>
@@ -14,8 +12,8 @@ namespace domain.Events.Admin
         public string? IpAddress { get; }
 
         public UserRegisteredEvent(
-            string userId, 
-            string email, 
+            string userId,
+            string email,
             string? userName = null,
             string? ipAddress = null)
         {

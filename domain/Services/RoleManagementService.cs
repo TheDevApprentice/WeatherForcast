@@ -1,8 +1,8 @@
 using domain.Constants;
 using domain.Entities;
+using domain.Events;
 using domain.Events.Admin;
 using domain.Interfaces.Services;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -40,7 +40,7 @@ namespace domain.Services
                 return false;
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
-            
+
             if (result.Succeeded)
             {
                 // Publier l'événement UserRoleChanged
@@ -53,7 +53,7 @@ namespace domain.Services
                     changedBy: changedBy
                 ));
             }
-            
+
             return result.Succeeded;
         }
 
@@ -63,7 +63,7 @@ namespace domain.Services
             if (user == null) return false;
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-            
+
             if (result.Succeeded)
             {
                 // Publier l'événement UserRoleChanged
@@ -76,7 +76,7 @@ namespace domain.Services
                     changedBy: changedBy
                 ));
             }
-            
+
             return result.Succeeded;
         }
 
@@ -103,7 +103,7 @@ namespace domain.Services
 
             var claim = new Claim(claimType, claimValue);
             var result = await _userManager.AddClaimAsync(user, claim);
-            
+
             if (result.Succeeded)
             {
                 // Publier l'événement UserClaimChanged
@@ -117,7 +117,7 @@ namespace domain.Services
                     changedBy: changedBy
                 ));
             }
-            
+
             return result.Succeeded;
         }
 
@@ -128,7 +128,7 @@ namespace domain.Services
 
             var claim = new Claim(claimType, claimValue);
             var result = await _userManager.RemoveClaimAsync(user, claim);
-            
+
             if (result.Succeeded)
             {
                 // Publier l'événement UserClaimChanged
@@ -142,7 +142,7 @@ namespace domain.Services
                     changedBy: changedBy
                 ));
             }
-            
+
             return result.Succeeded;
         }
 

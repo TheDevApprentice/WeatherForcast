@@ -1,9 +1,9 @@
 using domain.Entities;
+using domain.Events;
+using domain.Events.WeatherForecast;
 using domain.Interfaces;
 using domain.Interfaces.Services;
-using domain.Events.WeatherForecast;
 using domain.ValueObjects;
-using MediatR;
 
 namespace domain.Services
 {
@@ -42,20 +42,20 @@ namespace domain.Services
         {
             await _unitOfWork.WeatherForecasts.AddAsync(forecast);
             await _unitOfWork.SaveChangesAsync();
-            
+
             // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
             var excludedConnectionId = _connectionService.GetCurrentConnectionId();
-            
+
             // Publier l'event pour notifier tous les handlers (SignalR, Audit, etc.)
             await _publisher.Publish(new ForecastCreatedEvent(forecast, excludedConnectionId: excludedConnectionId));
-            
+
             return forecast;
         }
 
         public async Task<bool> UpdateAsync(int id, DateTime date, Temperature temperature, string? summary)
         {
             var existingForecast = await _unitOfWork.WeatherForecasts.GetByIdAsync(id);
-            
+
             if (existingForecast == null)
             {
                 return false;
@@ -67,20 +67,20 @@ namespace domain.Services
             existingForecast.UpdateSummary(summary);
 
             await _unitOfWork.SaveChangesAsync();
-            
+
             // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
             var excludedConnectionId = _connectionService.GetCurrentConnectionId();
-            
+
             // Publier l'event pour notifier tous les handlers (utiliser l'entité trackée)
             await _publisher.Publish(new ForecastUpdatedEvent(existingForecast, excludedConnectionId: excludedConnectionId));
-            
+
             return true;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var forecast = await _unitOfWork.WeatherForecasts.GetByIdAsync(id);
-            
+
             if (forecast == null)
             {
                 return false;
@@ -88,13 +88,13 @@ namespace domain.Services
 
             _unitOfWork.WeatherForecasts.Delete(forecast);
             await _unitOfWork.SaveChangesAsync();
-            
+
             // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
             var excludedConnectionId = _connectionService.GetCurrentConnectionId();
-            
+
             // Publier l'event pour notifier tous les handlers
             await _publisher.Publish(new ForecastDeletedEvent(id, excludedConnectionId: excludedConnectionId));
-            
+
             return true;
         }
     }

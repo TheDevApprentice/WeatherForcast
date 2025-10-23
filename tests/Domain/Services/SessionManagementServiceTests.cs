@@ -1,9 +1,9 @@
 using domain.Entities;
+using domain.Events;
 using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using domain.Services;
 using FluentAssertions;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 
@@ -24,7 +24,7 @@ namespace tests.Domain.Services
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockSessionRepository = new Mock<ISessionRepository>();
             _mockPublisher = new Mock<IPublisher>();
-            
+
             var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(
                 userStoreMock.Object, null, null, null, null, null, null, null, null);

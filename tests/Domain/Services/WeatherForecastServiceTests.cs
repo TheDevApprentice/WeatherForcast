@@ -1,13 +1,12 @@
 using domain.Entities;
+using domain.Events;
 using domain.Events.WeatherForecast;
 using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using domain.Services;
 using domain.ValueObjects;
 using FluentAssertions;
-using MediatR;
 using Moq;
-using NUnit.Framework;
 
 namespace tests.Domain.Services
 {
@@ -30,12 +29,12 @@ namespace tests.Domain.Services
 
             // Setup UnitOfWork to return the mock repository
             _mockUnitOfWork.Setup(u => u.WeatherForecasts).Returns(_mockRepository.Object);
-            
+
             // Setup ConnectionService to return null by default (no ConnectionId in tests)
             _mockConnectionService.Setup(c => c.GetCurrentConnectionId()).Returns((string?)null);
 
             _service = new WeatherForecastService(
-                _mockUnitOfWork.Object, 
+                _mockUnitOfWork.Object,
                 _mockPublisher.Object,
                 _mockConnectionService.Object);
         }

@@ -1,4 +1,4 @@
-using MediatR;
+using domain.Events;
 using domain.Events.WeatherForecast;
 
 namespace api.Handlers.WeatherForecast

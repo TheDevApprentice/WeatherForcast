@@ -1,7 +1,7 @@
-using MediatR;
+using domain.Events;
+using domain.Events.WeatherForecast;
 using StackExchange.Redis;
 using System.Text.Json;
-using domain.Events.WeatherForecast;
 
 namespace api.Handlers.WeatherForecast
 {
@@ -116,7 +116,7 @@ namespace api.Handlers.WeatherForecast
                 }
 
                 var subscriber = _redis.GetSubscriber();
-                
+
                 // Pour la suppression, on envoie juste l'ID
                 var message = JsonSerializer.Serialize(new { Id = notification.Id });
 

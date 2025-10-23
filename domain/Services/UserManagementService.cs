@@ -1,9 +1,9 @@
 using domain.DTOs;
 using domain.Entities;
+using domain.Events;
 using domain.Events.Admin;
 using domain.Interfaces;
 using domain.Interfaces.Services;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 

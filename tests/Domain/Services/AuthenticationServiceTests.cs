@@ -1,8 +1,8 @@
 using domain.Entities;
+using domain.Events;
 using domain.Interfaces.Services;
 using domain.Services;
 using FluentAssertions;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;

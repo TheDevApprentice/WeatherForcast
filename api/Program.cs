@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using shared.Messaging;
 using shared.Hubs;
 
 namespace api
@@ -102,14 +103,8 @@ namespace api
                 };
             });
 
-            // 4. MediatR pour les Domain Events (doit être enregistré AVANT les services)
-            builder.Services.AddMediatR(cfg =>
-            {
-                // Enregistrer les handlers depuis l'assembly api
-                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-                // Enregistrer les events depuis l'assembly domain
-                cfg.RegisterServicesFromAssembly(typeof(WeatherForecastService).Assembly);
-            });
+            // 4. Event Bus (remplace MediatR) - enregistre automatiquement les handlers
+            builder.Services.AddEventBus(typeof(Program).Assembly, typeof(WeatherForecastService).Assembly);
 
             // 5. Services (Domain - Logique métier)
             // Nouveaux services séparés (SRP)

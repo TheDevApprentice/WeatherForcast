@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace domain.Events.Admin
 {
     /// <summary>

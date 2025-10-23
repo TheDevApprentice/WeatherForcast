@@ -1,10 +1,10 @@
 using domain.DTOs;
 using domain.Entities;
+using domain.Events;
 using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using domain.Services;
 using FluentAssertions;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;

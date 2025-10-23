@@ -1,5 +1,5 @@
+using domain.Events;
 using domain.Events.WeatherForecast;
-using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
 

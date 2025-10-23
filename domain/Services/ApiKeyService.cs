@@ -1,13 +1,13 @@
 using domain.Entities;
+using domain.Events;
 using domain.Events.Admin;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
+using Konscious.Security.Cryptography;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
 using System.Text;
-using Konscious.Security.Cryptography;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace domain.Services
 {

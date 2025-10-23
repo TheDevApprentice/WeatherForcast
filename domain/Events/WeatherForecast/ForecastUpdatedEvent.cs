@@ -1,6 +1,3 @@
-using MediatR;
-using domain.Entities;
-
 namespace domain.Events.WeatherForecast
 {
     /// <summary>
@@ -14,7 +11,7 @@ namespace domain.Events.WeatherForecast
         public DateTime Timestamp { get; }
 
         public ForecastUpdatedEvent(
-            Entities.WeatherForecast forecast, 
+            Entities.WeatherForecast forecast,
             string? triggeredBy = null,
             string? excludedConnectionId = null)
         {
