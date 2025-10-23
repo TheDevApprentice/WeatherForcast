@@ -35,7 +35,7 @@ Cette application utilise le **Domain Events Pattern** avec **MediatR** pour imp
 ┌───────────────┐ ┌─────────────┐ ┌──────────────┐
 │ SignalR       │ │ Audit Log   │ │ Future...    │
 │ Handler       │ │ Handler     │ │ (Email, SMS) │
-│ (Web App)     │ │ (Web + API) │ │              │
+│ (Web + API)   │ │ (Web + API) │ │              │
 └───────────────┘ └─────────────┘ └──────────────┘
 ```
 
