@@ -89,30 +89,5 @@ namespace infra.Data
 
             _logger.LogInformation("Test user seeding completed: {Created} created, {Skipped} skipped", created, skipped);
         }
-
-        /// <summary>
-        /// Supprimer tous les utilisateurs de test
-        /// </summary>
-        public async Task DeleteTestUsersAsync()
-        {
-            _logger.LogInformation("Deleting test users...");
-
-            var testUsers = _userManager.Users
-                .Where(u => u.Email!.StartsWith("user") && u.Email.EndsWith("@test.com"))
-                .ToList();
-
-            int deleted = 0;
-
-            foreach (var user in testUsers)
-            {
-                var result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
-                {
-                    deleted++;
-                }
-            }
-
-            _logger.LogInformation("Deleted {Count} test users", deleted);
-        }
     }
 }
