@@ -224,7 +224,10 @@ namespace application
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 // S'assurer que la base de données est créée avec les données seed
-                context.Database.EnsureCreated();
+                if (app.Environment.IsProduction())
+                    context.Database.Migrate();
+                else
+                    context.Database.EnsureCreated();
             }
 
             // ============================================

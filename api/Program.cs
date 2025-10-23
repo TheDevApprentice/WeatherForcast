@@ -288,7 +288,10 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 // S'assurer que la base de données est créée avec les données seed
-                context.Database.EnsureCreated();
+                if (app.Environment.IsProduction())
+                    context.Database.Migrate();
+                else
+                    context.Database.EnsureCreated();
             }
 
             // ============================================
