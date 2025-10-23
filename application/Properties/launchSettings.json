@@ -33,7 +33,7 @@
         "ASPNETCORE_HTTPS_PORTS": "8081",
         "ASPNETCORE_HTTP_PORTS": "8080",
         "ConnectionStrings__DefaultConnection": "Host=host.docker.internal;Database=weatherforecastdb;Username=weatheruser;Password=weatherpass",
-        "ConnectionStrings__Redis": "host.docker.internal:6379,password=redisSecurePass123!"
+        "ConnectionStrings__Redis": "host.docker.internal:6370,password=redisSecurePass123!"
       },
       "publishAllPorts": false,
       "httpPort": 5203,

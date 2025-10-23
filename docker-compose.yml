@@ -23,7 +23,7 @@ services:
     image: redis:7-alpine
     container_name: weatherforecast-redis
     ports:
-      - "6379:6379"
+      - "6370:6379"
     environment:
       # Set a strong password here (dev example)
       REDIS_PASSWORD: ${REDIS_PASSWORD}
