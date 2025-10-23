@@ -331,16 +331,22 @@ namespace application
                     var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
                     var roleLogger = loggerFactory.CreateLogger<RoleSeeder>();
+                    var userLogger = loggerFactory.CreateLogger<UserSeeder>();
 
+                    // 1. Créer les rôles avec leurs claims
                     var roleSeeder = new RoleSeeder(roleManager, roleLogger);
 
                     // Créer les rôles avec leurs claims
                     await roleSeeder.SeedRolesAsync();
 
-                    // Créer l'utilisateur admin par défaut
+                    // 2. Créer l'utilisateur admin par défaut
                     await roleSeeder.SeedAdminUserAsync(userManager);
 
-                    Console.WriteLine("✅ Roles, admin user, and 100+ test users seeded successfully");
+                    // 3. Créer 200 utilisateurs de test pour tester les performances
+                    var userSeeder = new UserSeeder(userManager, userLogger);
+                    await userSeeder.SeedTestUsersAsync(200);
+
+                    Console.WriteLine("✅ Roles, admin user, and 200 test users seeded successfully");
                 }
                 catch (Exception ex)
                 {
