@@ -47,7 +47,7 @@ namespace tests.Domain.ValueObjects
 
             // Assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage($"*Température invalide*{celsius}*");
+                .WithMessage($"*température doit être entre*{celsius}*");
         }
 
         [Test]
