@@ -46,7 +46,7 @@ namespace domain.Services
             );
 
             await _unitOfWork.ApiKeys.CreateAsync(apiKey);
-            // SaveChangesAsync est déjà appelé dans CreateAsync du repository
+            await _unitOfWork.SaveChangesAsync();
 
             return (apiKey, plainSecret);
         }
@@ -98,18 +98,6 @@ namespace domain.Services
             await _unitOfWork.SaveChangesAsync();
 
             return true;
-        }
-
-        public async Task UpdateLastUsedAsync(string key)
-        {
-            // Cette méthode est maintenant gérée par RecordUsage() dans ValidateApiKeyAsync
-            // On peut la garder pour compatibilité ou la supprimer
-            var apiKey = await _unitOfWork.ApiKeys.GetByKeyAsync(key);
-            if (apiKey != null)
-            {
-                apiKey.RecordUsage();
-                await _unitOfWork.SaveChangesAsync();
-            }
         }
 
         private string GenerateRandomString(int length)

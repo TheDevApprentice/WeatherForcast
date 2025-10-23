@@ -21,13 +21,8 @@ namespace domain.Interfaces.Services
         Task<IEnumerable<ApiKey>> GetUserApiKeysAsync(string userId);
         
         /// <summary>
-        /// Révoquer une clé API avec traçabilité
+        /// Révoquer une clé API
         /// </summary>
         Task<bool> RevokeApiKeyAsync(int apiKeyId, string userId, string reason);
-        
-        /// <summary>
-        /// Mettre à jour la date de dernière utilisation
-        /// </summary>
-        Task UpdateLastUsedAsync(string key);
     }
 }

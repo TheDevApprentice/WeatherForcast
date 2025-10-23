@@ -31,16 +31,16 @@ namespace infra.Repositories
 
         public async Task<ApiKey> CreateAsync(ApiKey apiKey)
         {
-            _context.ApiKeys.Add(apiKey);
-            await _context.SaveChangesAsync();
+            await _context.ApiKeys.AddAsync(apiKey);
+            // SaveChanges géré par le UnitOfWork
             return apiKey;
         }
 
-        public async Task<bool> UpdateAsync(ApiKey apiKey)
+        public Task<bool> UpdateAsync(ApiKey apiKey)
         {
             _context.ApiKeys.Update(apiKey);
-            var result = await _context.SaveChangesAsync();
-            return result > 0;
+            // SaveChanges géré par le UnitOfWork
+            return Task.FromResult(true);
         }
 
         public async Task<ApiKey?> GetByIdAsync(int id)
@@ -48,37 +48,6 @@ namespace infra.Repositories
             return await _context.ApiKeys
                 .Include(k => k.User)
                 .FirstOrDefaultAsync(k => k.Id == id);
-        }
-
-        public async Task<bool> RevokeAsync(int id, string userId)
-        {
-            var apiKey = await _context.ApiKeys
-                .FirstOrDefaultAsync(k => k.Id == id && k.UserId == userId);
-
-            if (apiKey == null)
-            {
-                return false;
-            }
-
-            // Note: Cette méthode est deprecated, utiliser apiKey.Revoke() dans le service
-            apiKey.Revoke("Révoquée via l'ancienne méthode");
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> IncrementRequestCountAsync(string key)
-        {
-            var apiKey = await _context.ApiKeys.FirstOrDefaultAsync(k => k.Key == key);
-            
-            if (apiKey == null)
-            {
-                return false;
-            }
-
-            // Note: Cette méthode est deprecated, utiliser apiKey.RecordUsage() dans le service
-            apiKey.RecordUsage();
-            await _context.SaveChangesAsync();
-            return true;
         }
     }
 }
