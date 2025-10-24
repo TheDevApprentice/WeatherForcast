@@ -2,7 +2,9 @@
 
 ## 📋 Architecture
 
-Cette implémentation utilise **Redis Pub/Sub** pour permettre la communication entre l'API et l'Application Web, afin que les clients Web reçoivent les notifications en temps réel même lorsque les modifications proviennent de l'API.
+Cette implémentation utilise **Redis Pub/Sub** avec un **EventPublisher custom** pour permettre la communication entre l'API et l'Application Web, afin que les clients Web reçoivent les notifications en temps réel même lorsque les modifications proviennent de l'API.
+
+> **Note :** Ce système utilise un EventPublisher custom au lieu de MediatR pour plus de simplicité et de performance.
 
 ### Flux Complet
 
@@ -21,14 +23,13 @@ Cette implémentation utilise **Redis Pub/Sub** pour permettre la communication 
                ▼                               ▼
     ┌─────────────────────────────────────────────────────┐
     │        WeatherForecastService (Domain)              │
-    │                                                      │
+    │                                                     │
     │  1. Persister en DB                                 │
     │  2. await _publisher.Publish(event)                 │
     └──────────────────────┬──────────────────────────────┘
                            │
                            ▼
                ┌───────────────────────┐
-               │       MediatR         │
                │   Event Dispatcher    │
                └───────────────────────┘
                            │
@@ -38,7 +39,7 @@ Cette implémentation utilise **Redis Pub/Sub** pour permettre la communication 
 │ SignalR       │  │ Audit Log    │  │ Redis Broker     │
 │ Handler (Web) │  │ Handler      │  │ Handler (API)    │
 │               │  │              │  │                  │
-│ Broadcast ✅  │  │ Log ✅       │  │ Publish → Redis  │
+│ Broadcast ✅ │   │ Log ✅      │  │ Publish → Redis  │
 └───────────────┘  └──────────────┘  └──────────┬───────┘
                                                  │
                                                  ▼

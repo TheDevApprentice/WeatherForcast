@@ -1,8 +1,8 @@
-# 🎯 Domain Events Pattern avec MediatR
+# 🎯 Domain Events Pattern avec EventPublisher Custom
 
 ## 📋 Architecture
 
-Cette application utilise le **Domain Events Pattern** avec **MediatR** pour implémenter les notifications en temps réel et l'extensibilité du système.
+Cette application utilise le **Domain Events Pattern** avec un **EventPublisher custom** (remplace MediatR) pour implémenter les notifications en temps réel et l'extensibilité du système.
 
 ### Structure
 
@@ -26,7 +26,6 @@ Cette application utilise le **Domain Events Pattern** avec **MediatR** pour imp
                         │
                         ▼
             ┌───────────────────────┐
-            │      MediatR          │
             │   Event Dispatcher    │
             └───────────────────────┘
                         │
