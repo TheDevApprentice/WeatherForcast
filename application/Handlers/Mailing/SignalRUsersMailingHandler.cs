@@ -1,10 +1,10 @@
 using domain.Entities;
 using domain.Events;
 using domain.Events.Mailing;
+using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
-using domain.Interfaces.Services;
 using System.Text.Json;
 
 namespace application.Handlers.Mailing
@@ -67,22 +67,23 @@ namespace application.Handlers.Mailing
             try
             {
                 var user = await _userManager.FindByEmailAsync(notification.ToEmail);
+                string notificationText = "Un email de vérification vous a été envoyé.";
                 if (user != null)
                 {
                     await _usersHub.Clients.User(user.Id).SendAsync(
                         "VerificationEmailSentToUser",
-                        new { Message = "Email de vérification envoyé" },
+                        new { Message = notificationText },
                         cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
                 await _usersHub.Clients.Group(notification.ToEmail).SendAsync(
                     "VerificationEmailSentToUser",
-                    new { Message = "Email de vérification envoyé" },
+                    new { Message = notificationText },
                     cancellationToken);
 
                 // Bufferiser dans Redis pour rattrapage
-                var payloadJson = JsonSerializer.Serialize(new { Message = "Email de vérification envoyé" });
+                var payloadJson = JsonSerializer.Serialize(new { Message = notificationText });
                 await _pending.AddAsync("mail", notification.ToEmail, "VerificationEmailSentToUser", payloadJson, TimeSpan.FromMinutes(2), cancellationToken);
             }
             catch (Exception ex)
