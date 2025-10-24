@@ -125,6 +125,9 @@ namespace api
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
+            // Email options (SMTP)
+            builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+
             // Redis Distributed Cache pour Rate Limiting (support multi-serveurs)
             builder.Services.AddStackExchangeRedisCache(options =>
             {
@@ -146,6 +149,7 @@ namespace api
 
             // 6. Unit of Work (Clean Architecture)
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
             // 7. SignalR pour les notifications temps réel
             builder.Services.AddSignalR(options =>

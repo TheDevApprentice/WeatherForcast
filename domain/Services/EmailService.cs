@@ -1,7 +1,11 @@
 using domain.Events;
 using domain.Events.Mailing;
 using domain.Interfaces.Services;
+using domain.Constants;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net;
+using System.Net.Mail;
 
 namespace domain.Services
 {
@@ -9,22 +13,54 @@ namespace domain.Services
     {
         private readonly ILogger<EmailService> _logger;
         private readonly IPublisher _publisher;
+        private readonly EmailOptions _options;
 
-        public EmailService(ILogger<EmailService> logger, IPublisher publisher)
+        public EmailService(ILogger<EmailService> logger, IPublisher publisher, IOptions<EmailOptions> options)
         {
             _logger = logger;
             _publisher = publisher;
+            _options = options.Value;
         }
 
         private async Task SendAsync(string toEmail, string subject, string body, CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("[Email] To={To} | Subject={Subject} | Body={Body}", toEmail, subject, body);
+                if (string.IsNullOrWhiteSpace(_options.Host) || string.IsNullOrWhiteSpace(_options.From))
+                {
+                    _logger.LogWarning("[Email] Configuration incomplète. Host/From requis. Log-only: To={To} | Subject={Subject}", toEmail, subject);
+                    return;
+                }
+
+                using var message = new MailMessage();
+                message.From = new MailAddress(_options.From);
+                message.To.Add(new MailAddress(toEmail));
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = true;
+
+                using var client = new SmtpClient(_options.Host, _options.Port)
+                {
+                    EnableSsl = _options.EnableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = string.IsNullOrWhiteSpace(_options.UserName)
+                        ? CredentialCache.DefaultNetworkCredentials
+                        : new NetworkCredential(_options.UserName, _options.Password)
+                };
+
+#if NET6_0_OR_GREATER
+                await client.SendMailAsync(message, cancellationToken);
+#else
+                await client.SendMailAsync(message);
+#endif
+
+                _logger.LogInformation("[Email] Envoyé à {To} | Subject={Subject}", toEmail, subject);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de l'envoi d'un email à {Email}", toEmail);
+                throw;
             }
         }
 
