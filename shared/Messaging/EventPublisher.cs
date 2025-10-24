@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using domain.Events;
@@ -32,18 +33,45 @@ namespace shared.Messaging
                 return;
             }
 
-            foreach (var handler in handlers)
+            var correlationId = Activity.Current?.Id ?? Guid.NewGuid().ToString("N");
+            using var logScope = _logger.BeginScope(new Dictionary<string, object>
             {
+                ["CorrelationId"] = correlationId,
+                ["Event"] = typeof(TNotification).Name
+            });
+
+            var totalSw = Stopwatch.StartNew();
+
+            var tasks = handlers.Select(async handler =>
+            {
+                var sw = Stopwatch.StartNew();
                 try
                 {
                     await handler.Handle(notification, cancellationToken);
+                    sw.Stop();
+                    _logger.LogInformation("Handled {EventType} with {Handler} in {DurationMs} ms",
+                        typeof(TNotification).FullName,
+                        handler.GetType().FullName,
+                        sw.ElapsedMilliseconds);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error while handling event {EventType} with {Handler}", typeof(TNotification).FullName, handler.GetType().FullName);
-                    // Ne pas throw pour ne pas bloquer les autres handlers (comportement similaire à MediatR dans vos handlers)
+                    sw.Stop();
+                    _logger.LogError(ex, "Error while handling event {EventType} with {Handler} after {DurationMs} ms",
+                        typeof(TNotification).FullName,
+                        handler.GetType().FullName,
+                        sw.ElapsedMilliseconds);
+                    // Ne pas throw pour ne pas bloquer les autres handlers
                 }
-            }
+            });
+
+            await Task.WhenAll(tasks);
+
+            totalSw.Stop();
+            _logger.LogInformation("Published {EventType} to {HandlersCount} handlers in {TotalMs} ms",
+                typeof(TNotification).FullName,
+                handlers.Count,
+                totalSw.ElapsedMilliseconds);
         }
     }
 }

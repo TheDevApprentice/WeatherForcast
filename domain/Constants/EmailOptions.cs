@@ -8,5 +8,7 @@ namespace domain.Constants
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string From { get; set; } = string.Empty;
+        public int MaxConcurrency { get; set; } = 3;
+        public int BatchSize { get; set; } = 200;
     }
 }

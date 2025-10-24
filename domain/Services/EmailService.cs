@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
+using System.Threading;
 
 namespace domain.Services
 {
@@ -14,12 +15,15 @@ namespace domain.Services
         private readonly ILogger<EmailService> _logger;
         private readonly IPublisher _publisher;
         private readonly EmailOptions _options;
+        private readonly SemaphoreSlim _smtpConcurrency;
 
         public EmailService(ILogger<EmailService> logger, IPublisher publisher, IOptions<EmailOptions> options)
         {
             _logger = logger;
             _publisher = publisher;
             _options = options.Value;
+            var maxConc = _options.MaxConcurrency <= 0 ? 1 : _options.MaxConcurrency;
+            _smtpConcurrency = new SemaphoreSlim(initialCount: maxConc, maxCount: maxConc);
         }
 
         private async Task SendAsync(string toEmail, string subject, string body, CancellationToken cancellationToken = default)
@@ -49,11 +53,19 @@ namespace domain.Services
                         : new NetworkCredential(_options.UserName, _options.Password)
                 };
 
+                await _smtpConcurrency.WaitAsync(cancellationToken);
+                try
+                {
 #if NET6_0_OR_GREATER
-                await client.SendMailAsync(message, cancellationToken);
+                    await client.SendMailAsync(message, cancellationToken);
 #else
-                await client.SendMailAsync(message);
+                    await client.SendMailAsync(message);
 #endif
+                }
+                finally
+                {
+                    _smtpConcurrency.Release();
+                }
 
                 _logger.LogInformation("[Email] Envoyé à {To} | Subject={Subject}", toEmail, subject);
             }
@@ -66,19 +78,30 @@ namespace domain.Services
 
         private async Task SendBulkAsync(IEnumerable<string> toEmails, string subject, string body, CancellationToken cancellationToken = default)
         {
-            foreach (var toEmail in toEmails)
+            var emailList = toEmails?.Where(e => !string.IsNullOrWhiteSpace(e))?.Distinct(StringComparer.OrdinalIgnoreCase).ToList() ?? new();
+            if (emailList.Count == 0) return;
+
+            var batchSize = _options.BatchSize <= 0 ? 200 : _options.BatchSize;
+            for (int i = 0; i < emailList.Count; i += batchSize)
             {
-                try
+                var batch = emailList.Skip(i).Take(batchSize).ToList();
+
+                var tasks = batch.Select(async toEmail =>
                 {
-                    await SendAsync(toEmail, subject, body, cancellationToken);
-                    _logger.LogInformation("[Email] To={To} | Subject={Subject} | Body={Body}", toEmail, subject, body);
-                    await _publisher.Publish(new EmailSentToUser(toEmail, subject, body), cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Erreur lors de l'envoi d'un email en masse à {Email}", toEmail);
-                    // Continue avec les autres destinataires
-                }
+                    try
+                    {
+                        await SendAsync(toEmail, subject, body, cancellationToken);
+                        _logger.LogInformation("[Email] To={To} | Subject={Subject}", toEmail, subject);
+                        await _publisher.Publish(new EmailSentToUser(toEmail, subject, body), cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erreur lors de l'envoi d'un email en masse à {Email}", toEmail);
+                        // Continue avec les autres destinataires
+                    }
+                });
+
+                await Task.WhenAll(tasks);
             }
         }
 

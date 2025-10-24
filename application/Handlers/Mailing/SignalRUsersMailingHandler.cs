@@ -38,22 +38,23 @@ namespace application.Handlers.Mailing
             try
             {
                 var user = await _userManager.FindByEmailAsync(notification.ToEmail);
+                var correlationId = System.Diagnostics.Activity.Current?.Id ?? Guid.NewGuid().ToString("N");
                 if (user != null)
                 {
                     await _usersHub.Clients.User(user.Id).SendAsync(
                         "EmailSentToUser",
-                        new { notification.Subject },
+                        new { notification.Subject, CorrelationId = correlationId },
                         cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
                 await _usersHub.Clients.Group(notification.ToEmail).SendAsync(
                     "EmailSentToUser",
-                    new { notification.Subject },
+                    new { notification.Subject, CorrelationId = correlationId },
                     cancellationToken);
 
                 // Bufferiser dans Redis pour rattrapage après redirect/reload
-                var payloadJson = JsonSerializer.Serialize(new { notification.Subject });
+                var payloadJson = JsonSerializer.Serialize(new { notification.Subject, CorrelationId = correlationId });
                 await _pending.AddAsync("mail", notification.ToEmail, "EmailSentToUser", payloadJson, TimeSpan.FromMinutes(2), cancellationToken);
             }
             catch (Exception ex)
@@ -67,23 +68,24 @@ namespace application.Handlers.Mailing
             try
             {
                 var user = await _userManager.FindByEmailAsync(notification.ToEmail);
+                var correlationId = System.Diagnostics.Activity.Current?.Id ?? Guid.NewGuid().ToString("N");
                 string notificationText = "Un email de vérification vous a été envoyé.";
                 if (user != null)
                 {
                     await _usersHub.Clients.User(user.Id).SendAsync(
                         "VerificationEmailSentToUser",
-                        new { Message = notificationText },
+                        new { Message = notificationText, CorrelationId = correlationId },
                         cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
                 await _usersHub.Clients.Group(notification.ToEmail).SendAsync(
                     "VerificationEmailSentToUser",
-                    new { Message = notificationText },
+                    new { Message = notificationText, CorrelationId = correlationId },
                     cancellationToken);
 
                 // Bufferiser dans Redis pour rattrapage
-                var payloadJson = JsonSerializer.Serialize(new { Message = notificationText });
+                var payloadJson = JsonSerializer.Serialize(new { Message = notificationText, CorrelationId = correlationId });
                 await _pending.AddAsync("mail", notification.ToEmail, "VerificationEmailSentToUser", payloadJson, TimeSpan.FromMinutes(2), cancellationToken);
             }
             catch (Exception ex)

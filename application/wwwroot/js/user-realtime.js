@@ -19,21 +19,58 @@ const usersConnection = new signalR.HubConnectionBuilder()
 
 // Email générique envoyé au user
 usersConnection.on("EmailSentToUser", (payload) => {
-    const subject = payload && payload.subject ? payload.subject : "Un email vient de vous être envoyé.";
+    const cId = payload?.CorrelationId || payload?.correlationId;
+    if (hasProcessedCorrelation(cId)) return;
+    const subject = payload && (payload.Subject || payload.subject) ? (payload.Subject || payload.subject) : "Un email vient de vous être envoyé.";
     showNotification("Email envoyé", subject, "info");
+    markProcessedCorrelation(cId);
     // Une notification reçue: on peut nettoyer le pending si présent
     clearPendingEmail();
 });
 
 // Email de vérification envoyé
 usersConnection.on("VerificationEmailSentToUser", (payload) => {
-    showNotification("Vérification", "Email de vérification envoyé. Vérifiez votre boîte.", "success");
+    const cId = payload?.CorrelationId || payload?.correlationId;
+    if (hasProcessedCorrelation(cId)) return;
+    const msg = payload?.Message || payload?.message || "Email de vérification envoyé. Vérifiez votre boîte.";
+    showNotification("Vérification", msg, "success");
+    markProcessedCorrelation(cId);
     clearPendingEmail();
 });
 
 // ============================================
 // OUTILS
 // ============================================
+function getSeenCorrelationIds() {
+    try {
+        const raw = sessionStorage.getItem("wf_seen_corrids");
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? new Set(arr) : new Set();
+    } catch (_) {
+        return new Set();
+    }
+}
+
+function saveSeenCorrelationIds(set) {
+    try {
+        // Conserver au plus 100 derniers IDs
+        const arr = Array.from(set).slice(-100);
+        sessionStorage.setItem("wf_seen_corrids", JSON.stringify(arr));
+    } catch (_) {}
+}
+
+function hasProcessedCorrelation(cId) {
+    if (!cId) return false;
+    const set = getSeenCorrelationIds();
+    return set.has(cId);
+}
+
+function markProcessedCorrelation(cId) {
+    if (!cId) return;
+    const set = getSeenCorrelationIds();
+    set.add(cId);
+    saveSeenCorrelationIds(set);
+}
 function getPendingEmail() {
     try {
         return sessionStorage.getItem("wf_pending_email");
@@ -150,11 +187,18 @@ async function fetchAndDisplayPending(email) {
             const payloadJson = it?.payload;
             let payload;
             try { payload = payloadJson ? JSON.parse(payloadJson) : {}; } catch { payload = {}; }
+            const cId = payload?.CorrelationId || payload?.correlationId;
             if (type === "VerificationEmailSentToUser") {
-                showNotification("Vérification", payload?.Message, "success");
+                if (!hasProcessedCorrelation(cId)) {
+                    showNotification("Vérification", payload?.Message || payload?.message, "success");
+                    markProcessedCorrelation(cId);
+                }
             } else if (type === "EmailSentToUser") {
-                const subject = payload?.Subject || payload?.subject;
-                showNotification("Email envoyé", subject, "info");
+                if (!hasProcessedCorrelation(cId)) {
+                    const subject = payload?.Subject || payload?.subject;
+                    showNotification("Email envoyé", subject, "info");
+                    markProcessedCorrelation(cId);
+                }
             }
         }
         if (items.length) {
