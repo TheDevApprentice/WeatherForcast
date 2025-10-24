@@ -202,9 +202,19 @@ namespace application.BackgroundServices
         {
             try
             {
-                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                var root = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                // Normaliser les clés pour le frontend (camelCase)
+                var data = new
+                {
+                    userId = root.TryGetProperty("UserId", out var v1) ? v1.GetString() : null,
+                    email = root.TryGetProperty("Email", out var v2) ? v2.GetString() : null,
+                    userName = root.TryGetProperty("UserName", out var v3) ? v3.GetString() : null,
+                    registeredAt = root.TryGetProperty("RegisteredAt", out var v4) ? v4.GetDateTime() : (DateTime?)null,
+                    ipAddress = root.TryGetProperty("IpAddress", out var v5) ? v5.GetString() : null
+                };
+
                 _logger.LogInformation("📥 [Redis Sub] Admin UserRegistered → Broadcasting via SignalR");
-                await _adminHubContext.Clients.All.SendAsync("UserRegistered", payload);
+                await _adminHubContext.Clients.All.SendAsync("UserRegistered", data);
             }
             catch (Exception ex)
             {
