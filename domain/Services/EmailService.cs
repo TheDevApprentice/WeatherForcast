@@ -1,7 +1,7 @@
+using domain.Constants;
 using domain.Events;
 using domain.Events.Mailing;
 using domain.Interfaces.Services;
-using domain.Constants;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
@@ -70,7 +70,7 @@ namespace domain.Services
             {
                 try
                 {
-                    // await SendAsync(toEmail, subject, body, cancellationToken);
+                    await SendAsync(toEmail, subject, body, cancellationToken);
                     _logger.LogInformation("[Email] To={To} | Subject={Subject} | Body={Body}", toEmail, subject, body);
                     await _publisher.Publish(new EmailSentToUser(toEmail, subject, body), cancellationToken);
                 }
