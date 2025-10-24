@@ -47,18 +47,7 @@
     }
 }
 
-/* Statut de connexion */
-#admin-connection-status .badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
-#admin-connection-status .spinner-border-sm {
-    width: 0.8rem;
-    height: 0.8rem;
-    border-width: 0.15em;
-}
 
 /* Session nouvellement créée (highlight) */
 .session-item-new {
@@ -128,7 +117,7 @@
         width: 100%;
     }
 
-    #admin-connection-status {
+    #connection-status {
         bottom: 0;
         right: 0;
         left: 0;
@@ -143,7 +132,7 @@
         box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
     }
 
-    #admin-connection-status .badge {
+    #connection-status .badge {
         box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
     }
 }

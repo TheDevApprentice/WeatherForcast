@@ -2,8 +2,9 @@
 // SIGNALR - NOTIFICATIONS EN TEMPS RÉEL
 // ============================================
 
-// Importer showNotification (nécessite <script type="module">)
+// Importe showNotification (nécessite <script type="module">)
 import { showNotification } from "./notifications/notification.js";
+import { updateConnectionStatus } from "./utils/connection-status.js";
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/weatherforecast")
@@ -20,7 +21,7 @@ connection.on("ForecastCreated", (forecast) => {
     console.log("📢 Nouvelle prévision créée:", forecast);
     
     // Afficher une notification
-    showNotification(`Nouvelle prévision ajoutée par un autre utilisateur`, "success");
+    showNotification(`Nouvelle prévision`, `${forecast.date} - ${forecast.summary} - ${forecast.temperatureC}°C`, "success");
     
     // Ajouter la nouvelle ligne au tableau
     addForecastRow(forecast);
@@ -30,7 +31,8 @@ connection.on("ForecastCreated", (forecast) => {
 connection.on("ForecastUpdated", (forecast) => {
     console.log("📢 Prévision mise à jour:", forecast);
     
-    showNotification(`Prévision #${forecast.id} mise à jour`, "info");
+    const details = `${forecast.date} - ${forecast.summary} - ${forecast.temperatureC}°C (id ${forecast.id})`;
+    showNotification("Prévision mise à jour", details, "info");
     
     // Mettre à jour la ligne existante
     updateForecastRow(forecast);
@@ -40,7 +42,7 @@ connection.on("ForecastUpdated", (forecast) => {
 connection.on("ForecastDeleted", (id) => {
     console.log("📢 Prévision supprimée:", id);
     
-    showNotification(`Prévision #${id} supprimée`, "warning");
+    showNotification("Prévision supprimée", `Prévision #${id}`, "warning");
     
     // Supprimer la ligne du tableau
     removeForecastRow(id);
@@ -256,60 +258,7 @@ function removeForecastRow(id) {
     }
 }
 
-function showNotification(message, type = "info") {
-    // Créer une notification Bootstrap Toast
-    const toastContainer = document.getElementById("toast-container");
-    if (!toastContainer) {
-        // Créer le container s'il n'existe pas
-        const container = document.createElement("div");
-        container.id = "toast-container";
-        container.className = "toast-container position-fixed bottom-0 end-0 p-3";
-        container.style.zIndex = "11";
-        document.body.appendChild(container);
-    }
-    
-    const toast = document.createElement("div");
-    toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "assertive");
-    toast.setAttribute("aria-atomic", "true");
-    
-    const icon = type === "success" ? "✅" : type === "warning" ? "⚠️" : "ℹ️";
-    
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                ${icon} ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    
-    document.getElementById("toast-container").appendChild(toast);
-    
-    const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-    bsToast.show();
-    
-    // Supprimer après fermeture
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
-}
 
-function updateConnectionStatus(status) {
-    const indicator = document.getElementById("signalr-status");
-    if (!indicator) return;
-    
-    const statusConfig = {
-        connected: { text: "🟢 Temps réel activé", class: "badge bg-success" },
-        reconnecting: { text: "🟡 Reconnexion...", class: "badge bg-warning" },
-        disconnected: { text: "🔴 Déconnecté", class: "badge bg-danger" }
-    };
-    
-    const config = statusConfig[status] || statusConfig.disconnected;
-    indicator.textContent = config.text;
-    indicator.className = config.class;
-}
 
 // ============================================
 // DÉMARRAGE

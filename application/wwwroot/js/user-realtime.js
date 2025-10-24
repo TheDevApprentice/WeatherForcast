@@ -1,14 +1,15 @@
+import { showNotification } from "./notifications/notification.js";
+import { updateConnectionStatus } from "./utils/connection-status.js";
+
 // ============================================
 // USERS HUB - NOTIFICATIONS UTILISATEUR EN TEMPS RÉEL
 // ============================================
 // Ce fichier gère la connexion SignalR pour les notifications côté utilisateur
 
-import { showNotification } from "./notifications/notification.js";
-
 // Créer la connexion au UsersHub
 const usersConnection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/users")
-    .withAutomaticReconnect()
+    .withAutomaticReconnect([0, 1000, 3000, 5000, 10000])
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
@@ -100,9 +101,11 @@ async function startUsersConnection() {
     try {
         await usersConnection.start();
         console.log("✅ Connecté au UsersHub SignalR");
+        updateConnectionStatus("connected");
         await joinEmailGroupIfPossible();
     } catch (err) {
         console.error("❌ Erreur de connexion UsersHub:", err);
+        updateConnectionStatus("disconnected");
         setTimeout(startUsersConnection, 3000);
     }
 }
@@ -113,6 +116,15 @@ usersConnection.onreconnected(async () => {
     if (email) {
         await fetchAndDisplayPending(email);
     }
+    updateGlobalConnectionStatus("connected");
+});
+
+usersConnection.onreconnecting(() => {
+    updateConnectionStatus("reconnecting");
+});
+
+usersConnection.onclose(() => {
+    updateConnectionStatus("disconnected");
 });
 
 window.addEventListener("beforeunload", async () => {

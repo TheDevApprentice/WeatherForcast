@@ -4,8 +4,9 @@
 // Ce fichier gère la connexion SignalR pour les notifications admin
 // Seuls les utilisateurs avec le rôle Admin peuvent se connecter
 
-// Importer showNotification (nécessite <script type="module">)
+// Importe showNotification (nécessite <script type="module">)
 import { showNotification } from "./notifications/notification.js";
+import { updateConnectionStatus } from "./utils/connection-status.js";
 
 // Créer la connexion au AdminHub
 const adminConnection = new signalR.HubConnectionBuilder()
@@ -21,7 +22,7 @@ const adminConnection = new signalR.HubConnectionBuilder()
 // Événement : Nouvel utilisateur enregistré
 adminConnection.on("UserRegistered", (data) => {
     console.log("🆕 Nouvel utilisateur enregistré:", data);
-    // showNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
+    showNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
     
     // Mettre à jour la liste des users si on est sur la page users
     const isOnUsersPage = window.location.pathname === "/Admin" || 
@@ -36,7 +37,7 @@ adminConnection.on("UserRegistered", (data) => {
 // Événement : Utilisateur connecté
 adminConnection.on("UserLoggedIn", (data) => {
     console.log("🔐 Utilisateur connecté:", data);
-    // showNotification("Connexion", `${data.email} s'est connecté`, "info");
+    showNotification("Connexion", `${data.email} s'est connecté`, "info");
     
     // Mettre à jour la dernière connexion dans la liste des users
     updateUserLastLogin(data.userId, data.loggedInAt);
@@ -53,7 +54,7 @@ adminConnection.on("UserLoggedIn", (data) => {
 // Événement : Utilisateur déconnecté
 adminConnection.on("UserLoggedOut", (data) => {
     console.log("🚪 Utilisateur déconnecté:", data);
-    // showNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
+    showNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
@@ -72,14 +73,14 @@ adminConnection.on("SessionCreated", (data) => {
         // Laisser un délai pour que la DB soit à jour + un retry
         setTimeout(() => refreshUserSessions(data.userId), 600);
         setTimeout(() => refreshUserSessions(data.userId), 2000);
-        // showNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
+        showNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
     }
 });
 
 // Événement : API Key créée
 adminConnection.on("ApiKeyCreated", (data) => {
     console.log("🔑 API Key créée:", data);
-    // showNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
+    showNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -91,7 +92,7 @@ adminConnection.on("ApiKeyCreated", (data) => {
 // Événement : API Key révoquée
 adminConnection.on("ApiKeyRevoked", (data) => {
     console.log("🚫 API Key révoquée:", data);
-    // showNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
+    showNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -104,7 +105,7 @@ adminConnection.on("ApiKeyRevoked", (data) => {
 adminConnection.on("UserRoleChanged", (data) => {
     console.log("👤 Rôle utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    // showNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
+    showNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les rôles
     const currentUserId = getCurrentUserIdFromPage();
@@ -117,7 +118,7 @@ adminConnection.on("UserRoleChanged", (data) => {
 adminConnection.on("UserClaimChanged", (data) => {
     console.log("🎫 Claim utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    // showNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
+    showNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les claims
     const currentUserId = getCurrentUserIdFromPage();
@@ -133,19 +134,19 @@ adminConnection.on("UserClaimChanged", (data) => {
 // Événement : Reconnexion en cours
 adminConnection.onreconnecting((error) => {
     console.warn("⚠️ Reconnexion au AdminHub en cours...", error);
-    updateAdminConnectionStatus("reconnecting");
+    updateConnectionStatus("reconnecting");
 });
 
 // Événement : Reconnecté
 adminConnection.onreconnected((connectionId) => {
     console.log("✅ Reconnecté au AdminHub:", connectionId);
-    updateAdminConnectionStatus("connected");
+    updateConnectionStatus("connected");
 });
 
 // Événement : Connexion fermée
 adminConnection.onclose((error) => {
     console.error("❌ Connexion AdminHub fermée:", error);
-    updateAdminConnectionStatus("disconnected");
+    updateConnectionStatus("disconnected");
 });
 
 // Démarrer la connexion
@@ -153,10 +154,10 @@ async function startAdminConnection() {
     try {
         await adminConnection.start();
         console.log("✅ Connecté au AdminHub SignalR");
-        updateAdminConnectionStatus("connected");
+        updateConnectionStatus("connected");
     } catch (err) {
         console.error("❌ Erreur de connexion AdminHub:", err);
-        updateAdminConnectionStatus("disconnected");
+        updateConnectionStatus("disconnected");
         // Réessayer après 5 secondes
         setTimeout(startAdminConnection, 5000);
     }
@@ -169,19 +170,7 @@ async function startAdminConnection() {
 // Notifications: utiliser showNotification(title, message, type) depuis notifications/notification.js
 
 // Mettre à jour le statut de connexion
-function updateAdminConnectionStatus(status) {
-    const statusElement = document.getElementById("admin-connection-status");
-    if (!statusElement) return;
-
-    const statusConfig = {
-        connected: { text: "Connecté", class: "bg-success", icon: "✓" },
-        reconnecting: { text: "Reconnexion...", class: "bg-warning", icon: "⚠" },
-        disconnected: { text: "Déconnecté", class: "bg-danger", icon: "✗" }
-    };
-
-    const config = statusConfig[status] || statusConfig.disconnected;
-    statusElement.innerHTML = `<span class="badge ${config.class}">${config.icon} ${config.text}</span>`;
-}
+// updateConnectionStatus is imported from utils/connection-status.js
 
 // Récupérer l'ID de l'utilisateur depuis l'URL (page de détail)
 function getCurrentUserIdFromPage() {

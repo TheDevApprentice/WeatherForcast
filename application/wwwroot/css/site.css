@@ -695,3 +695,27 @@ main {
         box-shadow: var(--shadow-md);
     }
 }
+
+/* Statut de connexion */
+#connection-status .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#connection-status .spinner-border-sm {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-width: 0.15em;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    #connection-status {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        text-align: center;
+        padding: 0.5rem;
+    }
+}
