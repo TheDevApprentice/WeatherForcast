@@ -74,14 +74,6 @@ namespace api.Controllers
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
-            // Créer une session API
-            await _sessionManagementService.CreateApiSessionAsync(
-                user.Id,
-                token,
-                ipAddress,
-                userAgent,
-                expirationHours: 24);
-
             var response = new AuthResponse
             {
                 Token = token,

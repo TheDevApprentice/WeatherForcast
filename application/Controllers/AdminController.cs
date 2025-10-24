@@ -217,6 +217,11 @@ namespace application.Controllers
                     model.FirstName,
                     model.LastName);
 
+                if (!success || user == null)
+                {
+                    return BadRequest(new { Errors = errors });
+                }
+                
                 if (success && user != null)
                 {
                     // Assigner les rôles sélectionnés
