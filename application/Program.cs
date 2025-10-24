@@ -37,10 +37,13 @@ namespace application
             {
                 // PostgreSQL (Docker ou production) avec Connection Pooling
                 Console.WriteLine("[Web] Using PostgreSQL database with DbContext pooling");
-
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
                 {
-                    options.UseNpgsql(connectionString);
+                    options.UseNpgsql(connectionString, npgsql =>
+                    {
+                        npgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                        npgsql.CommandTimeout(30);
+                    });
 
                     // options.EnableSensitiveDataLogging(false);
                     // options.EnableDetailedErrors(false);
@@ -51,7 +54,7 @@ namespace application
                         options.EnableDetailedErrors(false);
                     }
                 },
-                poolSize: 128); // Taille du pool (par défaut: 128)
+                poolSize: 256); // Pool plus large pour charges concurrentes
             }
 
             // 2. Identity (Authentification)
@@ -133,15 +136,12 @@ namespace application
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
-            builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
+            builder.Services.AddSingleton<IConnectionMappingService, RedisConnectionMappingService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IPendingNotificationService, RedisPendingNotificationService>();
+            builder.Services.AddSingleton<IPendingNotificationService, RedisPendingNotificationService>();
 
             // Email options (SMTP)
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
-
-            // Repositories
-            builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
 
             // Redis Distributed Cache pour Rate Limiting (support multi-serveurs)
             builder.Services.AddStackExchangeRedisCache(options =>

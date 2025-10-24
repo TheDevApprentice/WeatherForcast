@@ -2,11 +2,9 @@ using api.Middleware;
 using domain.Constants;
 using domain.Entities;
 using domain.Interfaces;
-using domain.Interfaces.Repositories;
 using domain.Interfaces.Services;
 using domain.Services;
 using infra.Data;
-using infra.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -35,12 +33,24 @@ namespace api
 
             if (!string.IsNullOrEmpty(connectionString))
             {
-                // PostgreSQL (Docker ou production) avec Connection Pooling
-                //Console.WriteLine("[API] Using PostgreSQL database with DbContext pooling");
-
                 builder.Services.AddDbContextPool<AppDbContext>(options =>
-                    options.UseNpgsql(connectionString),
-                    poolSize: 128); // Taille du pool (par défaut: 128)
+                {
+                    options.UseNpgsql(connectionString, npgsql =>
+                    {
+                        npgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                        npgsql.CommandTimeout(30);
+                    });
+
+                    // options.EnableSensitiveDataLogging(false);
+                    // options.EnableDetailedErrors(false);
+                    // Désactiver les logs sensibles en production pour les performances
+                    if (!builder.Environment.IsDevelopment())
+                    {
+                        options.EnableSensitiveDataLogging(false);
+                        options.EnableDetailedErrors(false);
+                    }
+                },
+                poolSize: 256); // Pool plus large pour charges concurrentes
             }
 
             // 2. Identity (Authentification)
@@ -111,6 +121,7 @@ namespace api
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();
             builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IRoleManagementService, RoleManagementService>();
 
             // Autres services
             builder.Services.AddHttpContextAccessor(); // Nécessaire pour SignalRConnectionService
@@ -119,12 +130,9 @@ namespace api
             builder.Services.AddScoped<IWeatherForecastService, WeatherForecastService>();
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
-            builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
+            builder.Services.AddSingleton<IConnectionMappingService, RedisConnectionMappingService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IPendingNotificationService, RedisPendingNotificationService>();
-
-            // Repositories
-            builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
+            builder.Services.AddSingleton<IPendingNotificationService, RedisPendingNotificationService>();
 
             // Email options (SMTP)
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
