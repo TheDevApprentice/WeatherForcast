@@ -146,19 +146,18 @@ namespace infra.Repositories
                 _ => query.OrderBy(u => u.CreatedAt)
             };
 
-            // Optimisation: Exécuter Count et données en parallèle
-            var countTask = query.CountAsync();
-            var itemsTask = query
+            // IMPORTANT: EF Core interdit plusieurs opérations concurrentes sur le même DbContext.
+            // Exécuter séquentiellement Count puis la pagination pour éviter InvalidOperationException.
+            var totalCount = await query.CountAsync();
+            var items = await query
                 .Skip((criteria.PageNumber - 1) * criteria.PageSize)
                 .Take(criteria.PageSize)
                 .ToListAsync();
 
-            await Task.WhenAll(countTask, itemsTask);
-
             return new PagedResult<ApplicationUser>
             {
-                Items = itemsTask.Result,
-                TotalCount = countTask.Result,
+                Items = items,
+                TotalCount = totalCount,
                 PageNumber = criteria.PageNumber,
                 PageSize = criteria.PageSize
             };
