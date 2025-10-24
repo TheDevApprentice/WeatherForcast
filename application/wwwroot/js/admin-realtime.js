@@ -4,6 +4,9 @@
 // Ce fichier gère la connexion SignalR pour les notifications admin
 // Seuls les utilisateurs avec le rôle Admin peuvent se connecter
 
+// Importer showNotification (nécessite <script type="module">)
+import { showNotification } from "./notifications/notification.js";
+
 // Créer la connexion au AdminHub
 const adminConnection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/admin")
@@ -18,7 +21,7 @@ const adminConnection = new signalR.HubConnectionBuilder()
 // Événement : Nouvel utilisateur enregistré
 adminConnection.on("UserRegistered", (data) => {
     console.log("🆕 Nouvel utilisateur enregistré:", data);
-    // showAdminNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
+    // showNotification("Nouvel utilisateur", `${data.email} s'est enregistré`, "success");
     
     // Mettre à jour la liste des users si on est sur la page users
     const isOnUsersPage = window.location.pathname === "/Admin" || 
@@ -33,7 +36,7 @@ adminConnection.on("UserRegistered", (data) => {
 // Événement : Utilisateur connecté
 adminConnection.on("UserLoggedIn", (data) => {
     console.log("🔐 Utilisateur connecté:", data);
-    // showAdminNotification("Connexion", `${data.email} s'est connecté`, "info");
+    // showNotification("Connexion", `${data.email} s'est connecté`, "info");
     
     // Mettre à jour la dernière connexion dans la liste des users
     updateUserLastLogin(data.userId, data.loggedInAt);
@@ -50,7 +53,7 @@ adminConnection.on("UserLoggedIn", (data) => {
 // Événement : Utilisateur déconnecté
 adminConnection.on("UserLoggedOut", (data) => {
     console.log("🚪 Utilisateur déconnecté:", data);
-    // showAdminNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
+    // showNotification("Déconnexion", `${data.email} s'est déconnecté`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
@@ -69,14 +72,14 @@ adminConnection.on("SessionCreated", (data) => {
         // Laisser un délai pour que la DB soit à jour + un retry
         setTimeout(() => refreshUserSessions(data.userId), 600);
         setTimeout(() => refreshUserSessions(data.userId), 2000);
-        // showAdminNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
+        // showNotification("Nouvelle session", `${data.email} - ${data.ipAddress}`, "info");
     }
 });
 
 // Événement : API Key créée
 adminConnection.on("ApiKeyCreated", (data) => {
     console.log("🔑 API Key créée:", data);
-    // showAdminNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
+    // showNotification("Nouvelle API Key", `${data.email} - ${data.keyName}`, "success");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -88,7 +91,7 @@ adminConnection.on("ApiKeyCreated", (data) => {
 // Événement : API Key révoquée
 adminConnection.on("ApiKeyRevoked", (data) => {
     console.log("🚫 API Key révoquée:", data);
-    // showAdminNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
+    // showNotification("API Key révoquée", `${data.email} - ${data.keyName}`, "warning");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les API keys
     const currentUserId = getCurrentUserIdFromPage();
@@ -101,7 +104,7 @@ adminConnection.on("ApiKeyRevoked", (data) => {
 adminConnection.on("UserRoleChanged", (data) => {
     console.log("👤 Rôle utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    // showAdminNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
+    // showNotification("Rôle modifié", `${data.email} - Rôle ${data.roleName} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les rôles
     const currentUserId = getCurrentUserIdFromPage();
@@ -114,7 +117,7 @@ adminConnection.on("UserRoleChanged", (data) => {
 adminConnection.on("UserClaimChanged", (data) => {
     console.log("🎫 Claim utilisateur changé:", data);
     const action = data.isAdded ? "ajouté" : "retiré";
-    // showAdminNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
+    // showNotification("Claim modifié", `${data.email} - ${data.claimType}=${data.claimValue} ${action}`, "info");
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les claims
     const currentUserId = getCurrentUserIdFromPage();
@@ -163,29 +166,7 @@ async function startAdminConnection() {
 // FONCTIONS UTILITAIRES
 // ============================================
 
-// Afficher une notification admin
-function showAdminNotification(title, message, type = "info") {
-    // Créer l'élément de notification
-    const notification = document.createElement("div");
-    notification.className = `alert alert-${type} alert-dismissible fade show admin-notification`;
-    notification.setAttribute("role", "alert");
-    notification.innerHTML = `
-        <strong>${title}</strong> ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    
-    // Ajouter au conteneur de notifications
-    const container = document.getElementById("admin-notifications");
-    if (container) {
-        container.appendChild(notification);
-        
-        // Supprimer automatiquement après 5 secondes
-        setTimeout(() => {
-            notification.classList.remove("show");
-            setTimeout(() => notification.remove(), 150);
-        }, 5000);
-    }
-}
+// Notifications: utiliser showNotification(title, message, type) depuis notifications/notification.js
 
 // Mettre à jour le statut de connexion
 function updateAdminConnectionStatus(status) {
