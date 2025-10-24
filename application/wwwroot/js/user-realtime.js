@@ -139,9 +139,9 @@ async function fetchAndDisplayPending(email) {
             let payload;
             try { payload = payloadJson ? JSON.parse(payloadJson) : {}; } catch { payload = {}; }
             if (type === "VerificationEmailSentToUser") {
-                showNotification("Vérification", payload?.Message || "Email de vérification envoyé", "success");
+                showNotification("Vérification", payload?.Message, "success");
             } else if (type === "EmailSentToUser") {
-                const subject = payload?.Subject || payload?.subject || "Un email vient de vous être envoyé.";
+                const subject = payload?.Subject || payload?.subject;
                 showNotification("Email envoyé", subject, "info");
             }
         }
