@@ -62,4 +62,25 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            const form = document.querySelector('form[asp-action="Register"]')
+                || document.querySelector('form[action$="/Auth/Register"], form[action$="/Register"]')
+                || document.querySelector('form');
+            const emailInput = document.querySelector('input[name="Email"], #Email, input[type="email"]');
+            if (!form || !emailInput) return;
+
+            function storePendingEmail() {
+                try {
+                    const val = emailInput.value && emailInput.value.trim();
+                    if (val && val.length > 3) {
+                        sessionStorage.setItem('wf_pending_email', val);
+                        sessionStorage.setItem('wf_pending_reason', 'register');
+                    }
+                } catch (_) { }
+            }
+
+            form.addEventListener('submit', storePendingEmail);
+        })();
+    </script>
 }

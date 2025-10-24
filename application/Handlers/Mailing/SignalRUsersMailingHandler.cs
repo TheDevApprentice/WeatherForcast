@@ -1,8 +1,8 @@
 using domain.Entities;
 using domain.Events;
 using domain.Events.Mailing;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
 
 namespace application.Handlers.Mailing
@@ -64,6 +64,10 @@ namespace application.Handlers.Mailing
                         "VerificationEmailSentToUser",
                         new { Message = "Email de vérification envoyé" },
                         cancellationToken);
+                    await _usersHub.Clients.All.SendAsync(
+       "VerificationEmailSentToUser",
+       new { Message = "Email de vérification envoyé" },
+       cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
