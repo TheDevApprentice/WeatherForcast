@@ -64,10 +64,18 @@
 
     <footer class="footer text-muted">
         <div class="container">
-            <p>&copy; @DateTime.UtcNow.Year - WeatherForecast</p>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">
+                        &copy; 2025 <span class="text-gradient fw-bold">WeatherForecast</span> - Clean Architecture Demo
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Confidentialité</a>
                     <span class="mx-2">•</span>
                     <a href="https://github.com/TheDevApprentice/WeatherForecast" target="_blank" class="text-decoration-none">GitHub</a>
                 </div>
+
             </div>
         </div>
     </footer>

@@ -6,12 +6,23 @@ export function showNotification(title, message, type = "info") {
     notification.className = `alert alert-${type} alert-dismissible fade show app-notification`;
     notification.setAttribute("role", "alert");
     notification.innerHTML = `
-        <strong>${title}</strong> ${message}
+        <div class="d-flex flex-column">
+            <div class="fw-bold mb-1">${title}</div>
+            <div>${message || ""}</div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
 
     const container = document.getElementById("notifications");
     if (container) {
+        // Initialise le conteneur pour empiler joliment
+        if (!container.dataset.stackInit) {
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.gap = '8px';
+            container.dataset.stackInit = 'true';
+        }
+
         container.appendChild(notification);
 
         setTimeout(() => {
