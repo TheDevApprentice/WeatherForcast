@@ -203,16 +203,14 @@ namespace application.BackgroundServices
             try
             {
                 var root = JsonSerializer.Deserialize<JsonElement>(message.ToString());
-                // Normaliser les clés pour le frontend (camelCase)
                 var data = new
                 {
-                    userId = root.TryGetProperty("UserId", out var v1) ? v1.GetString() : null,
-                    email = root.TryGetProperty("Email", out var v2) ? v2.GetString() : null,
-                    userName = root.TryGetProperty("UserName", out var v3) ? v3.GetString() : null,
-                    registeredAt = root.TryGetProperty("RegisteredAt", out var v4) ? v4.GetDateTime() : (DateTime?)null,
-                    ipAddress = root.TryGetProperty("IpAddress", out var v5) ? v5.GetString() : null
+                    userId = root.TryGetProperty("userId", out var c1) ? c1.GetString() : (root.TryGetProperty("UserId", out var p1) ? p1.GetString() : null),
+                    email = root.TryGetProperty("email", out var c2) ? c2.GetString() : (root.TryGetProperty("Email", out var p2) ? p2.GetString() : null),
+                    userName = root.TryGetProperty("userName", out var c3) ? c3.GetString() : (root.TryGetProperty("UserName", out var p3) ? p3.GetString() : null),
+                    registeredAt = root.TryGetProperty("registeredAt", out var c4) ? (c4.ValueKind == JsonValueKind.String ? DateTime.Parse(c4.GetString()!) : c4.GetDateTime()) : (root.TryGetProperty("RegisteredAt", out var p4) ? p4.GetDateTime() : (DateTime?)null),
+                    ipAddress = root.TryGetProperty("ipAddress", out var c5) ? c5.GetString() : (root.TryGetProperty("IpAddress", out var p5) ? p5.GetString() : null)
                 };
-
                 _logger.LogInformation("📥 [Redis Sub] Admin UserRegistered → Broadcasting via SignalR");
                 await _adminHubContext.Clients.All.SendAsync("UserRegistered", data);
             }
