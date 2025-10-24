@@ -81,6 +81,8 @@
 ## 🏗️ PRIORITÉ 3 - Architecture et Abstractions
 
 ### 3.1 Interfaces Manquantes
+- [x] **IEmailService** - ✅ Déjà créé dans domain/Interfaces/Services/
+- [x] **IConnectionMappingService** - ✅ Déjà créé dans domain/Interfaces/Services/
 - [ ] **Créer IHtmlSanitizer** pour la sanitisation centralisée
 
 ### 3.2 Améliorer le Système d'Événements
