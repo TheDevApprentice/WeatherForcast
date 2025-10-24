@@ -121,6 +121,7 @@ namespace api
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
             builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IPendingNotificationService, RedisPendingNotificationService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();

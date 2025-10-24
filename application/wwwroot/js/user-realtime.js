@@ -76,6 +76,7 @@ async function joinEmailGroupIfPossible() {
     try {
         await usersConnection.invoke("JoinEmailChannel", email);
         console.log("UsersHub: rejoint le canal email:", email);
+        await fetchAndDisplayPending(email);
     } catch (err) {
         console.warn("UsersHub: impossible de rejoindre le canal email:", err);
     }
@@ -107,7 +108,11 @@ async function startUsersConnection() {
 }
 
 usersConnection.onreconnected(async () => {
+    const email = getUserEmailForChannel();
     await joinEmailGroupIfPossible();
+    if (email) {
+        await fetchAndDisplayPending(email);
+    }
 });
 
 window.addEventListener("beforeunload", async () => {
@@ -122,4 +127,28 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startUsersConnection);
 } else {
     startUsersConnection();
+}
+
+async function fetchAndDisplayPending(email) {
+    try {
+        const items = await usersConnection.invoke("FetchPendingMailNotifications", email);
+        if (!Array.isArray(items)) return;
+        for (const it of items) {
+            const type = it?.type;
+            const payloadJson = it?.payload;
+            let payload;
+            try { payload = payloadJson ? JSON.parse(payloadJson) : {}; } catch { payload = {}; }
+            if (type === "VerificationEmailSentToUser") {
+                showNotification("Vérification", payload?.Message || "Email de vérification envoyé", "success");
+            } else if (type === "EmailSentToUser") {
+                const subject = payload?.Subject || payload?.subject || "Un email vient de vous être envoyé.";
+                showNotification("Email envoyé", subject, "info");
+            }
+        }
+        if (items.length) {
+            clearPendingEmail();
+        }
+    } catch (err) {
+        console.warn("UsersHub: FetchPending a échoué", err);
+    }
 }

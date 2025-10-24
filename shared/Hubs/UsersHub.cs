@@ -1,5 +1,7 @@
+using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace shared.Hubs
 {
@@ -7,6 +9,15 @@ namespace shared.Hubs
     [AllowAnonymous]
     public class UsersHub : Hub
     {
+        private readonly IPendingNotificationService _pending;
+        private readonly ILogger<UsersHub> _logger;
+
+        public UsersHub(IPendingNotificationService pending, ILogger<UsersHub> logger)
+        {
+            _pending = pending;
+            _logger = logger;
+        }
+
         /// <summary>
         /// Permet à un client de rejoindre un canal basé sur l'email
         /// Utile pour notifier un utilisateur non connecté juste après l'inscription/verification
@@ -14,8 +25,12 @@ namespace shared.Hubs
         public Task JoinEmailChannel(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogWarning("[UsersHub] JoinEmailChannel: email vide pour ConnId={ConnId}", Context.ConnectionId);
                 return Task.CompletedTask;
+            }
 
+            _logger.LogInformation("[UsersHub] JoinEmailChannel: {Email} ConnId={ConnId}", email, Context.ConnectionId);
             return Groups.AddToGroupAsync(Context.ConnectionId, email);
         }
 
@@ -25,9 +40,30 @@ namespace shared.Hubs
         public Task LeaveEmailChannel(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogWarning("[UsersHub] LeaveEmailChannel: email vide pour ConnId={ConnId}", Context.ConnectionId);
                 return Task.CompletedTask;
+            }
 
+            _logger.LogInformation("[UsersHub] LeaveEmailChannel: {Email} ConnId={ConnId}", email, Context.ConnectionId);
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, email);
+        }
+
+        /// <summary>
+        /// Récupère les notifications en attente pour cet email puis purge le buffer.
+        /// </summary>
+        public async Task<object[]> FetchPendingMailNotifications(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogWarning("[UsersHub] FetchPendingMailNotifications: email vide pour ConnId={ConnId}", Context.ConnectionId);
+                return Array.Empty<object>();
+            }
+
+            _logger.LogInformation("[UsersHub] FetchPendingMailNotifications: {Email} ConnId={ConnId}", email, Context.ConnectionId);
+            var items = await _pending.FetchPendingAsync("mail", email);
+            // Retourne un tableau d'objets anonymes { type, payload }
+            return items.Select(i => new { type = i.Type, payload = i.PayloadJson }).Cast<object>().ToArray();
         }
     }
 }

@@ -4,6 +4,8 @@ using domain.Events.Mailing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
+using domain.Interfaces.Services;
+using System.Text.Json;
 
 namespace application.Handlers.Mailing
 {
@@ -17,15 +19,18 @@ namespace application.Handlers.Mailing
         private readonly IHubContext<UsersHub> _usersHub;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<SignalRUsersMailingHandler> _logger;
+        private readonly IPendingNotificationService _pending;
 
         public SignalRUsersMailingHandler(
             IHubContext<UsersHub> usersHub,
             UserManager<ApplicationUser> userManager,
-            ILogger<SignalRUsersMailingHandler> logger)
+            ILogger<SignalRUsersMailingHandler> logger,
+            IPendingNotificationService pending)
         {
             _usersHub = usersHub;
             _userManager = userManager;
             _logger = logger;
+            _pending = pending;
         }
 
         public async Task Handle(EmailSentToUser notification, CancellationToken cancellationToken)
@@ -46,6 +51,10 @@ namespace application.Handlers.Mailing
                     "EmailSentToUser",
                     new { notification.Subject },
                     cancellationToken);
+
+                // Bufferiser dans Redis pour rattrapage après redirect/reload
+                var payloadJson = JsonSerializer.Serialize(new { notification.Subject });
+                await _pending.AddAsync("mail", notification.ToEmail, "EmailSentToUser", payloadJson, TimeSpan.FromMinutes(2), cancellationToken);
             }
             catch (Exception ex)
             {
@@ -64,10 +73,6 @@ namespace application.Handlers.Mailing
                         "VerificationEmailSentToUser",
                         new { Message = "Email de vérification envoyé" },
                         cancellationToken);
-                    await _usersHub.Clients.All.SendAsync(
-       "VerificationEmailSentToUser",
-       new { Message = "Email de vérification envoyé" },
-       cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
@@ -75,6 +80,10 @@ namespace application.Handlers.Mailing
                     "VerificationEmailSentToUser",
                     new { Message = "Email de vérification envoyé" },
                     cancellationToken);
+
+                // Bufferiser dans Redis pour rattrapage
+                var payloadJson = JsonSerializer.Serialize(new { Message = "Email de vérification envoyé" });
+                await _pending.AddAsync("mail", notification.ToEmail, "VerificationEmailSentToUser", payloadJson, TimeSpan.FromMinutes(2), cancellationToken);
             }
             catch (Exception ex)
             {

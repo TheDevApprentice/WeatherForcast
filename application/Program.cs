@@ -7,7 +7,6 @@ using domain.Interfaces;
 using domain.Interfaces.Repositories;
 using domain.Interfaces.Services;
 using domain.Services;
-using domain.Constants;
 using infra.Data;
 using infra.Repositories;
 using Microsoft.AspNetCore.DataProtection;
@@ -136,6 +135,7 @@ namespace application
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
             builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IPendingNotificationService, RedisPendingNotificationService>();
 
             // Email options (SMTP)
             builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
