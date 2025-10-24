@@ -120,6 +120,7 @@ namespace api
             builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
             builder.Services.AddScoped<ISignalRConnectionService, SignalRConnectionService>();
             builder.Services.AddScoped<IConnectionMappingService, RedisConnectionMappingService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             // Repositories
             builder.Services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
@@ -369,6 +370,7 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
             // 6. SignalR Hubs
             app.MapHub<WeatherForecastHub>("/hubs/weatherforecast");
             app.MapHub<AdminHub>("/hubs/admin"); // Hub pour les notifications admin
+            app.MapHub<UsersHub>("/hubs/users"); // Hub pour les notifications utilisateur
 
             app.Run();
         }
