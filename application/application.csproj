@@ -27,4 +27,8 @@
     <ProjectReference Include="..\shared\shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\js\notifications\" />
+  </ItemGroup>
+
 </Project>
