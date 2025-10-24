@@ -14,6 +14,7 @@ namespace application.BackgroundServices
     {
         private readonly IConnectionMultiplexer _redis;
         private readonly IHubContext<WeatherForecastHub> _hubContext;
+        private readonly IHubContext<AdminHub> _adminHubContext;
         private readonly ILogger<RedisSubscriberService> _logger;
 
         // Noms des canaux Redis
@@ -21,13 +22,25 @@ namespace application.BackgroundServices
         private const string ChannelForecastUpdated = "weatherforecast.updated";
         private const string ChannelForecastDeleted = "weatherforecast.deleted";
 
+        // Canaux Admin
+        private const string ChUserRegistered = "admin.user.registered";
+        private const string ChUserLoggedIn = "admin.user.loggedin";
+        private const string ChUserLoggedOut = "admin.user.loggedout";
+        private const string ChSessionCreated = "admin.session.created";
+        private const string ChApiKeyCreated = "admin.apikey.created";
+        private const string ChApiKeyRevoked = "admin.apikey.revoked";
+        private const string ChUserRoleChanged = "admin.user.rolechanged";
+        private const string ChUserClaimChanged = "admin.user.claimchanged";
+
         public RedisSubscriberService(
             IConnectionMultiplexer redis,
             IHubContext<WeatherForecastHub> hubContext,
+            IHubContext<AdminHub> adminHubContext,
             ILogger<RedisSubscriberService> logger)
         {
             _redis = redis;
             _hubContext = hubContext;
+            _adminHubContext = adminHubContext;
             _logger = logger;
         }
 
@@ -55,7 +68,7 @@ namespace application.BackgroundServices
             {
                 var subscriber = _redis.GetSubscriber();
 
-                // S'abonner aux events de création
+                // S'abonner aux events WeatherForecast (création)
                 await subscriber.SubscribeAsync(
                     new RedisChannel(ChannelForecastCreated, RedisChannel.PatternMode.Literal),
                     async (channel, message) =>
@@ -63,7 +76,7 @@ namespace application.BackgroundServices
                         await HandleForecastCreated(message);
                     });
 
-                // S'abonner aux events de mise à jour
+                // S'abonner aux events WeatherForecast (mise à jour)
                 await subscriber.SubscribeAsync(
                     new RedisChannel(ChannelForecastUpdated, RedisChannel.PatternMode.Literal),
                     async (channel, message) =>
@@ -71,7 +84,7 @@ namespace application.BackgroundServices
                         await HandleForecastUpdated(message);
                     });
 
-                // S'abonner aux events de suppression
+                // S'abonner aux events WeatherForecast (suppression)
                 await subscriber.SubscribeAsync(
                     new RedisChannel(ChannelForecastDeleted, RedisChannel.PatternMode.Literal),
                     async (channel, message) =>
@@ -79,9 +92,22 @@ namespace application.BackgroundServices
                         await HandleForecastDeleted(message);
                     });
 
+                // S'abonner aux events Admin
+                await subscriber.SubscribeAsync(
+                    new RedisChannel(ChUserRegistered, RedisChannel.PatternMode.Literal),
+                    async (ch, msg) => await HandleAdminUserRegistered(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChUserLoggedIn, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminUserLoggedIn(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChUserLoggedOut, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminUserLoggedOut(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChSessionCreated, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminSessionCreated(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChApiKeyCreated, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminApiKeyCreated(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChApiKeyRevoked, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminApiKeyRevoked(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChUserRoleChanged, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminUserRoleChanged(msg));
+                await subscriber.SubscribeAsync(new RedisChannel(ChUserClaimChanged, RedisChannel.PatternMode.Literal), async (ch, msg) => await HandleAdminUserClaimChanged(msg));
+
+
                 _logger.LogInformation(
                     "✅ Abonné aux canaux Redis: {Channels}",
-                    string.Join(", ", ChannelForecastCreated, ChannelForecastUpdated, ChannelForecastDeleted));
+                    string.Join(", ", new[] { ChannelForecastCreated, ChannelForecastUpdated, ChannelForecastDeleted, ChUserRegistered, ChUserLoggedIn, ChUserLoggedOut, ChSessionCreated, ChApiKeyCreated, ChApiKeyRevoked, ChUserRoleChanged, ChUserClaimChanged }));
 
                 // Attendre indéfiniment (le service tourne en background)
                 await Task.Delay(Timeout.Infinite, stoppingToken);
@@ -93,7 +119,7 @@ namespace application.BackgroundServices
         }
 
         /// <summary>
-        /// Gère l'event de création reçu depuis Redis
+        /// Gère l'événement WeatherForecast (création) reçu depuis Redis
         /// </summary>
         private async Task HandleForecastCreated(RedisValue message)
         {
@@ -119,7 +145,7 @@ namespace application.BackgroundServices
         }
 
         /// <summary>
-        /// Gère l'event de mise à jour reçu depuis Redis
+        /// Gère l'événement WeatherForecast (mise à jour) reçu depuis Redis
         /// </summary>
         private async Task HandleForecastUpdated(RedisValue message)
         {
@@ -144,7 +170,7 @@ namespace application.BackgroundServices
         }
 
         /// <summary>
-        /// Gère l'event de suppression reçu depuis Redis
+        /// Gère l'événement WeatherForecast (suppression) reçu depuis Redis
         /// </summary>
         private async Task HandleForecastDeleted(RedisValue message)
         {
@@ -163,6 +189,145 @@ namespace application.BackgroundServices
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du traitement de ForecastDeleted depuis Redis");
+            }
+        }
+
+        // ==============================================
+        // Handlers Admin (réception Redis → AdminHub)
+        // ==============================================
+        /// <summary>
+        /// Gère l'événement d'inscription d'un utilisateur (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminUserRegistered(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin UserRegistered → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("UserRegistered", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin UserRegistered depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de connexion d'un utilisateur (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminUserLoggedIn(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin UserLoggedIn → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("UserLoggedIn", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin UserLoggedIn depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de déconnexion d'un utilisateur (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminUserLoggedOut(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin UserLoggedOut → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("UserLoggedOut", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin UserLoggedOut depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de création de session (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminSessionCreated(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin SessionCreated → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("SessionCreated", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin SessionCreated depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de création d'API Key (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminApiKeyCreated(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin ApiKeyCreated → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("ApiKeyCreated", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin ApiKeyCreated depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de révocation d'API Key (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminApiKeyRevoked(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin ApiKeyRevoked → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("ApiKeyRevoked", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin ApiKeyRevoked depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de changement de rôle (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminUserRoleChanged(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin UserRoleChanged → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("UserRoleChanged", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin UserRoleChanged depuis Redis");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de changement de claim (Admin) reçu depuis Redis
+        /// </summary>
+        private async Task HandleAdminUserClaimChanged(RedisValue message)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<JsonElement>(message.ToString());
+                _logger.LogInformation("📥 [Redis Sub] Admin UserClaimChanged → Broadcasting via SignalR");
+                await _adminHubContext.Clients.All.SendAsync("UserClaimChanged", payload);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du traitement Admin UserClaimChanged depuis Redis");
             }
         }
 

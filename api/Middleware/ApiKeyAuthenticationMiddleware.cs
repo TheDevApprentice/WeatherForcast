@@ -3,6 +3,7 @@ using System.Text;
 using api.DTOs;
 using domain.Interfaces.Services;
 using domain.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api.Middleware
 {
@@ -25,6 +26,14 @@ namespace api.Middleware
 
         public async Task InvokeAsync(HttpContext context, IApiKeyService apiKeyService)
         {
+            // Respecter [AllowAnonymous] sur les endpoints (ex: /api/Auth/register)
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+            {
+                await _next(context);
+                return;
+            }
+
             // Skip les endpoints publics (Swagger, health check, etc.)
             var path = context.Request.Path.Value?.ToLower() ?? string.Empty;
             if (path.Contains("/swagger") || 
