@@ -85,8 +85,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <!-- SignalR Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
-    <!-- Users realtime as ES modules -->
-    <script type="module" src="/js/user-realtime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.14/dist/browser/signalr.min.js"></script>
+    <script type="module" src="/js/hubs-bootstrap.js"></script>
 </body>
 </html>

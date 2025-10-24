@@ -75,7 +75,7 @@ connection.onclose((error) => {
 });
 
 // Démarrer la connexion
-async function startConnection() {
+export async function startConnection() {
     try {
         await connection.start();
         console.log("✅ Connecté au hub SignalR WeatherForecast");
@@ -264,12 +264,7 @@ function removeForecastRow(id) {
 // DÉMARRAGE
 // ============================================
 
-// Démarrer la connexion au chargement de la page
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startConnection);
-} else {
-    startConnection();
-}
+// Le démarrage est désormais piloté par js/hubs-bootstrap.js
 
 // Fermer la connexion proprement à la fermeture de la page
 window.addEventListener("beforeunload", () => {
