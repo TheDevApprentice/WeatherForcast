@@ -146,8 +146,6 @@ namespace infra.Repositories
                 _ => query.OrderBy(u => u.CreatedAt)
             };
 
-            // IMPORTANT: EF Core interdit plusieurs opérations concurrentes sur le même DbContext.
-            // Exécuter séquentiellement Count puis la pagination pour éviter InvalidOperationException.
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((criteria.PageNumber - 1) * criteria.PageSize)
