@@ -2,6 +2,9 @@
 // SIGNALR - NOTIFICATIONS EN TEMPS RÉEL
 // ============================================
 
+// Importer showNotification (nécessite <script type="module">)
+import { showNotification } from "./notifications/notification.js";
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/weatherforecast")
     .withAutomaticReconnect([0, 1000, 3000, 5000, 10000]) // Retry strategy
