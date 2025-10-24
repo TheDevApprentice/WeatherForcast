@@ -5,10 +5,12 @@ export function showNotification(title, message, type = "info") {
     const notification = document.createElement("div");
     notification.className = `alert alert-${type} alert-dismissible fade show app-notification`;
     notification.setAttribute("role", "alert");
+    const time = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     notification.innerHTML = `
         <div class="d-flex flex-column">
             <div class="fw-bold mb-1">${title}</div>
             <div>${message || ""}</div>
+            <div class="text-end mt-2"><small class="text-muted">${time}</small></div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
