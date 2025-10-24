@@ -70,7 +70,7 @@ namespace domain.Services
             {
                 try
                 {
-                    await SendAsync(toEmail, subject, body, cancellationToken);
+                    // await SendAsync(toEmail, subject, body, cancellationToken);
                     _logger.LogInformation("[Email] To={To} | Subject={Subject} | Body={Body}", toEmail, subject, body);
                     await _publisher.Publish(new EmailSentToUser(toEmail, subject, body), cancellationToken);
                 }
@@ -87,7 +87,7 @@ namespace domain.Services
             // NOTE: Ici on simule un envoi. En prod: générer un token & URL et utiliser un provider SMTP/SendGrid/etc.
             var subject = "Confirmez votre adresse email";
             var body = "Merci pour votre inscription. Cliquez sur le lien de confirmation envoyé par l'application (démo).";
-            await SendAsync(toEmail, subject, body, cancellationToken);
+            // await SendAsync(toEmail, subject, body, cancellationToken);
             await _publisher.Publish(new VerificationEmailSentToUser(toEmail), cancellationToken);
         }
 
@@ -96,7 +96,7 @@ namespace domain.Services
             // NOTE: Ici on simule un envoi. En prod: générer un token & URL et utiliser un provider SMTP/SendGrid/etc.
             var subject = "Mot de passe oublié";
             var body = "Vous avez demandé un nouveau mot de passe. Cliquez sur le lien de confirmation envoyé par l'application (démo).";
-            await SendAsync(toEmail, subject, body, cancellationToken);
+            // await SendAsync(toEmail, subject, body, cancellationToken);
             await _publisher.Publish(new VerificationEmailSentToUser(toEmail), cancellationToken);
         }
 
