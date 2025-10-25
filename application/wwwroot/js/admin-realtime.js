@@ -44,7 +44,7 @@ adminConnection.on("UserLoggedIn", (data) => {
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
-    if (currentUserId === data.userId) {
+    if (currentUserId === data.userId && isOnUserDetailsPage()) {
         // Rafraîchir avec un petit délai + retry, pour s'assurer que la session est bien persistée
         setTimeout(() => refreshUserSessions(data.userId), 400);
         setTimeout(() => refreshUserSessions(data.userId), 1500);
@@ -58,7 +58,7 @@ adminConnection.on("UserLoggedOut", (data) => {
     
     // Si on est sur la page de détail de cet utilisateur, mettre à jour les sessions
     const currentUserId = getCurrentUserIdFromPage();
-    if (currentUserId === data.userId) {
+    if (currentUserId === data.userId && isOnUserDetailsPage()) {
         refreshUserSessions(data.userId);
     }
 });
@@ -69,7 +69,7 @@ adminConnection.on("SessionCreated", (data) => {
     
     // Si on est sur la page de détail de cet utilisateur, rafraîchir la liste via AJAX
     const currentUserId = getCurrentUserIdFromPage();
-    if (currentUserId === data.userId) {
+    if (currentUserId === data.userId && isOnUserDetailsPage()) {
         // Laisser un délai pour que la DB soit à jour + un retry
         setTimeout(() => refreshUserSessions(data.userId), 600);
         setTimeout(() => refreshUserSessions(data.userId), 2000);
@@ -213,11 +213,30 @@ function refreshUsersList() {
 // Rafraîchir les sessions d'un utilisateur
 function refreshUserSessions(userId) {
     console.log("🔄 Rafraîchissement des sessions pour user:", userId);
-    const sessionsContainer = document.getElementById("user-sessions");
-    if (!sessionsContainer) {
-        console.warn("Container user-sessions introuvable");
-        return;
+    
+    // Fonction pour essayer de trouver le container avec retry
+    function tryRefresh(retryCount = 0) {
+        const sessionsContainer = document.getElementById("user-sessions");
+        if (!sessionsContainer) {
+            if (retryCount < 3) {
+                console.log(`Container user-sessions introuvable, retry ${retryCount + 1}/3 dans 500ms`);
+                setTimeout(() => tryRefresh(retryCount + 1), 500);
+                return;
+            } else {
+                console.log("Container user-sessions définitivement introuvable après 3 tentatives");
+                return;
+            }
+        }
+        
+        // Container trouvé, procéder au refresh
+        performSessionsRefresh(userId);
     }
+    
+    tryRefresh();
+}
+
+// Effectuer le refresh des sessions
+function performSessionsRefresh(userId) {
     
     fetch(`/Admin/GetUserSessions?userId=${userId}`)
         .then(response => response.json())
@@ -531,6 +550,15 @@ function updateApiKeysCount(count) {
             badge.classList.add('bg-info');
         }, 1000);
     }
+}
+
+// Vérifier si on est sur la page de détails d'un utilisateur
+function isOnUserDetailsPage() {
+    // Vérifier l'URL et la présence d'éléments spécifiques à la page Details
+    const isDetailsUrl = window.location.pathname.includes('/Admin/Details/');
+    const hasSessionsContainer = document.getElementById("user-sessions") !== null;
+    
+    return isDetailsUrl && hasSessionsContainer;
 }
 
 // ============================================
