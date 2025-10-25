@@ -38,6 +38,28 @@ usersConnection.on("VerificationEmailSentToUser", (payload) => {
     clearPendingEmail();
 });
 
+// Session révoquée par l'admin
+usersConnection.on("SessionRevoked", (payload) => {
+    console.warn("🚪 Session révoquée par l'administrateur:", payload);
+    const message = payload?.Message || "Votre session a été révoquée par un administrateur.";
+    showNotification("Session révoquée", message, "warning");
+});
+
+// Logout forcé
+usersConnection.on("ForceLogout", (payload) => {
+    console.warn("🚪 Logout forcé:", payload);
+    const reason = payload?.Reason || "Session révoquée";
+    const redirectUrl = payload?.RedirectUrl || "/Auth/Login";
+    
+    showNotification("Déconnexion forcée", reason, "danger");
+    
+    // Attendre un peu pour que l'utilisateur voie la notification
+    setTimeout(() => {
+        // Rediriger vers la page de login
+        window.location.href = redirectUrl;
+    }, 2000);
+});
+
 // ============================================
 // OUTILS
 // ============================================
@@ -120,6 +142,40 @@ async function joinEmailGroupIfPossible() {
     }
 }
 
+async function joinUserGroupIfAuthenticated() {
+    // Vérifier si l'utilisateur est connecté en cherchant son ID
+    const userId = getUserIdFromPage();
+    if (!userId) return;
+    
+    try {
+        await usersConnection.invoke("JoinUserGroup", userId);
+        console.log("UsersHub: rejoint le groupe utilisateur:", userId);
+    } catch (err) {
+        console.warn("UsersHub: impossible de rejoindre le groupe utilisateur:", err);
+    }
+}
+
+function getUserIdFromPage() {
+    // Chercher l'ID utilisateur dans différents endroits possibles
+    if (typeof window.currentUserId === "string" && window.currentUserId.length > 0) {
+        return window.currentUserId;
+    }
+    
+    // Chercher dans les meta tags
+    const metaUserId = document.querySelector('meta[name="user-id"]');
+    if (metaUserId && metaUserId.content) {
+        return metaUserId.content;
+    }
+    
+    // Chercher dans les éléments data-user-id
+    const userIdElement = document.querySelector('[data-user-id]');
+    if (userIdElement && userIdElement.dataset.userId) {
+        return userIdElement.dataset.userId;
+    }
+    
+    return null;
+}
+
 async function leaveEmailGroupIfPossible() {
     const email = getUserEmailForChannel();
     if (!email) return;
@@ -140,6 +196,7 @@ async function startUsersConnection() {
         console.log("✅ Connecté au UsersHub SignalR");
         updateConnectionStatus("connected");
         await joinEmailGroupIfPossible();
+        await joinUserGroupIfAuthenticated();
     } catch (err) {
         console.error("❌ Erreur de connexion UsersHub:", err);
         updateConnectionStatus("disconnected");
@@ -150,10 +207,11 @@ async function startUsersConnection() {
 usersConnection.onreconnected(async () => {
     const email = getUserEmailForChannel();
     await joinEmailGroupIfPossible();
+    await joinUserGroupIfAuthenticated();
     if (email) {
         await fetchAndDisplayPending(email);
     }
-    updateGlobalConnectionStatus("connected");
+    updateConnectionStatus("connected");
 });
 
 usersConnection.onreconnecting(() => {

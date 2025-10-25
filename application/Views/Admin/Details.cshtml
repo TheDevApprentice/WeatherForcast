@@ -300,8 +300,7 @@
                                             <form asp-action="RevokeSession" asp-route-sessionId="@session.Id" method="post" class="d-inline">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="userId" value="@Model.Id" />
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                        onclick="return confirm('Révoquer cette session ?')">
+                                                <button type="submit" class="btn btn-sm btn-danger revoke-session-btn">
                                                     <i class="bi bi-x-circle"></i> Révoquer
                                                 </button>
                                             </form>
@@ -355,6 +354,7 @@
 
     <script nonce="@(Context?.Items["CspNonce"] as string)">
         (function(){
+            // Gestionnaire pour la suppression de claims
             document.querySelectorAll('form.remove-claim-form').forEach(function(f){
                 f.addEventListener('submit', async function(e){
                     e.preventDefault();
@@ -363,6 +363,19 @@
                         : window.confirm('Supprimer ce claim ?');
                     if (ok) {
                         f.submit();
+                    }
+                });
+            });
+
+            // Gestionnaire pour la révocation de sessions
+            document.querySelectorAll('button.revoke-session-btn').forEach(function(btn){
+                btn.addEventListener('click', async function(e){
+                    e.preventDefault();
+                    const ok = window.confirmNotification
+                        ? await window.confirmNotification('Révoquer cette session ?', 'L\'utilisateur sera déconnecté immédiatement.', 'Révoquer', 'Annuler')
+                        : window.confirm('Révoquer cette session ? L\'utilisateur sera déconnecté immédiatement.');
+                    if (ok) {
+                        btn.closest('form').submit();
                     }
                 });
             });

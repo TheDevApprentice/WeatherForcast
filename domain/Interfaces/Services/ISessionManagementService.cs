@@ -31,7 +31,7 @@ namespace domain.Interfaces.Services
         /// <summary>
         /// Révoquer une session spécifique
         /// </summary>
-        Task<bool> RevokeAsync(Guid sessionId);
+        Task<bool> RevokeAsync(Guid sessionId, string? reason = null, string? revokedBy = null);
 
         /// <summary>
         /// Révoquer toutes les sessions d'un utilisateur

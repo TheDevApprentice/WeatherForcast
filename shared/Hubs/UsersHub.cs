@@ -50,6 +50,37 @@ namespace shared.Hubs
         }
 
         /// <summary>
+        /// Permet à un utilisateur authentifié de rejoindre son groupe personnel
+        /// Utilisé pour les notifications spécifiques à l'utilisateur (révocation de session, etc.)
+        /// </summary>
+        public Task JoinUserGroup(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogWarning("[UsersHub] JoinUserGroup: userId vide pour ConnId={ConnId}", Context.ConnectionId);
+                return Task.CompletedTask;
+            }
+
+            _logger.LogInformation("[UsersHub] JoinUserGroup: User_{UserId} ConnId={ConnId}", userId, Context.ConnectionId);
+            return Groups.AddToGroupAsync(Context.ConnectionId, $"User_{userId}");
+        }
+
+        /// <summary>
+        /// Permet de quitter le groupe utilisateur
+        /// </summary>
+        public Task LeaveUserGroup(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogWarning("[UsersHub] LeaveUserGroup: userId vide pour ConnId={ConnId}", Context.ConnectionId);
+                return Task.CompletedTask;
+            }
+
+            _logger.LogInformation("[UsersHub] LeaveUserGroup: User_{UserId} ConnId={ConnId}", userId, Context.ConnectionId);
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
+        }
+
+        /// <summary>
         /// Récupère les notifications en attente pour cet email puis purge le buffer.
         /// </summary>
         public async Task<object[]> FetchPendingMailNotifications(string email)

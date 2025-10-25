@@ -14,6 +14,7 @@ namespace application.Handlers.Admin
         INotificationHandler<UserLoggedInEvent>,
         INotificationHandler<UserLoggedOutEvent>,
         INotificationHandler<SessionCreatedEvent>,
+        INotificationHandler<SessionRevokedEvent>,
         INotificationHandler<ApiKeyCreatedEvent>,
         INotificationHandler<ApiKeyRevokedEvent>,
         INotificationHandler<UserRoleChangedEvent>,
@@ -147,6 +148,37 @@ namespace application.Handlers.Admin
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du broadcast SignalR (SessionCreated)");
+            }
+        }
+
+        /// <summary>
+        /// Gère l'événement de révocation de session
+        /// </summary>
+        public async Task Handle(SessionRevokedEvent notification, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation(
+                "🔐 [AdminHub] Broadcasting SessionRevoked: {Email} - Session {SessionId}",
+                notification.Email,
+                notification.SessionId);
+
+            try
+            {
+                await _adminHubContext.Clients.All.SendAsync(
+                    "SessionRevoked",
+                    new
+                    {
+                        notification.SessionId,
+                        notification.UserId,
+                        notification.Email,
+                        notification.RevokedAt,
+                        notification.Reason,
+                        notification.RevokedBy
+                    },
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors du broadcast SignalR (SessionRevoked)");
             }
         }
 

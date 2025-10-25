@@ -369,6 +369,8 @@ namespace application.Controllers
                 return NotFound();
             }
 
+            bool wasActive = user.IsActive;
+
             if (user.IsActive)
             {
                 user.Deactivate();
@@ -382,6 +384,23 @@ namespace application.Controllers
 
             await _userManager.UpdateAsync(user);
 
+            // Si l'utilisateur vient d'être désactivé, révoquer toutes ses sessions actives
+            if (wasActive && !user.IsActive)
+            {
+                var activeSessions = await _sessionManagementService.GetActiveSessionsAsync(user.Id);
+                foreach (var session in activeSessions)
+                {
+                    // Utiliser RevokeAsync qui va supprimer la session et publier SessionRevokedEvent
+                    await _sessionManagementService.RevokeAsync(
+                        session.Id, 
+                        "Compte désactivé par l'administrateur", 
+                        "Admin");
+                }
+
+                _logger.LogInformation("Admin deactivated user {Email} and revoked {SessionCount} active sessions",
+                    user.Email, activeSessions.Count());
+            }
+
             _logger.LogInformation("Admin toggled active status for user {Email}: {IsActive}",
                 user.Email, user.IsActive);
 
@@ -393,7 +412,10 @@ namespace application.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RevokeSession(Guid sessionId, string userId)
         {
-            await _sessionManagementService.RevokeAsync(sessionId);
+            await _sessionManagementService.RevokeAsync(
+                sessionId, 
+                "Session révoquée manuellement par l'administrateur", 
+                "Admin");
 
             _logger.LogInformation("Admin revoked session {SessionId}", sessionId);
 
