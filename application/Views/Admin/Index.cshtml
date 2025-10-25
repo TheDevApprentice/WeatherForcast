@@ -370,13 +370,6 @@
         }
     }
 
-    // Fonction pour encoder le HTML et prévenir les attaques XSS
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     // Rendu des utilisateurs
     function renderUsers() {
         const tbody = document.getElementById('userTableBody');
@@ -388,10 +381,10 @@
 
         tbody.innerHTML = allUsers.map(user => `
             <tr>
-                <td><strong>${escapeHtml(user.email)}</strong></td>
-                <td>${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}</td>
+                <td><strong>${HtmlSanitizer.sanitize(user.email)}</strong></td>
+                <td>${HtmlSanitizer.sanitize(user.firstName)} ${HtmlSanitizer.sanitize(user.lastName)}</td>
                 <td>
-                    ${user.roles.map(r => `<span class="badge bg-primary me-1">${escapeHtml(r)}</span>`).join('')}
+                    ${user.roles.map(r => `<span class="badge bg-primary me-1">${HtmlSanitizer.sanitize(r)}</span>`).join('')}
                     ${user.roles.length === 0 ? '<span class="text-muted">Aucun rôle</span>' : ''}
                 </td>
                 <td>
@@ -399,18 +392,18 @@
                         ? '<span class="badge bg-success">🟢 Actif</span>' 
                         : '<span class="badge bg-secondary">🔴 Inactif</span>'}
                 </td>
-                <td><small>${escapeHtml(new Date(user.createdAt).toLocaleDateString('fr-FR'))}</small></td>
+                <td><small>${HtmlSanitizer.sanitize(new Date(user.createdAt).toLocaleDateString('fr-FR'))}</small></td>
                 <td>
                     ${user.lastLoginAt 
-                        ? `<small>${escapeHtml(new Date(user.lastLoginAt).toLocaleString('fr-FR'))}</small>`
+                        ? `<small>${HtmlSanitizer.sanitize(new Date(user.lastLoginAt).toLocaleString('fr-FR'))}</small>`
                         : '<small class="text-muted">Jamais</small>'}
                 </td>
                 <td>
                     <div class="btn-group" role="group">
-                        <a href="/Admin/Details/${escapeHtml(user.id)}" class="btn btn-sm btn-info" title="Voir les détails">
+                        <a href="/Admin/Details/${HtmlSanitizer.sanitize(user.id)}" class="btn btn-sm btn-info" title="Voir les détails">
                             <i class="bi bi-eye"></i>
                         </a>
-                        <a href="/Admin/EditRoles/${escapeHtml(user.id)}" class="btn btn-sm btn-warning" title="Gérer les rôles">
+                        <a href="/Admin/EditRoles/${HtmlSanitizer.sanitize(user.id)}" class="btn btn-sm btn-warning" title="Gérer les rôles">
                             <i class="bi bi-shield-check"></i>
                         </a>
                     </div>

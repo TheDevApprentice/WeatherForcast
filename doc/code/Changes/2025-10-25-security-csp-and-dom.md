@@ -138,3 +138,23 @@ Ce document explique pour chaque modification le pourquoi (motivation) et le quo
   - Violations CSP sur styles/handlers inline, script module non déclaré, confirmations via alertes natives.
 - Après
   - Pages conformes CSP (nonce, pas d’inline handlers/styles), UX améliorée (notifications et confirmation non bloquante), chargement ES modules correct.
+
+---
+
+## 10) Sanitation centralisée côté client (HtmlSanitizer)
+
+- Pourquoi
+  - Assurer un échappement cohérent pour toutes les valeurs textuelles injectées en HTML côté client.
+  - Réduire le risque XSS si des templates HTML sont utilisés.
+- Changements
+  - `application/wwwroot/js/utils/html-sanitizer.js`
+    - Ajout de `HtmlSanitizer.sanitize(input)` (échappement `& < > " '`).
+    - Exposition globale via `window.HtmlSanitizer.sanitize` (importé par `hubs-bootstrap.js`).
+  - `application/wwwroot/js/hubs-bootstrap.js`
+    - Import de `./utils/html-sanitizer.js` pour rendre le sanitizer disponible partout.
+  - `application/Views/Admin/Index.cshtml`
+    - Remplacement de la fonction locale `escapeHtml` par `HtmlSanitizer.sanitize(...)` dans le rendu dynamique de la table.
+- Avant
+  - Échappement local ponctuel (fonction ad hoc) et dépendance implicite à `textContent`.
+- Après
+  - API d’échappement unique et réutilisable; code plus lisible et maintenable.
