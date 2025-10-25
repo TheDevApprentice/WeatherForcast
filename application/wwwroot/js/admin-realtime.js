@@ -405,7 +405,14 @@ function updateSessionsTable(sessions) {
             const button = document.createElement("button");
             button.type = "submit";
             button.className = "btn btn-sm btn-danger";
-            button.onclick = function () { return confirm('Révoquer cette session ?'); };
+            button.addEventListener('click', async function(e){
+                const ok = window.confirmNotification
+                    ? await window.confirmNotification('Révoquer la session ?', 'Cette action est irréversible.', 'Révoquer', 'Annuler')
+                    : window.confirm('Révoquer cette session ?');
+                if (!ok) {
+                    e.preventDefault();
+                }
+            });
 
             const icon = document.createElement("i");
             icon.className = "bi bi-x-circle";

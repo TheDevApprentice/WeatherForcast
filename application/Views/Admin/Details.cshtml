@@ -130,12 +130,11 @@
                                     <td><code>@claim.Type</code></td>
                                     <td>@claim.Value</td>
                                     <td>
-                                        <form asp-action="RemoveClaim" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                        <form asp-action="RemoveClaim" asp-route-id="@Model.Id" method="post" class="d-inline remove-claim-form">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="claimType" value="@claim.Type" />
                                             <input type="hidden" name="claimValue" value="@claim.Value" />
-                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                    onclick="return confirm('Supprimer ce claim ?')">
+                                            <button type="submit" class="btn btn-sm btn-danger">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -352,5 +351,21 @@
     <script nonce="@(Context?.Items["CspNonce"] as string)">
         // Stocker l'userId pour les mises à jour en temps réel
         window.currentUserId = '@Model.Id';
+    </script>
+
+    <script nonce="@(Context?.Items["CspNonce"] as string)">
+        (function(){
+            document.querySelectorAll('form.remove-claim-form').forEach(function(f){
+                f.addEventListener('submit', async function(e){
+                    e.preventDefault();
+                    const ok = window.confirmNotification
+                        ? await window.confirmNotification('Supprimer ce claim ?', '', 'Supprimer', 'Annuler')
+                        : window.confirm('Supprimer ce claim ?');
+                    if (ok) {
+                        f.submit();
+                    }
+                });
+            });
+        })();
     </script>
 }
