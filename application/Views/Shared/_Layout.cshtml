@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/web.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -48,8 +47,8 @@
         </nav>
     </header>
     
-    <div id="notifications" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
-    <div id="connection-status" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9998;">
+    <div id="notifications" class="position-fixed top-0 end-0 p-3"></div>
+    <div id="connection-status" class="position-fixed bottom-0 end-0 p-3">
         <span class="badge bg-secondary">
             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             Connexion...
@@ -80,12 +79,12 @@
         </div>
     </footer>
     
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <!-- SignalR Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.14/dist/browser/signalr.min.js"></script>
-    <script type="module" src="/js/hubs-bootstrap.js"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.14/dist/browser/signalr.min.js"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" type="module" src="/js/hubs-bootstrap.js"></script>
 </body>
 </html>

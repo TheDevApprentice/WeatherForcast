@@ -62,7 +62,7 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)">
         (function () {
             const form = document.querySelector('form[asp-action="Register"]')
                 || document.querySelector('form[action$="/Auth/Register"], form[action$="/Register"]')

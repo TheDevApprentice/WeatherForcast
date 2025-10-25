@@ -289,6 +289,11 @@ namespace application
             // Security Headers Middleware
             app.Use(async (context, next) =>
             {
+                // Generate a per-request CSP nonce and expose it to Razor views
+                var nonceBytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
+                var cspNonce = Convert.ToBase64String(nonceBytes);
+                context.Items["CspNonce"] = cspNonce;
+
                 // Protection contre Clickjacking
                 context.Response.Headers.Add("X-Frame-Options", "DENY");
 
@@ -301,14 +306,18 @@ namespace application
                 // Referrer Policy
                 context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
 
-                // Content Security Policy (CSP)
-                context.Response.Headers.Add("Content-Security-Policy",
-                    "default-src 'self'; " +
-                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-                    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-                    "font-src 'self' https://cdn.jsdelivr.net; " +
-                    "img-src 'self' data:; " +
-                    "connect-src 'self';");
+                // Content Security Policy (CSP) with nonce for scripts
+                // Note: nonce is primarily for inline scripts; kept for consistency and future inline usage
+                var csp =
+                    $"default-src 'self'; " +
+                    $"script-src 'self' 'nonce-{cspNonce}' https://cdn.jsdelivr.net; " +
+                    $"style-src-elem 'self' 'nonce-{cspNonce}' https://cdn.jsdelivr.net; " +
+                    $"style-src-attr 'unsafe-inline'; " +
+                    $"font-src 'self' https://cdn.jsdelivr.net; " +
+                    $"img-src 'self' data:; " +
+                    $"connect-src 'self' https://cdn.jsdelivr.net;";
+
+                context.Response.Headers["Content-Security-Policy"] = csp;
 
                 await next();
             });
@@ -369,7 +378,7 @@ namespace application
             // ============================================
             // SEED DES USERS DE TEST - si activé
             // ============================================
-            if (builder.Configuration.GetValue<bool>("SeedTestUsers", false))
+            if (builder.Configuration.GetValue<bool>("SeedTestUsers") == true)
             {
                 using (var scope = app.Services.CreateScope())
                 {

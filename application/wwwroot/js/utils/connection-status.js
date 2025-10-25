@@ -11,5 +11,10 @@ export function updateConnectionStatus(status) {
         connecting: { text: "Connexion...", cls: "bg-secondary", icon: "⏳" }
     };
     const cfg = map[status] || map.disconnected;
-    el.innerHTML = `<span class="badge ${cfg.cls}">${cfg.icon} ${cfg.text}</span>`;
+    // Clear existing content
+    while (el.firstChild) el.removeChild(el.firstChild);
+    const span = document.createElement("span");
+    span.className = `badge ${cfg.cls}`;
+    span.textContent = `${cfg.icon} ${cfg.text}`;
+    el.appendChild(span);
 }

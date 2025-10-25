@@ -41,7 +41,7 @@
                         <label class="form-label"><strong>Client ID (Clé) :</strong></label>
                         <div class="input-group">
                             <input type="text" class="form-control" value="@TempData["NewApiKey"]" id="apiKey" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('apiKey')">
+                            <button class="btn btn-outline-secondary btn-copy" type="button" data-target="apiKey">
                                 <i class="bi bi-clipboard"></i> Copier
                             </button>
                         </div>
@@ -51,7 +51,7 @@
                         <label class="form-label"><strong>Client Secret (Secret) :</strong></label>
                         <div class="input-group">
                             <input type="text" class="form-control" value="@TempData["NewApiSecret"]" id="apiSecret" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('apiSecret')">
+                            <button class="btn btn-outline-secondary btn-copy" type="button" data-target="apiSecret">
                                 <i class="bi bi-clipboard"></i> Copier
                             </button>
                         </div>
@@ -128,8 +128,7 @@
                                         <td>
                                             @if (key.IsActive)
                                             {
-                                                <form asp-action="Revoke" asp-route-id="@key.Id" method="post" style="display:inline;" 
-                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir révoquer cette clé API ?');">
+                                                <form asp-action="Revoke" asp-route-id="@key.Id" method="post" class="d-inline revoke-form">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" class="btn btn-sm btn-danger">
                                                         <i class="bi bi-trash"></i> Révoquer
@@ -163,14 +162,39 @@
     </div>
 </div>
 
-<script>
-    function copyToClipboard(elementId) {
-        const element = document.getElementById(elementId);
-        element.select();
-        element.setSelectionRange(0, 99999); // Pour mobile
-        
-        navigator.clipboard.writeText(element.value).then(() => {
-            alert('Copié dans le presse-papiers !');
+<script nonce="@(Context?.Items["CspNonce"] as string)">
+    (function(){
+        // Confirmation de révocation
+        document.querySelectorAll('form.revoke-form').forEach(function(f){
+            f.addEventListener('submit', async function(e){
+                e.preventDefault();
+                const ok = window.confirmNotification
+                    ? await window.confirmNotification('Révoquer la clé API ?', 'Cette action est irréversible.', 'Révoquer', 'Annuler')
+                    : window.confirm('Êtes-vous sûr de vouloir révoquer cette clé API ?');
+                if (ok) {
+                    f.submit();
+                }
+            });
         });
-    }
+
+        // Copie presse-papiers pour les champs affichés dans la bannière
+        function copyValueById(elementId){
+            const element = document.getElementById(elementId);
+            if(!element) return;
+            element.select();
+            element.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(element.value).then(function(){
+                if (window.showNotification) {
+                    window.showNotification('Copié dans le presse-papiers !', 'success');
+                }
+            });
+        }
+
+        document.querySelectorAll('.btn-copy[data-target]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                const targetId = this.getAttribute('data-target');
+                copyValueById(targetId);
+            });
+        });
+    })();
 </script>

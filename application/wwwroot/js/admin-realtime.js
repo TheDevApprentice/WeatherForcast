@@ -167,6 +167,17 @@ async function startAdminConnection() {
 // FONCTIONS UTILITAIRES
 // ============================================
 
+function clearElement(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+function el(tag, className, text) {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (text !== undefined && text !== null) e.textContent = String(text);
+    return e;
+}
+
 // Notifications: utiliser showNotification(title, message, type) depuis notifications/notification.js
 
 // Mettre à jour le statut de connexion
@@ -316,10 +327,10 @@ function updateSessionsTable(sessions) {
     const tbody = document.getElementById("user-sessions");
     if (!tbody) return;
 
-    tbody.innerHTML = "";
+    clearElement(tbody);
     // Récupérer un éventuel anti-forgery token présent dans la page
     const antiForgeryInput = document.querySelector('input[name="__RequestVerificationToken"]');
-    const antiForgeryField = antiForgeryInput ? `<input type="hidden" name="__RequestVerificationToken" value="${antiForgeryInput.value}" />` : "";
+    const antiForgeryValue = antiForgeryInput ? antiForgeryInput.value : null;
     
     sessions.forEach(session => {
         const row = document.createElement("tr");
@@ -329,28 +340,33 @@ function updateSessionsTable(sessions) {
         const td1 = document.createElement("td");
         const typeIcon = session.type === "Web" ? "🌐 Web" : "📱 Mobile";
         const typeBadge = session.type === "Web" ? "bg-primary" : "bg-info";
-        td1.innerHTML = `<span class="badge ${typeBadge}">${typeIcon}</span>`;
+        const spanBadge = el("span", `badge ${typeBadge}`, typeIcon);
+        td1.appendChild(spanBadge);
         row.appendChild(td1);
         
         // Colonne 2 : IP
         const td2 = document.createElement("td");
-        td2.innerHTML = `<small>${session.ipAddress || 'N/A'}</small>`;
+        const smallIp = el("small", null, session.ipAddress || 'N/A');
+        td2.appendChild(smallIp);
         row.appendChild(td2);
         
         // Colonne 3 : User Agent
         const td3 = document.createElement("td");
-        td3.innerHTML = `<small>${session.userAgent || 'N/A'}</small>`;
+        const smallUa = el("small", null, session.userAgent || 'N/A');
+        td3.appendChild(smallUa);
         row.appendChild(td3);
         
         // Colonne 4 : Statut
         const td4 = document.createElement("td");
+        let statusSpan;
         if (session.isRevoked) {
-            td4.innerHTML = '<span class="badge bg-danger">🔴 Révoquée</span>';
+            statusSpan = el("span", "badge bg-danger", "🔴 Révoquée");
         } else if (session.isExpired) {
-            td4.innerHTML = '<span class="badge bg-warning">⏰ Expirée</span>';
+            statusSpan = el("span", "badge bg-warning", "⏰ Expirée");
         } else {
-            td4.innerHTML = '<span class="badge bg-success">🟢 Active</span>';
+            statusSpan = el("span", "badge bg-success", "🟢 Active");
         }
+        td4.appendChild(statusSpan);
         row.appendChild(td4);
         
         // Colonne 5 : Expiration
@@ -361,22 +377,43 @@ function updateSessionsTable(sessions) {
         const year = expiresAt.getFullYear();
         const hours = String(expiresAt.getHours()).padStart(2, '0');
         const minutes = String(expiresAt.getMinutes()).padStart(2, '0');
-        td5.innerHTML = `<small>${day}/${month}/${year} ${hours}:${minutes}</small>`;
+        td5.appendChild(el("small", null, `${day}/${month}/${year} ${hours}:${minutes}`));
         row.appendChild(td5);
         
         // Colonne 6 : Actions
         const td6 = document.createElement("td");
         if (session.isActive) {
-            td6.innerHTML = `
-                <form action="/Admin/RevokeSession/${session.id}" method="post" class="d-inline">
-                    ${antiForgeryField}
-                    <input type="hidden" name="userId" value="${window.currentUserId || ''}" />
-                    <button type="submit" class="btn btn-sm btn-danger" 
-                            onclick="return confirm('Révoquer cette session ?');">
-                        <i class="bi bi-x-circle"></i> Révoquer
-                    </button>
-                </form>
-            `;
+            const form = document.createElement("form");
+            form.action = `/Admin/RevokeSession/${session.id}`;
+            form.method = "post";
+            form.className = "d-inline";
+
+            if (antiForgeryValue) {
+                const anti = document.createElement("input");
+                anti.type = "hidden";
+                anti.name = "__RequestVerificationToken";
+                anti.value = antiForgeryValue;
+                form.appendChild(anti);
+            }
+
+            const userIdHidden = document.createElement("input");
+            userIdHidden.type = "hidden";
+            userIdHidden.name = "userId";
+            userIdHidden.value = window.currentUserId || '';
+            form.appendChild(userIdHidden);
+
+            const button = document.createElement("button");
+            button.type = "submit";
+            button.className = "btn btn-sm btn-danger";
+            button.onclick = function () { return confirm('Révoquer cette session ?'); };
+
+            const icon = document.createElement("i");
+            icon.className = "bi bi-x-circle";
+            button.appendChild(icon);
+            button.appendChild(document.createTextNode(" Révoquer"));
+
+            form.appendChild(button);
+            td6.appendChild(form);
         }
         row.appendChild(td6);
         
@@ -397,33 +434,52 @@ function updateApiKeysTable(apiKeys) {
     const tbody = document.getElementById("user-apikeys");
     if (!tbody) return;
 
-    tbody.innerHTML = "";
+    clearElement(tbody);
     
     apiKeys.forEach(apiKey => {
         const row = document.createElement("tr");
         row.className = "apikey-item-new"; // Effet de surbrillance
         
-        let statusBadge;
+        let statusSpan;
         if (apiKey.isRevoked) {
-            statusBadge = '<span class="badge bg-danger">🔴 Révoquée</span>';
+            statusSpan = el("span", "badge bg-danger", "🔴 Révoquée");
         } else if (apiKey.isExpired) {
-            statusBadge = '<span class="badge bg-warning">⏰ Expirée</span>';
+            statusSpan = el("span", "badge bg-warning", "⏰ Expirée");
         } else {
-            statusBadge = '<span class="badge bg-success">🟢 Active</span>';
+            statusSpan = el("span", "badge bg-success", "🟢 Active");
         }
-        
-        const lastUsed = apiKey.lastUsedAt 
+
+        const lastUsed = apiKey.lastUsedAt
             ? new Date(apiKey.lastUsedAt).toLocaleString('fr-FR')
             : 'Jamais';
-        
-        row.innerHTML = `
-            <td><strong>${apiKey.name}</strong></td>
-            <td><code>${apiKey.key}</code></td>
-            <td><small>${apiKey.scopes}</small></td>
-            <td>${statusBadge}</td>
-            <td><small>${lastUsed}</small></td>
-            <td><span class="badge bg-info">${apiKey.requestCount}</span></td>
-        `;
+
+        const tdName = document.createElement("td");
+        const strongName = document.createElement("strong");
+        strongName.textContent = apiKey.name;
+        tdName.appendChild(strongName);
+        row.appendChild(tdName);
+
+        const tdKey = document.createElement("td");
+        const codeKey = document.createElement("code");
+        codeKey.textContent = apiKey.key;
+        tdKey.appendChild(codeKey);
+        row.appendChild(tdKey);
+
+        const tdScopes = document.createElement("td");
+        tdScopes.appendChild(el("small", null, apiKey.scopes));
+        row.appendChild(tdScopes);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.appendChild(statusSpan);
+        row.appendChild(tdStatus);
+
+        const tdLastUsed = document.createElement("td");
+        tdLastUsed.appendChild(el("small", null, lastUsed));
+        row.appendChild(tdLastUsed);
+
+        const tdCount = document.createElement("td");
+        tdCount.appendChild(el("span", "badge bg-info", apiKey.requestCount));
+        row.appendChild(tdCount);
         
         tbody.appendChild(row);
         

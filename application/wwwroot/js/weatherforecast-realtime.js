@@ -100,6 +100,17 @@ export async function startConnection() {
 // FONCTIONS D'UI
 // ============================================
 
+function clearElement(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+function el(tag, className, text) {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (text !== undefined && text !== null) e.textContent = String(text);
+    return e;
+}
+
 function addForecastRow(forecast) {
     const container = document.getElementById("forecasts-container");
     if (!container) return;
@@ -115,60 +126,73 @@ function addForecastRow(forecast) {
     const tempF = Math.round((forecast.temperatureC * 9/5) + 32);
     
     // Déterminer le badge de température
-    let tempBadge = '';
+    let tempBadgeSpan;
     if (forecast.temperatureC >= 30) {
-        tempBadge = '<span class="badge bg-danger">🔥 Chaud</span>';
+        tempBadgeSpan = el("span", "badge bg-danger", "🔥 Chaud");
     } else if (forecast.temperatureC >= 20) {
-        tempBadge = '<span class="badge bg-warning">☀️ Agréable</span>';
+        tempBadgeSpan = el("span", "badge bg-warning", "☀️ Agréable");
     } else if (forecast.temperatureC >= 10) {
-        tempBadge = '<span class="badge bg-info">🌤️ Frais</span>';
+        tempBadgeSpan = el("span", "badge bg-info", "🌤️ Frais");
     } else {
-        tempBadge = '<span class="badge bg-primary">❄️ Froid</span>';
+        tempBadgeSpan = el("span", "badge bg-primary", "❄️ Froid");
     }
     
     const col = document.createElement("div");
     col.className = "col-12 col-md-6 col-lg-4 new-row";
     col.setAttribute("data-forecast-id", forecast.id);
     
-    col.innerHTML = `
-        <div class="card h-100 weather-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-0">📅 ${date}</h5>
-                </div>
-                <div>${tempBadge}</div>
-            </div>
-            <div class="card-body">
-                <div class="row text-center mb-3">
-                    <div class="col-6">
-                        <div class="display-4">🌡️</div>
-                        <h3 class="text-primary mb-0">${forecast.temperatureC}°C</h3>
-                        <small class="text-muted">${tempF}°F</small>
-                    </div>
-                    <div class="col-6">
-                        <div class="display-4">${forecast.summary === 'Hot' ? '☀️' : forecast.summary === 'Cool' || forecast.summary === 'Freezing' ? '❄️' : '⛅'}</div>
-                        <h5 class="mb-0">${forecast.summary || 'N/A'}</h5>
-                        <small class="text-muted">Condition</small>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-top-0">
-                    <div class="d-grid gap-2">
-                        <a href="/WeatherForecast/Details/${forecast.id}" class="btn btn-info btn-sm">
-                            🔍 Détails
-                        </a>
-                        <div class="btn-group" role="group">
-                            <a href="/WeatherForecast/Edit/${forecast.id}" class="btn btn-warning btn-sm">
-                                ✏️ Modifier
-                            </a>
-                            <a href="/WeatherForecast/Delete/${forecast.id}" class="btn btn-danger btn-sm">
-                                🗑️ Supprimer
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    const card = el("div", "card h-100 weather-card");
+    const header = el("div", "card-header d-flex justify-content-between align-items-center");
+    const headerLeft = document.createElement("div");
+    const h5 = el("h5", "mb-0", `📅 ${date}`);
+    headerLeft.appendChild(h5);
+    const headerRight = document.createElement("div");
+    headerRight.appendChild(tempBadgeSpan);
+    header.appendChild(headerLeft);
+    header.appendChild(headerRight);
+
+    const body = el("div", "card-body");
+    const row = el("div", "row text-center mb-3");
+    const colLeft = el("div", "col-6");
+    colLeft.appendChild(el("div", "display-4", "🌡️"));
+    colLeft.appendChild(el("h3", "text-primary mb-0", `${forecast.temperatureC}°C`));
+    colLeft.appendChild(el("small", "text-muted", `${tempF}°F`));
+    const colRight = el("div", "col-6");
+    const emoji = forecast.summary === 'Hot' ? '☀️' : (forecast.summary === 'Cool' || forecast.summary === 'Freezing' ? '❄️' : '⛅');
+    colRight.appendChild(el("div", "display-4", emoji));
+    colRight.appendChild(el("h5", "mb-0", forecast.summary || 'N/A'));
+    colRight.appendChild(el("small", "text-muted", "Condition"));
+    row.appendChild(colLeft);
+    row.appendChild(colRight);
+    body.appendChild(row);
+
+    const footer = el("div", "card-footer bg-transparent border-top-0");
+    const grid = el("div", "d-grid gap-2");
+    const details = document.createElement("a");
+    details.href = `/WeatherForecast/Details/${forecast.id}`;
+    details.className = "btn btn-info btn-sm";
+    details.textContent = "🔍 Détails";
+    grid.appendChild(details);
+    const group = el("div", "btn-group", null);
+    group.setAttribute("role", "group");
+    const edit = document.createElement("a");
+    edit.href = `/WeatherForecast/Edit/${forecast.id}`;
+    edit.className = "btn btn-warning btn-sm";
+    edit.textContent = "✏️ Modifier";
+    const del = document.createElement("a");
+    del.href = `/WeatherForecast/Delete/${forecast.id}`;
+    del.className = "btn btn-danger btn-sm";
+    del.textContent = "🗑️ Supprimer";
+    group.appendChild(edit);
+    group.appendChild(del);
+    grid.appendChild(group);
+    footer.appendChild(grid);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    card.appendChild(footer);
+
+    col.appendChild(card);
     
     container.insertBefore(col, container.firstChild);
     
@@ -202,46 +226,61 @@ function updateForecastRow(forecast) {
     }
     
     col.classList.add("updated-row"); // Animation
-    
-    col.innerHTML = `
-        <div class="card h-100 weather-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-0">📅 ${date}</h5>
-                </div>
-                <div>${tempBadge}</div>
-            </div>
-            <div class="card-body">
-                <div class="row text-center mb-3">
-                    <div class="col-6">
-                        <div class="display-4">🌡️</div>
-                        <h3 class="text-primary mb-0">${forecast.temperatureC}°C</h3>
-                        <small class="text-muted">${tempF}°F</small>
-                    </div>
-                    <div class="col-6">
-                        <div class="display-4">${forecast.summary === 'Hot' ? '☀️' : forecast.summary === 'Cool' || forecast.summary === 'Freezing' ? '❄️' : '⛅'}</div>
-                        <h5 class="mb-0">${forecast.summary || 'N/A'}</h5>
-                        <small class="text-muted">Condition</small>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-top-0">
-                    <div class="d-grid gap-2">
-                        <a href="/WeatherForecast/Details/${forecast.id}" class="btn btn-info btn-sm">
-                            🔍 Détails
-                        </a>
-                        <div class="btn-group" role="group">
-                            <a href="/WeatherForecast/Edit/${forecast.id}" class="btn btn-warning btn-sm">
-                                ✏️ Modifier
-                            </a>
-                            <a href="/WeatherForecast/Delete/${forecast.id}" class="btn btn-danger btn-sm">
-                                🗑️ Supprimer
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+
+    clearElement(col);
+
+    const card = el("div", "card h-100 weather-card");
+    const header = el("div", "card-header d-flex justify-content-between align-items-center");
+    const headerLeft = document.createElement("div");
+    const h5 = el("h5", "mb-0", `📅 ${date}`);
+    headerLeft.appendChild(h5);
+    const headerRight = document.createElement("div");
+    headerRight.appendChild(tempBadgeSpan);
+    header.appendChild(headerLeft);
+    header.appendChild(headerRight);
+
+    const body = el("div", "card-body");
+    const row = el("div", "row text-center mb-3");
+    const colLeft = el("div", "col-6");
+    colLeft.appendChild(el("div", "display-4", "🌡️"));
+    colLeft.appendChild(el("h3", "text-primary mb-0", `${forecast.temperatureC}°C`));
+    colLeft.appendChild(el("small", "text-muted", `${tempF}°F`));
+    const colRight = el("div", "col-6");
+    const emoji = forecast.summary === 'Hot' ? '☀️' : (forecast.summary === 'Cool' || forecast.summary === 'Freezing' ? '❄️' : '⛅');
+    colRight.appendChild(el("div", "display-4", emoji));
+    colRight.appendChild(el("h5", "mb-0", forecast.summary || 'N/A'));
+    colRight.appendChild(el("small", "text-muted", "Condition"));
+    row.appendChild(colLeft);
+    row.appendChild(colRight);
+    body.appendChild(row);
+
+    const footer = el("div", "card-footer bg-transparent border-top-0");
+    const grid = el("div", "d-grid gap-2");
+    const details = document.createElement("a");
+    details.href = `/WeatherForecast/Details/${forecast.id}`;
+    details.className = "btn btn-info btn-sm";
+    details.textContent = "🔍 Détails";
+    grid.appendChild(details);
+    const group = el("div", "btn-group", null);
+    group.setAttribute("role", "group");
+    const edit = document.createElement("a");
+    edit.href = `/WeatherForecast/Edit/${forecast.id}`;
+    edit.className = "btn btn-warning btn-sm";
+    edit.textContent = "✏️ Modifier";
+    const del = document.createElement("a");
+    del.href = `/WeatherForecast/Delete/${forecast.id}`;
+    del.className = "btn btn-danger btn-sm";
+    del.textContent = "🗑️ Supprimer";
+    group.appendChild(edit);
+    group.appendChild(del);
+    grid.appendChild(group);
+    footer.appendChild(grid);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    card.appendChild(footer);
+
+    col.appendChild(card);
     
     setTimeout(() => {
         col.classList.remove("updated-row");

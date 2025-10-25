@@ -1,6 +1,9 @@
 // Bootstrap central pour gérer les connexions multi-hubs
 // Chargé globalement dans le layout
 
+// Charger notifications pour exposer window.showNotification partout
+import "./notifications/notification.js";
+
 // Toujours charger UsersHub (auto-start à l'import)
 import "./user-realtime.js";
 
