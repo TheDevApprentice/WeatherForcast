@@ -96,17 +96,27 @@ namespace application.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.Email,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: true);
+                // Récupérer l'utilisateur
+                var user = await _userManagementService.GetByEmailAsync(model.Email);
 
-                if (result.Succeeded)
+                if (user != null)
                 {
-                    // Récupérer l'utilisateur
-                    var user = await _userManagementService.GetByEmailAsync(model.Email);
-                    if (user != null)
+                    // Bloquer l'accès si le compte est désactivé
+                    if (!user.IsActive)
+                    {
+                        // S'assurer qu'aucun cookie d'auth n'est conservé
+                        await _signInManager.SignOutAsync();
+                        ModelState.AddModelError(string.Empty, "Impossible de se connecter : le compte est désactivé.");
+                        return View(model);
+                    }
+
+                    var result = await _signInManager.PasswordSignInAsync(
+                        model.Email,
+                        model.Password,
+                        model.RememberMe,
+                        lockoutOnFailure: true);
+
+                    if (result.Succeeded)
                     {
                         // Récupérer les informations de la requête
                         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -135,28 +145,31 @@ namespace application.Controllers
 
                         // Mettre à jour LastLoginAt
                         await _userManagementService.UpdateLastLoginAsync(user.Id);
+
+                        return RedirectToLocal(returnUrl);
                     }
 
-                    return RedirectToLocal(returnUrl);
-                }
+                    // Enregistrer les tentatives échouées (brute force protection)
+                    var failedIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    if (!string.IsNullOrEmpty(failedIpAddress))
+                    {
+                        await _rateLimitService.RecordFailedLoginAttemptAsync(failedIpAddress, model.Email);
+                    }
 
-                // Enregistrer les tentatives échouées (brute force protection)
-                var failedIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-                if (!string.IsNullOrEmpty(failedIpAddress))
-                {
-                    await _rateLimitService.RecordFailedLoginAttemptAsync(failedIpAddress, model.Email);
-                }
-
-                if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty, "Compte verrouillé. Réessayez dans 5 minutes.");
+                    if (result.IsLockedOut)
+                    {
+                        ModelState.AddModelError(string.Empty, "Compte verrouillé. Réessayez dans 5 minutes.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
+                    }
                 }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
                 }
             }
-
             return View(model);
         }
 
