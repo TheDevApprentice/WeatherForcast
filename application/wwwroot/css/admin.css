@@ -1,0 +1,138 @@
+/* ============================================
+   ADMIN NOTIFICATIONS - Styles pour les notifications temps réel
+   ============================================ */
+
+/* Conteneur de notifications */
+#admin-notifications {
+    max-width: 400px;
+    pointer-events: none;
+}
+
+#admin-notifications > * {
+    pointer-events: all;
+}
+
+/* Notification individuelle */
+.admin-notification {
+    min-width: 300px;
+    margin-bottom: 10px;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation de sortie */
+.admin-notification.fade-out {
+    animation: slideOut 0.3s ease-out forwards;
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+
+
+/* Session nouvellement créée (highlight) */
+.session-item-new {
+    background-color: #d1ecf1 !important;
+    border-left: 4px solid #0dcaf0;
+    animation: highlight 3s ease-out;
+}
+
+@keyframes highlight {
+    0% {
+        background-color: #d1ecf1;
+    }
+    100% {
+        background-color: white;
+    }
+}
+
+/* API Key nouvellement créée (highlight) */
+.apikey-item-new {
+    background-color: #d1f2eb !important;
+    border-left: 4px solid #20c997;
+    animation: highlightGreen 3s ease-out;
+}
+
+@keyframes highlightGreen {
+    0% {
+        background-color: #d1f2eb;
+    }
+    100% {
+        background-color: white;
+    }
+}
+
+/* Rôle modifié (highlight) */
+.role-item-changed {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107;
+    animation: highlightYellow 3s ease-out;
+}
+
+@keyframes highlightYellow {
+    0% {
+        background-color: #fff3cd;
+    }
+    100% {
+        background-color: white;
+    }
+}
+
+/* Icônes dans les notifications */
+.admin-notification .bi {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    #admin-notifications {
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        padding: 0.5rem;
+    }
+
+    .admin-notification {
+        min-width: auto;
+        width: 100%;
+    }
+
+    #connection-status {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        text-align: center;
+        padding: 0.5rem;
+    }
+}
+
+/* Dark mode support (si besoin) */
+@media (prefers-color-scheme: dark) {
+    .admin-notification {
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    #connection-status .badge {
+        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+    }
+}

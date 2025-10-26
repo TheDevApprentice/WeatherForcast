@@ -1,0 +1,110 @@
+@model application.ViewModels.WeatherForecastViewModel
+
+@{
+    ViewData["Title"] = "Modifier la prévision";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" method="post" id="editForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger" id="validationSummary"></div>
+            
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group mb-3">
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" type="date" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="TemperatureC" class="control-label">Température (°C)</label>
+                <input asp-for="TemperatureC" class="form-control" type="number" />
+                <span asp-validation-for="TemperatureC" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Summary" class="control-label">Résumé</label>
+                <select asp-for="Summary" class="form-control">
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="Freezing">Freezing (Gelé)</option>
+                    <option value="Bracing">Bracing (Vivifiant)</option>
+                    <option value="Chilly">Chilly (Frais)</option>
+                    <option value="Cool">Cool (Frais)</option>
+                    <option value="Mild">Mild (Doux)</option>
+                    <option value="Warm">Warm (Chaud)</option>
+                    <option value="Balmy">Balmy (Tiède)</option>
+                    <option value="Hot">Hot (Chaud)</option>
+                    <option value="Sweltering">Sweltering (Étouffant)</option>
+                    <option value="Scorching">Scorching (Brûlant)</option>
+                </select>
+                <span asp-validation-for="Summary" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script nonce="@(Context?.Items["CspNonce"] as string)">
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            // Désactiver le bouton pendant la soumission
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enregistrement...';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': formData.get('__RequestVerificationToken')
+                    }
+                });
+                
+                if (response.redirected) {
+                    // ✅ Succès - Redirection vers Index
+                    window.location.href = response.url;
+                } else {
+                    // ❌ Erreur de validation - Rester sur la page
+                    const html = await response.text();
+                    
+                    // Parser le HTML pour extraire le message d'erreur
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const validationSummary = doc.querySelector('#validationSummary');
+                    
+                    if (validationSummary) {
+                        // Afficher le message d'erreur dans le formulaire
+                        document.getElementById('validationSummary').innerHTML = validationSummary.innerHTML;
+                    }
+                    
+                    // ✅ La notification SignalR sera affichée automatiquement
+                    // car la connexion n'a pas été interrompue (pas de refresh)
+                }
+            } catch (error) {
+                console.error('Erreur lors de la soumission:', error);
+                // if (typeof showNotification === 'function') {
+                //     showNotification('Erreur', 'Une erreur est survenue lors de l\'enregistrement.', 'danger');
+                // }
+            } finally {
+                // Réactiver le bouton
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Enregistrer';
+            }
+        });
+    </script>
+}

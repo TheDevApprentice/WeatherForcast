@@ -1,0 +1,105 @@
+@model IEnumerable<application.ViewModels.Admin.UserListViewModel>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Nom</th>
+            <th>Rôles</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Dernière connexion</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@user.Email</strong>
+                    </td>
+                    <td>@user.FullName</td>
+                    <td>
+                        @foreach (var role in user.Roles)
+                        {
+                            <span class="badge bg-@GetRoleBadgeColor(role) me-1">@role</span>
+                        }
+                        @if (!user.Roles.Any())
+                        {
+                            <span class="text-muted">Aucun rôle</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <span class="badge bg-success">🟢 Actif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">🔴 Inactif</span>
+                        }
+                    </td>
+                    <td>
+                        <small>@user.CreatedAt.ToString("dd/MM/yyyy")</small>
+                    </td>
+                    <td>
+                        @if (user.LastLoginAt.HasValue)
+                        {
+                            <small>@user.LastLoginAt.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                        }
+                        else
+                        {
+                            <small class="text-muted">Jamais</small>
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@user.Id" 
+                               class="btn btn-sm btn-info" title="Voir les détails">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="EditRoles" asp-route-id="@user.Id" 
+                               class="btn btn-sm btn-warning" title="Gérer les rôles">
+                                <i class="bi bi-shield-check"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="bi bi-search"></i>
+                        <p class="mb-0 mt-2">Aucun utilisateur trouvé</p>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <p class="text-muted">
+        <strong>@Model.Count()</strong> utilisateur(s) trouvé(s)
+    </p>
+</div>
+
+@functions {
+    string GetRoleBadgeColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "danger",
+            "User" => "primary",
+            "MobileUser" => "info",
+            "ApiConsumer" => "secondary",
+            _ => "dark"
+        };
+    }
+}

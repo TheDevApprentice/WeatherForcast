@@ -1,0 +1,67 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5204"
+    },
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7252;http://localhost:5204"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchBrowser": false,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_HTTPS_PORTS": "8081",
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Host=host.docker.internal;Database=weatherforecastdb;Username=weatheruser;Password=weatherpass",
+        "ConnectionStrings__Redis": "host.docker.internal:6370,password=redisSecurePass123!",
+        "Jwt__Secret": "VotreCleSecreteSuperSecuriseeDeMinimum32Caracteres!",
+        "Jwt__Issuer": "WeatherForecastApi",
+        "Jwt__Audience": "WeatherForecastClient",
+        "Jwt__ExpirationHours": "24",
+        "Email__Host": "smtp.example.com",
+        "Email__Port": "587",
+        "Email__EnableSsl": "true",
+        "Email__UserName": "smtp-user",
+        "Email__Password": "smtp-password",
+        "Email__From": "no-reply@yourdomain.com"
+      },
+      "publishAllPorts": false,
+      "httpPort": 5204,
+      "sslPort": 7252,
+      "useSSL": true
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:35879",
+      "sslPort": 44324
+    }
+  }
+}

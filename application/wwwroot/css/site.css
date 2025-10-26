@@ -1,0 +1,721 @@
+/* ===================================
+   🎨 Variables CSS Globales
+   =================================== */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --primary-dark: #5568d3;
+    --secondary-color: #764ba2;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --light-bg: #f8fafc;
+    --dark-text: #1e293b;
+    --gray-text: #64748b;
+    --border-radius: 12px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================
+   📐 Base Styles
+   =================================== */
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--dark-text);
+    background: var(--light-bg);
+    line-height: 1.6;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main content doit prendre l'espace disponible */
+main {
+    flex: 1 0 auto;
+}
+
+/* ===================================
+   🎯 Navigation
+   =================================== */
+.navbar {
+    background: white !important;
+    box-shadow: var(--shadow-sm);
+    padding: 1rem 0;
+    transition: var(--transition);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--gray-text) !important;
+    transition: var(--transition);
+    position: relative;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 80%;
+    height: 2px;
+    background: var(--primary-gradient);
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+/* ===================================
+   🎴 Cards
+   =================================== */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    overflow: hidden;
+    background: white;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+}
+
+.card-header {
+    background: var(--primary-gradient) !important;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* ===================================
+   🔘 Buttons
+   =================================== */
+.btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* ===================================
+   📝 Forms
+   =================================== */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    border-radius: 4px;
+    border: 2px solid #e2e8f0;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===================================
+   🚨 Alerts
+   =================================== */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ===================================
+   🎪 Hero Section
+   =================================== */
+.display-4 {
+    font-weight: 800;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.lead {
+    color: var(--gray-text);
+    font-size: 1.25rem;
+    font-weight: 400;
+}
+
+/* ===================================
+   🏷️ Badge & Tags
+   =================================== */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ===================================
+   📊 Tables
+   =================================== */
+.table {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.table thead th {
+    background: var(--light-bg);
+    color: var(--dark-text);
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+    transition: var(--transition);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Boutons dans les tables */
+.table .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    margin: 0 0.25rem;
+}
+
+/* Wrapper responsive pour tables */
+.table-responsive {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    background: white;
+}
+
+/* ===================================
+   🔌 API Card
+   =================================== */
+.api-card {
+    transition: var(--transition);
+    border: none;
+}
+
+.api-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.api-card .card-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+}
+
+.api-card .card-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.api-card .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+
+.api-card .btn-outline-success {
+    border: 2px solid #10b981;
+    color: #10b981;
+    background: transparent;
+}
+
+.api-card .btn-outline-success:hover {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.api-card .alert-info {
+    background: #e0f2fe;
+    border: none;
+    border-left: 4px solid #0ea5e9;
+}
+
+.api-card code {
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: #0ea5e9;
+    font-weight: 600;
+}
+
+/* ===================================
+   🌤️ Weather Cards
+   =================================== */
+.weather-card {
+    transition: var(--transition);
+    border: none;
+}
+
+.weather-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+.weather-card .card-header {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.weather-card .card-header h5 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.weather-summary {
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.weather-summary h3 {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-transform: capitalize;
+}
+
+.temp-box {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.temp-value {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.temp-label {
+    font-size: 0.75rem;
+    color: var(--gray-text);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.weather-card .btn-group {
+    width: 100%;
+}
+
+.weather-card .btn-group .btn {
+    flex: 1;
+}
+
+/* Cards à hauteur uniforme */
+.h-100 {
+    height: 100% !important;
+}
+
+.card-body.d-flex {
+    display: flex !important;
+}
+
+.card-body.flex-column {
+    flex-direction: column !important;
+}
+
+.flex-grow-1 {
+    flex-grow: 1 !important;
+}
+
+/* ===================================
+   📱 Responsive
+   =================================== */
+
+/* Tablettes et petits écrans */
+@media (max-width: 992px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .display-4 {
+        font-size: 2rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .footer .row {
+        text-align: center !important;
+    }
+
+    .footer .col-md-6 {
+        margin-bottom: 1rem;
+    }
+
+    .footer .col-md-6:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Tables responsive */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Stack cards sur mobile */
+    .row > [class*='col-'] {
+        margin-bottom: 1rem;
+    }
+
+    /* Empiler les boutons d'action verticalement sur mobile */
+    .table .btn {
+        display: block;
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+
+    /* Réduire padding des cellules de table */
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Wrapper pour gutter entre cards */
+    .g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+
+    /* Weather cards sur mobile */
+    .weather-card .card-header h5 {
+        font-size: 0.9rem;
+    }
+
+    .temp-value {
+        font-size: 1.5rem;
+    }
+
+    .weather-summary h3 {
+        font-size: 1.25rem;
+    }
+
+    .weather-card .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Petits mobiles */
+@media (max-width: 576px) {
+    html {
+        font-size: 14px;
+    }
+
+    .card-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .lead {
+        font-size: 1.1rem;
+    }
+}
+
+/* ===================================
+   🎞️ Animations
+   =================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ===================================
+   🎨 Utility Classes
+   =================================== */
+.text-gradient {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-card {
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===================================
+   🦶 Footer
+   =================================== */
+.footer {
+    background: white;
+    padding: 2rem 0;
+    margin-top: auto;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.footer a {
+    color: var(--gray-text);
+    transition: var(--transition);
+}
+
+.footer a:hover {
+    color: var(--primary-color);
+}
+
+/* ===================================
+   📱 Navigation Responsive
+   =================================== */
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+}
+
+.navbar-nav .nav-link i {
+    font-size: 1.2rem;
+}
+
+/* Dropdown utilisateur */
+.dropdown-menu {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: none;
+    margin-top: 0.5rem;
+}
+
+.dropdown-header {
+    color: var(--gray-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+}
+
+.dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+.dropdown-item i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive - Tablette (768-991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .navbar-nav .nav-link {
+        justify-content: center;
+    }
+    
+    .navbar-nav .nav-link i {
+        font-size: 1.5rem;
+    }
+}
+
+/* Responsive - Mobile (< 768px) */
+@media (max-width: 767px) {
+    .navbar-nav .nav-link {
+        justify-content: flex-start;
+        padding-left: 1rem;
+    }
+    
+    .navbar-nav .nav-link span {
+        margin-left: 0.5rem;
+    }
+    
+    .navbar-collapse {
+        background: white;
+        padding: 1rem 0;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        box-shadow: var(--shadow-md);
+    }
+}
+
+/* Statut de connexion */
+#connection-status .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#connection-status .spinner-border-sm {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-width: 0.15em;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    #connection-status {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        text-align: center;
+        padding: 0.5rem;
+    }
+}

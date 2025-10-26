@@ -1,0 +1,107 @@
+@api_HostAddress = http://localhost:5204
+@token = YOUR_JWT_TOKEN_HERE
+
+### ============================================
+### AUTHENTICATION ENDPOINTS
+### ============================================
+
+### 1. Register - Créer un nouveau compte
+POST {{api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### 2. Login - Se connecter (récupérer le token)
+POST {{api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!"
+}
+
+### 3. Get Current User - Tester l'authentification (nécessite un token)
+GET {{api_HostAddress}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### ============================================
+### WEATHER FORECAST ENDPOINTS (Authentification requise)
+### ============================================
+
+### 4. GET All WeatherForecasts - Récupérer toutes les prévisions
+GET {{api_HostAddress}}/api/weatherforecast
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 5. GET WeatherForecast by ID - Récupérer une prévision par ID
+GET {{api_HostAddress}}/api/weatherforecast/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 6. POST WeatherForecast - Créer une nouvelle prévision
+POST {{api_HostAddress}}/api/weatherforecast
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "date": "2025-01-15T00:00:00",
+  "temperatureC": 25,
+  "summary": "Sunny"
+}
+
+### 7. PUT WeatherForecast - Mettre à jour une prévision existante
+PUT {{api_HostAddress}}/api/weatherforecast/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id": 1,
+  "date": "2025-01-15T00:00:00",
+  "temperatureC": 30,
+  "summary": "Very Sunny"
+}
+
+### 8. DELETE WeatherForecast - Supprimer une prévision
+DELETE {{api_HostAddress}}/api/weatherforecast/1
+Authorization: Bearer {{token}}
+
+### ============================================
+### TESTS RAPIDES
+### ============================================
+
+### Test complet : Register → Login → Create Forecast
+### Étape 1 : Register
+POST {{api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "quicktest@example.com",
+  "password": "Quick123!",
+  "firstName": "Quick",
+  "lastName": "Test"
+}
+
+### Étape 2 : Login (copier le token retourné)
+POST {{api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "quicktest@example.com",
+  "password": "Quick123!"
+}
+
+### Étape 3 : Créer une prévision (remplacer {{token}} par le token reçu)
+POST {{api_HostAddress}}/api/weatherforecast
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "date": "2025-12-25T00:00:00",
+  "temperatureC": 5,
+  "summary": "Cold Winter Day"
+}

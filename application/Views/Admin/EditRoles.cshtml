@@ -1,0 +1,133 @@
+@model application.ViewModels.Admin.EditRolesViewModel
+
+@{
+    ViewData["Title"] = $"Gérer les rôles - {Model.Email}";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Utilisateurs</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.UserId">@Model.Email</a></li>
+            <li class="breadcrumb-item active">Gérer les rôles</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">🛡️ Gérer les rôles de @Model.Email</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditRoles" asp-route-id="@Model.UserId" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-4">
+                    <h5>Sélectionner les rôles</h5>
+                    <p class="text-muted">Cochez les rôles que vous souhaitez assigner à cet utilisateur :</p>
+                    
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="SelectedRoles" 
+                                   value="@role" id="role_@role" 
+                                   @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                            <label class="form-check-label" for="role_@role">
+                                <span class="badge bg-@GetRoleBadgeColor(role) me-2">@role</span>
+                                <span class="text-muted">@GetRoleDescription(role)</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <hr />
+
+                <!-- Aperçu des permissions -->
+                <div class="mb-4">
+                    <h5>📋 Permissions associées aux rôles sélectionnés</h5>
+                    @if (Model.Claims.Any())
+                    {
+                        <div class="alert alert-info">
+                            <strong>Claims actuels de l'utilisateur :</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var claim in Model.Claims)
+                                {
+                                    <li><code>@claim.Type</code>: @claim.Value</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Aucun claim personnalisé. Les permissions proviendront uniquement des rôles sélectionnés.</p>
+                    }
+                </div>
+
+                <!-- Boutons -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Informations sur les rôles -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">ℹ️ Description des rôles</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h6><span class="badge bg-danger">Admin</span></h6>
+                    <p class="text-muted mb-0">Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs.</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h6><span class="badge bg-primary">User</span></h6>
+                    <p class="text-muted mb-0">Utilisateur standard avec accès aux prévisions météo et gestion de ses API Keys.</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h6><span class="badge bg-info">MobileUser</span></h6>
+                    <p class="text-muted mb-0">Utilisateur mobile avec accès limité (lecture et écriture, pas de suppression).</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h6><span class="badge bg-secondary">ApiConsumer</span></h6>
+                    <p class="text-muted mb-0">Accès via API Key uniquement (lecture et écriture des prévisions).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetRoleBadgeColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "danger",
+            "User" => "primary",
+            "MobileUser" => "info",
+            "ApiConsumer" => "secondary",
+            _ => "dark"
+        };
+    }
+
+    string GetRoleDescription(string role)
+    {
+        return role switch
+        {
+            "Admin" => "Administrateur - Accès complet",
+            "User" => "Utilisateur standard - CRUD forecasts + API Keys",
+            "MobileUser" => "Utilisateur mobile - Lecture/Écriture uniquement",
+            "ApiConsumer" => "Consommateur API - Via API Key",
+            _ => ""
+        };
+    }
+}
+
+@section Scripts {
+}

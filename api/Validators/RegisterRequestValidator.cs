@@ -1,0 +1,57 @@
+using api.DTOs;
+using FluentValidation;
+
+namespace api.Validators
+{
+    /// <summary>
+    /// Validator pour RegisterRequest (API)
+    /// Valide l'inscription d'un nouvel utilisateur mobile
+    /// </summary>
+    public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
+    {
+        public RegisterRequestValidator()
+        {
+            // Validation du prénom
+            RuleFor(x => x.FirstName)
+                .NotEmpty()
+                .WithMessage("Le prénom est requis")
+                .MaximumLength(50)
+                .WithMessage("Le prénom ne peut pas dépasser 50 caractères")
+                .Matches("^[a-zA-ZÀ-ÿ '-]+$")
+                .WithMessage("Le prénom ne peut contenir que des lettres, espaces, apostrophes et tirets");
+
+            // Validation du nom
+            RuleFor(x => x.LastName)
+                .NotEmpty()
+                .WithMessage("Le nom est requis")
+                .MaximumLength(50)
+                .WithMessage("Le nom ne peut pas dépasser 50 caractères")
+                .Matches("^[a-zA-ZÀ-ÿ '-]+$")
+                .WithMessage("Le nom ne peut contenir que des lettres, espaces, apostrophes et tirets");
+
+            // Validation de l'email
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .WithMessage("L'email est requis")
+                .EmailAddress()
+                .WithMessage("Email invalide")
+                .MaximumLength(256)
+                .WithMessage("L'email ne peut pas dépasser 256 caractères");
+
+            // Validation du mot de passe
+            RuleFor(x => x.Password)
+                .NotEmpty()
+                .WithMessage("Le mot de passe est requis")
+                .MinimumLength(6)
+                .WithMessage("Le mot de passe doit contenir au moins 6 caractères")
+                .MaximumLength(100)
+                .WithMessage("Le mot de passe ne peut pas dépasser 100 caractères")
+                .Must(password => string.IsNullOrEmpty(password) || 
+                    (password.Any(char.IsUpper) && 
+                     password.Any(char.IsLower) && 
+                     password.Any(char.IsDigit) && 
+                     password.Any(ch => !char.IsLetterOrDigit(ch))))
+                .WithMessage("Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial");
+        }
+    }
+}
