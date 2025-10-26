@@ -120,7 +120,7 @@ namespace application
                 Console.WriteLine($"[Development] Data Protection keys stored in: {keysDirectory}");
             }
 
-            // 3. Event Bus (remplace MediatR)
+            // 3. Event Bus
             builder.Services.AddEventBus(typeof(Program).Assembly);
 
             // 4. Services (Domain - Logique métier)

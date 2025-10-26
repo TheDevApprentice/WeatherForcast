@@ -11,7 +11,7 @@ namespace domain.Services
     /// <summary>
     /// Service de gestion CRUD des prévisions météo
     /// Utilise le UnitOfWork pour gérer les transactions
-    /// Publie des domain events via MediatR pour les notifications temps réel
+    /// Publie des domain events via EventPublisher pour les notifications temps réel
     /// </summary>
     public class WeatherForecastService : IWeatherForecastService
     {

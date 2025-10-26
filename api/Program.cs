@@ -115,7 +115,7 @@ namespace api
                 };
             });
 
-            // 4. Event Bus (remplace MediatR) - enregistre automatiquement les handlers
+            // 4. Event Bus - enregistre automatiquement les handlers
             builder.Services.AddEventBus(typeof(Program).Assembly);
 
             // 5. Services (Domain - Logique métier)
