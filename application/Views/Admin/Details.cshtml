@@ -341,12 +341,6 @@
 }
 
 @section Scripts {
-    <!-- SignalR -->
-    <script nonce="@(Context?.Items["CspNonce"] as string)" src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
-    
-    <!-- Script temps réel admin -->
-    <script nonce="@(Context?.Items["CspNonce"] as string)" type="module" src="~/js/admin-realtime.js" asp-append-version="true"></script>
-    
     <script nonce="@(Context?.Items["CspNonce"] as string)">
         // Stocker l'userId pour les mises à jour en temps réel
         window.currentUserId = '@Model.Id';

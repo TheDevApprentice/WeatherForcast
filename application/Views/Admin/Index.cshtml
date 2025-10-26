@@ -293,11 +293,6 @@
 }
 
 @section Scripts {
-<!-- SignalR Client Library -->
-<script nonce="@(Context?.Items["CspNonce"] as string)" src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
-    
-<!-- Script temps réel -->
-<script nonce="@(Context?.Items["CspNonce"] as string)" type="module" src="~/js/admin-realtime.js" asp-append-version="true"></script>
 <script nonce="@(Context?.Items["CspNonce"] as string)">
     // Recherche dynamique avec pagination (scroll infini)
     let searchTimeout;
