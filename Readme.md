@@ -129,12 +129,14 @@ User (Browser 1) → Web App → WeatherForecastService → EventPublisher
 
 ### Backend
 - **ASP.NET Core 8.0** - Framework web moderne
-- **Entity Framework Core 8.0** - ORM avec DbContext Pooling (256 instances)
-- **PostgreSQL 16** - Base de données relationnelle avec index composites
-- **Redis 7** - Pub/Sub (11 canaux), Cache distribué, Connection Mapping
-- **SignalR** - Communication WebSocket temps réel avec reconnexion automatique
-- **StackExchange.Redis** - Client Redis haute performance
-- **Argon2id** - Hashing sécurisé (64MB RAM, 4 iterations) - OWASP 2024
+- **Entity Framework Core 8.0** - ORM avec migrations
+- **PostgreSQL 16** - Base de données relationnelle
+- **Redis 7** - Cache distribué et Pub/Sub
+- **SignalR** - WebSocket temps réel
+- **Identity** - Authentification et autorisation
+- **JWT Bearer** - Tokens RS256 avec validation en base
+- **Argon2id** - Hashing moderne (OWASP 2024)
+- **FluentValidation** - Validation déclarative (10 validators)
 
 ### Frontend
 - **Razor Pages / MVC** - Interface web avec ViewModels
@@ -185,15 +187,16 @@ User (Browser 1) → Web App → WeatherForecastService → EventPublisher
 
 ### 📡 Notifications Temps Réel
 
-- ✅ **3 SignalR Hubs** : WeatherForecastHub, AdminHub, UsersHub
+- ✅ **3 SignalR Hubs** : WeatherForecastHub, AdminHub, UsersHub (6 méthodes)
 - ✅ **Redis Pub/Sub** : 11 canaux pour communication inter-processus
 - ✅ **Notifications automatiques** pour :
   - **Prévisions** : Création, modification, suppression
   - **Admin** : Nouveaux utilisateurs, sessions, API Keys
-  - **Utilisateurs** : Emails reçus, logout forcé
+  - **Utilisateurs** : Emails reçus, logout forcé, notifications en attente
 - ✅ **Exclusion émetteur** : Évite les boucles de notification
 - ✅ **Reconnexion automatique** : Retry exponentiel côté client
 - ✅ **Connection Mapping Redis** : Notifications ciblées par utilisateur
+- ✅ **Bufferisation Redis** : Notifications en attente récupérables (erreurs, emails)
 
 ### 🎯 Architecture Événementielle
 
@@ -230,15 +233,24 @@ await _publisher.Publish(new ForecastCreatedEvent(forecast));
 - ✅ **Session Validation** : Vérification DB à chaque requête
 - ✅ **Redis authentifié** : Mot de passe fort requis
 
-### 🛡️ Gestion d'Erreurs
+### ✅ Validation & Gestion d'Erreurs
 
+#### FluentValidation (10 Validators)
+- ✅ **Validation déclarative** : 5 validators Application + 5 validators API
+- ✅ **Séparation présentation/domain** : ViewModels/DTOs vs Entités
+- ✅ **Messages personnalisés** : Feedback utilisateur clair
+- ✅ **Validation client-side** : JavaScript automatique (Application)
+- ✅ **Validation server-side** : ModelState.IsValid dans controllers
+- ✅ **Pas de DataAnnotations** : Architecture propre et testable
+
+#### Gestion d'Erreurs
 - ✅ **Exceptions typées** : ValidationException, EntityNotFoundException, DatabaseException
 - ✅ **Middleware global** : Filet de sécurité pour erreurs non gérées
 - ✅ **Notifications temps réel** : SignalR avec déduplication (CorrelationId)
-- ✅ **Bufferisation Redis** : Intelligente (pas pour Validation)
+- ✅ **Bufferisation Redis** : Notifications en attente récupérables
 - ✅ **AJAX** : Soumission sans rechargement pour UX fluide
 - ✅ **Logs structurés** : Audit complet avec contexte
-- ✅ **Fail-Fast** : Validation au plus tôt (constructeurs, Value Objects)
+- ✅ **Fail-Fast** : Validation FluentValidation + constructeurs + Value Objects
 - ✅ **Observabilité** : Traçabilité complète des erreurs
 
 ---

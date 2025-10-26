@@ -205,7 +205,11 @@ Le projet WeatherForecast implémente une **Clean Architecture** avec une sépar
 #### SignalR Hubs (3)
 - **`WeatherForecastHub`** : Hub prévisions météo (ForecastCreated, ForecastUpdated, ForecastDeleted)
 - **`AdminHub`** : Hub admin (UserRegistered, SessionCreated, ApiKeyCreated, etc.)
-- **`UsersHub`** : Hub utilisateurs (EmailReceived, SessionRevoked pour logout forcé)
+- **`UsersHub`** : Hub utilisateurs avec 6 méthodes :
+  - `JoinEmailChannel` / `LeaveEmailChannel` : Groupes basés sur email
+  - `JoinUserGroup` / `LeaveUserGroup` : Groupes basés sur userId
+  - `FetchPendingMailNotifications` : Récupère notifications email en attente
+  - `GetPendingNotifications` : Récupère notifications (erreurs, etc.) en attente
 
 #### Messaging (2)
 - **`EventPublisher`** : Implémentation IPublisher avec logging, métriques et corrélation
