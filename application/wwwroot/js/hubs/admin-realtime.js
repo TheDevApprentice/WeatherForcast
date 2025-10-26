@@ -5,8 +5,8 @@
 // Seuls les utilisateurs avec le rôle Admin peuvent se connecter
 
 // Importe showNotification (nécessite <script type="module">)
-import { showNotification } from "./notifications/notification.js";
-import { updateConnectionStatus } from "./utils/connection-status.js";
+import { showNotification } from "../notifications/notification.js";
+import { updateConnectionStatus } from "../utils/connection-status.js";
 
 // Créer la connexion au AdminHub
 const adminConnection = new signalR.HubConnectionBuilder()

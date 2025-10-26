@@ -3,8 +3,8 @@
 // ============================================
 
 // Importe showNotification (nécessite <script type="module">)
-import { showNotification } from "./notifications/notification.js";
-import { updateConnectionStatus } from "./utils/connection-status.js";
+import { showNotification } from "../notifications/notification.js";
+import { updateConnectionStatus } from "../utils/connection-status.js";
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/weatherforecast")

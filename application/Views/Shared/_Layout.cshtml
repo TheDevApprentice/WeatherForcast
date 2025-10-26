@@ -89,6 +89,6 @@
     @await RenderSectionAsync("Scripts", required: false)
     <!-- SignalR Client Library -->
     <script nonce="@(Context?.Items["CspNonce"] as string)" src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.14/dist/browser/signalr.min.js"></script>
-    <script nonce="@(Context?.Items["CspNonce"] as string)" type="module" src="/js/hubs-bootstrap.js"></script>
+    <script nonce="@(Context?.Items["CspNonce"] as string)" type="module" src="~/js/hubs/hubs-bootstrap.js"></script>
 </body>
 </html>

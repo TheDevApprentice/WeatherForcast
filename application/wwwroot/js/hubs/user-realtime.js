@@ -1,5 +1,5 @@
-import { showNotification } from "./notifications/notification.js";
-import { updateConnectionStatus } from "./utils/connection-status.js";
+import { showNotification } from "../notifications/notification.js";
+import { updateConnectionStatus } from "../utils/connection-status.js";
 
 // ============================================
 // USERS HUB - NOTIFICATIONS UTILISATEUR EN TEMPS RÉEL

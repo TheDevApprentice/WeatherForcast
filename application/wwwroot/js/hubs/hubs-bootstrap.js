@@ -2,10 +2,10 @@
 // Chargé globalement dans le layout
 
 // Utilitaires globaux (sanitizer)
-import "./utils/html-sanitizer.js";
+import "../utils/html-sanitizer.js";
 
 // Charger notifications pour exposer window.showNotification partout
-import "./notifications/notification.js";
+import "../notifications/notification.js";
 
 // Toujours charger UsersHub (auto-start à l'import)
 import "./user-realtime.js";
