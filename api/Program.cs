@@ -4,6 +4,8 @@ using domain.Entities;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using infra.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
@@ -210,8 +212,12 @@ namespace api
                 }
             });
 
-            // 8. Controllers
+            // 8. Controllers avec FluentValidation
             builder.Services.AddControllers();
+
+            // FluentValidation - Validation automatique
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
             // 7. Swagger/OpenAPI avec API Key (OAuth2 Client Credentials)
             builder.Services.AddEndpointsApiExplorer();

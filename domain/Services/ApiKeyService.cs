@@ -1,6 +1,7 @@
 using domain.Entities;
 using domain.Events;
 using domain.Events.Admin;
+using domain.Exceptions;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
@@ -32,46 +33,59 @@ namespace domain.Services
             string name,
             int? expirationDays = null)
         {
-            // Générer la clé (client_id)
-            var key = $"wf_live_{GenerateRandomString(32)}";
-
-            // Générer le secret (client_secret)
-            var plainSecret = $"wf_secret_{GenerateRandomString(48)}";
-
-            // Hasher le secret
-            var secretHash = HashSecret(plainSecret);
-
-            // Créer l'API Key avec le constructeur (encapsulation)
-            var expiresAt = expirationDays.HasValue
-                ? DateTime.UtcNow.AddDays(expirationDays.Value)
-                : (DateTime?)null;
-
-            var apiKey = new ApiKey(
-                name: name,
-                key: key,
-                secretHash: secretHash,
-                userId: userId,
-                scopes: ApiKeyScopes.ReadWrite, // Par défaut, lecture et écriture
-                expiresAt: expiresAt
-            );
-
-            await _unitOfWork.ApiKeys.CreateAsync(apiKey);
-            await _unitOfWork.SaveChangesAsync();
-
-            // Publier l'événement ApiKeyCreated
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            // Validation déléguée à FluentValidation (couche présentation)
+            try
             {
-                await _publisher.Publish(new ApiKeyCreatedEvent(
-                    apiKeyId: apiKey.Id,
-                    userId: userId,
-                    email: user.Email!,
-                    keyName: name,
-                    expiresAt: expiresAt
-                ));
-            }
+                // Générer la clé (client_id)
+                var key = $"wf_live_{GenerateRandomString(32)}";
 
-            return (apiKey, plainSecret);
+                // Générer le secret (client_secret)
+                var plainSecret = $"wf_secret_{GenerateRandomString(48)}";
+
+                // Hasher le secret
+                var secretHash = HashSecret(plainSecret);
+
+                // Créer l'API Key avec le constructeur (encapsulation)
+                var expiresAt = expirationDays.HasValue
+                    ? DateTime.UtcNow.AddDays(expirationDays.Value)
+                    : (DateTime?)null;
+
+                var apiKey = new ApiKey(
+                    name: name,
+                    key: key,
+                    secretHash: secretHash,
+                    userId: userId,
+                    scopes: ApiKeyScopes.ReadWrite, // Par défaut, lecture et écriture
+                    expiresAt: expiresAt
+                );
+
+                await _unitOfWork.ApiKeys.CreateAsync(apiKey);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Publier l'événement ApiKeyCreated
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    await _publisher.Publish(new ApiKeyCreatedEvent(
+                        apiKeyId: apiKey.Id,
+                        userId: userId,
+                        email: user.Email!,
+                        keyName: name,
+                        expiresAt: expiresAt
+                    ));
+                }
+
+                return (apiKey, plainSecret);
+            }
+            catch (Exception ex) when (ex is not DomainException)
+            {
+                throw new DatabaseException(
+                    "Erreur lors de la création de la clé API.",
+                    "Create",
+                    "ApiKey",
+                    null,
+                    ex);
+            }
         }
 
         public async Task<(bool isValid, ApiKey? apiKey)> ValidateApiKeyAsync(string key, string secret)
@@ -111,29 +125,50 @@ namespace domain.Services
         {
             var apiKey = await _unitOfWork.ApiKeys.GetByIdAsync(apiKeyId);
 
-            if (apiKey == null || apiKey.UserId != userId)
+            if (apiKey == null)
             {
-                return false;
+                throw new EntityNotFoundException("ApiKey", apiKeyId.ToString(), "Revoke");
             }
 
-            // Utiliser la méthode Revoke() de l'entité (avec traçabilité)
-            apiKey.Revoke(reason);
-            await _unitOfWork.SaveChangesAsync();
-
-            // Publier l'événement ApiKeyRevoked
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (apiKey.UserId != userId)
             {
-                await _publisher.Publish(new ApiKeyRevokedEvent(
-                    apiKeyId: apiKey.Id,
-                    userId: userId,
-                    email: user.Email!,
-                    keyName: apiKey.Name,
-                    revokedBy: user.Email
-                ));
+                throw new ValidationException(
+                    "Vous ne pouvez révoquer que vos propres clés API.",
+                    "Revoke",
+                    "ApiKey",
+                    apiKeyId.ToString());
             }
 
-            return true;
+            try
+            {
+                // Utiliser la méthode Revoke() de l'entité (avec traçabilité)
+                apiKey.Revoke(reason);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Publier l'événement ApiKeyRevoked
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    await _publisher.Publish(new ApiKeyRevokedEvent(
+                        apiKeyId: apiKey.Id,
+                        userId: userId,
+                        email: user.Email!,
+                        keyName: apiKey.Name,
+                        revokedBy: user.Email
+                    ));
+                }
+
+                return true;
+            }
+            catch (Exception ex) when (ex is not DomainException)
+            {
+                throw new DatabaseException(
+                    "Erreur lors de la révocation de la clé API.",
+                    "Revoke",
+                    "ApiKey",
+                    apiKeyId.ToString(),
+                    ex);
+            }
         }
 
         private string GenerateRandomString(int length)

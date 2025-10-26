@@ -5,6 +5,8 @@ using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using domain.Events;
+using application.Helpers;
 
 namespace application.Controllers
 {
@@ -19,15 +21,18 @@ namespace application.Controllers
     {
         private readonly IApiKeyService _apiKeyService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPublisher _publisher;
         private readonly ILogger<AdminApiKeysController> _logger;
 
         public AdminApiKeysController(
             IApiKeyService apiKeyService,
             UserManager<ApplicationUser> userManager,
+            IPublisher publisher,
             ILogger<AdminApiKeysController> logger)
         {
             _apiKeyService = apiKeyService;
             _userManager = userManager;
+            _publisher = publisher;
             _logger = logger;
         }
 
@@ -83,7 +88,18 @@ namespace application.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de la révocation admin de la clé API {Id}", id);
-                TempData["ErrorMessage"] = "Erreur lors de la révocation de la clé API";
+                var errorMessage = "Erreur lors de la révocation de la clé API";
+                TempData["ErrorMessage"] = errorMessage;
+                
+                // Publier l'erreur pour notification temps réel (bufferisée car redirect)
+                await _publisher.PublishGenericErrorAsync(
+                    User,
+                    errorMessage,
+                    "AdminRevoke",
+                    "ApiKey",
+                    id.ToString(),
+                    ex);
+                
                 return RedirectToAction("Index", "ApiKeys");
             }
         }

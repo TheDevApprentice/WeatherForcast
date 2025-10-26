@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Identity;
 using domain.Entities;
 using domain.Interfaces.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace application.Middleware
 {
@@ -42,10 +42,10 @@ namespace application.Middleware
                     if (!activeSessions.Any())
                     {
                         _logger.LogWarning("Session révoquée pour l'utilisateur {UserId}. Déconnexion forcée.", userId);
-                        
+
                         // Déconnecter l'utilisateur
                         await signInManager.SignOutAsync();
-                        
+
                         // Rediriger vers la page de login
                         context.Response.Redirect("/Auth/Login?sessionExpired=true");
                         return;

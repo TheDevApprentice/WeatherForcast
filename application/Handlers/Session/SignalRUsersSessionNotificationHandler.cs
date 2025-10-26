@@ -9,7 +9,7 @@ namespace application.Handlers.Session
     /// Handler qui notifie l'utilisateur concerné via SignalR quand sa session est révoquée
     /// Force la déconnexion immédiate de l'utilisateur
     /// </summary>
-    public class SignalRUsersSessionNotificationHandler : 
+    public class SignalRUsersSessionNotificationHandler :
         INotificationHandler<SessionRevokedEvent>
     {
         private readonly IHubContext<UsersHub> _usersHubContext;
@@ -66,8 +66,8 @@ namespace application.Handlers.Session
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, 
-                    "❌ [UsersHub] Erreur lors de la notification de révocation de session pour {Email}", 
+                _logger.LogError(ex,
+                    "❌ [UsersHub] Erreur lors de la notification de révocation de session pour {Email}",
                     notification.Email);
             }
         }

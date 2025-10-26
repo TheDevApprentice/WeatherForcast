@@ -1,6 +1,7 @@
 using domain.Entities;
 using domain.Events;
 using domain.Events.WeatherForecast;
+using domain.Exceptions;
 using domain.Interfaces;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
@@ -58,23 +59,36 @@ namespace domain.Services
 
             if (existingForecast == null)
             {
-                return false;
+                throw new EntityNotFoundException("WeatherForecast", id.ToString(), "Update");
             }
 
-            // Mettre à jour les propriétés via les méthodes de l'entité
-            existingForecast.UpdateDate(date);
-            existingForecast.UpdateTemperature(temperature);
-            existingForecast.UpdateSummary(summary);
+            try
+            {
+                // Mettre à jour les propriétés via les méthodes de l'entité
+                existingForecast.UpdateDate(date);
+                existingForecast.UpdateTemperature(temperature);
+                existingForecast.UpdateSummary(summary);
 
-            await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
-            // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
-            var excludedConnectionId = _connectionService.GetCurrentConnectionId();
+                // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
+                var excludedConnectionId = _connectionService.GetCurrentConnectionId();
 
-            // Publier l'event pour notifier tous les handlers (utiliser l'entité trackée)
-            await _publisher.Publish(new ForecastUpdatedEvent(existingForecast, excludedConnectionId: excludedConnectionId));
+                // Publier l'event pour notifier tous les handlers (utiliser l'entité trackée)
+                await _publisher.Publish(new ForecastUpdatedEvent(existingForecast, excludedConnectionId: excludedConnectionId));
 
-            return true;
+                return true;
+            }
+            catch (Exception ex) when (ex is not DomainException)
+            {
+                // Wrapper les exceptions non-domain en DatabaseException
+                throw new DatabaseException(
+                    "Erreur lors de la mise à jour de la prévision.",
+                    "Update",
+                    "WeatherForecast",
+                    id.ToString(),
+                    ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -83,19 +97,32 @@ namespace domain.Services
 
             if (forecast == null)
             {
-                return false;
+                throw new EntityNotFoundException("WeatherForecast", id.ToString(), "Delete");
             }
 
-            _unitOfWork.WeatherForecasts.Delete(forecast);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _unitOfWork.WeatherForecasts.Delete(forecast);
+                await _unitOfWork.SaveChangesAsync();
 
-            // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
-            var excludedConnectionId = _connectionService.GetCurrentConnectionId();
+                // Récupérer le ConnectionId de l'émetteur pour l'exclure des notifications
+                var excludedConnectionId = _connectionService.GetCurrentConnectionId();
 
-            // Publier l'event pour notifier tous les handlers
-            await _publisher.Publish(new ForecastDeletedEvent(id, excludedConnectionId: excludedConnectionId));
+                // Publier l'event pour notifier tous les handlers
+                await _publisher.Publish(new ForecastDeletedEvent(id, excludedConnectionId: excludedConnectionId));
 
-            return true;
+                return true;
+            }
+            catch (Exception ex) when (ex is not DomainException)
+            {
+                // Wrapper les exceptions non-domain en DatabaseException
+                throw new DatabaseException(
+                    "Erreur lors de la suppression de la prévision.",
+                    "Delete",
+                    "WeatherForecast",
+                    id.ToString(),
+                    ex);
+            }
         }
     }
 }

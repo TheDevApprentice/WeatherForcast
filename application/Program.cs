@@ -4,11 +4,11 @@ using application.Middleware;
 using domain.Constants;
 using domain.Entities;
 using domain.Interfaces;
-using domain.Interfaces.Repositories;
 using domain.Interfaces.Services;
 using domain.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using infra.Data;
-using infra.Repositories;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -227,8 +227,13 @@ namespace application
             // 7. BackgroundService pour écouter les events Redis
             builder.Services.AddHostedService<RedisSubscriberService>();
 
-            // 8. MVC
+            // 8. MVC avec FluentValidation
             builder.Services.AddControllersWithViews();
+
+            // FluentValidation - Validation automatique
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
             // 9. SignalR pour les notifications en temps réel
             builder.Services.AddSignalR();
@@ -267,6 +272,9 @@ namespace application
             // ============================================
 
             // 1. Exception handling
+            // ✅ Middleware global d'erreurs (filet de sécurité)
+            app.UseGlobalErrorHandler();
+
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");

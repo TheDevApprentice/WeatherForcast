@@ -2,14 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace application.ViewModels
 {
+    /// <summary>
+    /// ViewModel pour la connexion d'un utilisateur
+    /// Validation déléguée à FluentValidation (LoginViewModelValidator)
+    /// </summary>
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "L'email est requis")]
-        [EmailAddress(ErrorMessage = "Email invalide")]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Le mot de passe est requis")]
         [DataType(DataType.Password)]
         [Display(Name = "Mot de passe")]
         public string Password { get; set; } = string.Empty;

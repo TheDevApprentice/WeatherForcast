@@ -49,6 +49,12 @@ namespace application.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
                 var (success, errors, user) = await _userManagementService.RegisterAsync(
@@ -93,6 +99,12 @@ namespace application.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
             if (ModelState.IsValid)
             {

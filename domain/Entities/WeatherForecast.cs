@@ -5,6 +5,7 @@ namespace domain.Entities
     /// <summary>
     /// Entité métier WeatherForecast (Domain Entity)
     /// Utilise le Value Object Temperature pour une meilleure encapsulation
+    /// Validation déléguée à FluentValidation (couche présentation)
     /// </summary>
     public class WeatherForecast
     {
@@ -37,11 +38,11 @@ namespace domain.Entities
         }
 
         /// <summary>
-        /// Constructeur principal avec validation
+        /// Constructeur principal
+        /// Validation déléguée à FluentValidation (couche présentation)
         /// </summary>
         public WeatherForecast(DateTime date, Temperature temperature, string? summary)
         {
-            ValidateDate(date);
             Date = date;
             Temperature = temperature ?? throw new ArgumentNullException(nameof(temperature));
             Summary = summary;
@@ -68,20 +69,7 @@ namespace domain.Entities
         /// </summary>
         public void UpdateDate(DateTime newDate)
         {
-            ValidateDate(newDate);
             Date = newDate;
-        }
-
-        /// <summary>
-        /// Validation de la date
-        /// </summary>
-        private static void ValidateDate(DateTime date)
-        {
-            if (date < DateTime.UtcNow.AddYears(-1))
-                throw new ArgumentException("La date ne peut pas être antérieure à 1 an");
-
-            if (date > DateTime.UtcNow.AddYears(1))
-                throw new ArgumentException("La date ne peut pas être supérieure à 1 an dans le futur");
         }
 
         // Propriétés de commodité pour accéder aux propriétés du Value Object

@@ -61,6 +61,71 @@ usersConnection.on("ForceLogout", (payload) => {
 });
 
 // ============================================
+// GESTION DES ERREURS
+// ============================================
+
+// Erreur survenue lors d'une action utilisateur
+usersConnection.on("ErrorOccurred", (payload) => {
+    console.error("❌ Erreur reçue:", payload);
+    
+    const cId = payload?.CorrelationId || payload?.correlationId;
+    
+    // ✅ Vérifier si déjà traité
+    if (hasProcessedCorrelation(cId)) {
+        console.warn(`⚠️ Erreur déjà traitée (CorrelationId: ${cId})`);
+        return;
+    }
+    
+    const message = payload?.Message || payload?.message || "Une erreur est survenue";
+    const errorType = payload?.ErrorType || payload?.errorType || "Unknown";
+    const action = payload?.Action || payload?.action;
+    const entityType = payload?.EntityType || payload?.entityType;
+    
+    // Construire un titre contextuel
+    let title = "Erreur";
+    if (action && entityType) {
+        const actionText = getActionText(action);
+        const entityText = getEntityText(entityType);
+        title = `Erreur - ${actionText} ${entityText}`;
+    } else if (action) {
+        title = `Erreur - ${getActionText(action)}`;
+    }
+    
+    // Afficher la notification d'erreur
+    showNotification(title, message, "danger");
+    
+    // Marquer comme traité pour éviter les doublons
+    markProcessedCorrelation(cId);
+    
+    // Log pour debugging
+    console.error(`[Error] CorrelationId=${cId} | Type=${errorType} | Action=${action} | Entity=${entityType} | Message=${message}`);
+});
+
+// Helpers pour traduire les actions et entités
+function getActionText(action) {
+    const translations = {
+        "Create": "Création",
+        "Update": "Modification",
+        "Delete": "Suppression",
+        "Revoke": "Révocation",
+        "AdminRevoke": "Révocation admin",
+        "Read": "Lecture",
+        "Search": "Recherche"
+    };
+    return translations[action] || action;
+}
+
+function getEntityText(entityType) {
+    const translations = {
+        "WeatherForecast": "de la prévision",
+        "ApiKey": "de la clé API",
+        "User": "de l'utilisateur",
+        "Session": "de la session"
+    };
+    return translations[entityType] || entityType;
+}
+
+// ============================================
 // OUTILS
 // ============================================
 function getSeenCorrelationIds() {
@@ -150,6 +215,9 @@ async function joinUserGroupIfAuthenticated() {
     try {
         await usersConnection.invoke("JoinUserGroup", userId);
         console.log("UsersHub: rejoint le groupe utilisateur:", userId);
+        
+        // Récupérer les notifications d'erreur en attente
+        await fetchAndDisplayPendingErrors(userId);
     } catch (err) {
         console.warn("UsersHub: impossible de rejoindre le groupe utilisateur:", err);
     }
@@ -206,11 +274,19 @@ async function startUsersConnection() {
 
 usersConnection.onreconnected(async () => {
     const email = getUserEmailForChannel();
+    const userId = getUserIdFromPage();
+    
     await joinEmailGroupIfPossible();
     await joinUserGroupIfAuthenticated();
+    
     if (email) {
         await fetchAndDisplayPending(email);
     }
+    
+    if (userId) {
+        await fetchAndDisplayPendingErrors(userId);
+    }
+    
     updateConnectionStatus("connected");
 });
 
@@ -264,5 +340,53 @@ async function fetchAndDisplayPending(email) {
         }
     } catch (err) {
         console.warn("UsersHub: FetchPending a échoué", err);
+    }
+}
+
+// Récupérer et afficher les notifications d'erreur en attente (après redirect)
+async function fetchAndDisplayPendingErrors(userId) {
+    try {
+        const items = await usersConnection.invoke("GetPendingNotifications", "error", userId);
+        if (!Array.isArray(items)) return;
+        
+        console.log(`UsersHub: ${items.length} notification(s) d'erreur en attente`);
+        
+        for (const it of items) {
+            const type = it?.type;
+            const payloadJson = it?.payload;
+            let payload;
+            try { 
+                payload = payloadJson ? JSON.parse(payloadJson) : {}; 
+            } catch { 
+                payload = {}; 
+            }
+            
+            if (type === "ErrorOccurred") {
+                const cId = payload?.CorrelationId || payload?.correlationId;
+                if (!hasProcessedCorrelation(cId)) {
+                    const message = payload?.Message || payload?.message || "Une erreur est survenue";
+                    const action = payload?.Action || payload?.action;
+                    const entityType = payload?.EntityType || payload?.entityType;
+                    
+                    // Construire le titre
+                    let title = "Erreur";
+                    if (action && entityType) {
+                        const actionText = getActionText(action);
+                        const entityText = getEntityText(entityType);
+                        title = `Erreur - ${actionText} ${entityText}`;
+                    } else if (action) {
+                        title = `Erreur - ${getActionText(action)}`;
+                    }
+                    
+                    // Afficher la notification
+                    showNotification(title, message, "danger");
+                    markProcessedCorrelation(cId);
+                    
+                    console.log(`[Error Pending] ${title}: ${message}`);
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("UsersHub: FetchPendingErrors a échoué", err);
     }
 }

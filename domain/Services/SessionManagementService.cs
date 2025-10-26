@@ -130,12 +130,12 @@ namespace domain.Services
             {
                 await _unitOfWork.Sessions.DeleteAsync(session.Id);
             }
-            
+
             await _unitOfWork.SaveChangesAsync();
 
             // Note: On ne publie pas d'événement SessionRevokedEvent ici car c'est utilisé 
             // lors du login pour nettoyer les anciennes sessions, pas pour forcer un logout
-            
+
             return sessionCount;
         }
 

@@ -1,11 +1,14 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using application.Authorization;
+using application.Helpers;
+using application.ViewModels;
+using domain.Constants;
 using domain.Entities;
+using domain.Events;
+using domain.Exceptions;
 using domain.Interfaces.Services;
 using domain.ValueObjects;
-using domain.Constants;
-using application.ViewModels;
-using application.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace application.Controllers
 {
@@ -19,13 +22,16 @@ namespace application.Controllers
     public class WeatherForecastController : Controller
     {
         private readonly IWeatherForecastService _weatherForecastService;
+        private readonly IPublisher _publisher;
         private readonly ILogger<WeatherForecastController> _logger;
 
         public WeatherForecastController(
             IWeatherForecastService weatherForecastService,
+            IPublisher publisher,
             ILogger<WeatherForecastController> logger)
         {
             _weatherForecastService = weatherForecastService;
+            _publisher = publisher;
             _logger = logger;
         }
 
@@ -50,7 +56,7 @@ namespace application.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
-            
+
             if (forecast == null)
             {
                 return NotFound();
@@ -72,6 +78,25 @@ namespace application.Controllers
         [HasPermission(AppClaims.ForecastWrite)]
         public async Task<IActionResult> Create(WeatherForecastViewModel viewModel)
         {
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
+            {
+                // Publier l'erreur pour notification SignalR
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+
+                await _publisher.PublishValidationErrorAsync(
+                    User,
+                    errors,
+                    "Create",
+                    "WeatherForecast",
+                    null,
+                    null);
+
+                return View(viewModel);
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -79,24 +104,31 @@ namespace application.Controllers
                     // Mapper le ViewModel vers l'entité avec le Value Object Temperature
                     var temperature = new Temperature(viewModel.TemperatureC);
                     var forecast = new WeatherForecast(viewModel.Date, temperature, viewModel.Summary);
-                    
+
                     await _weatherForecastService.CreateAsync(forecast);
-                    
+
                     _logger.LogInformation("Prévision météo créée avec succès : {Id}", forecast.Id);
-                    
+
                     // La notification SignalR est automatiquement gérée par le SignalRForecastNotificationHandler
-                    
+
                     return RedirectToAction(nameof(Index));
-                }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogWarning(ex, "Validation échouée lors de la création");
-                    ModelState.AddModelError("", ex.Message);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erreur lors de la création de la prévision météo");
-                    ModelState.AddModelError("", "Une erreur est survenue lors de la création.");
+                    var errorMessage = "Une erreur est survenue lors de la création de la prévision.";
+                    ModelState.AddModelError("", errorMessage);
+
+                    // Publier l'erreur pour notification temps réel
+                    await _publisher.PublishGenericErrorAsync(
+                        User,
+                        errorMessage,
+                        "Create",
+                        "WeatherForecast",
+                        null,
+                        ex);
+
+                    return View(viewModel);
                 }
             }
 
@@ -108,7 +140,7 @@ namespace application.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
-            
+
             if (forecast == null)
             {
                 return NotFound();
@@ -137,31 +169,57 @@ namespace application.Controllers
                 return NotFound();
             }
 
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
+            {
+                // Publier l'erreur pour notification SignalR
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+
+                await _publisher.PublishValidationErrorAsync(
+                    User,
+                    errors,
+                    "Update",
+                    "WeatherForecast",
+                    id.ToString(),
+                    null);
+
+                return View(viewModel);
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     // Créer le Value Object Temperature
                     var temperature = new Temperature(viewModel.TemperatureC);
-                    
+
                     // Appeler le service avec les valeurs individuelles
                     await _weatherForecastService.UpdateAsync(id, viewModel.Date, temperature, viewModel.Summary);
-                    
+
                     _logger.LogInformation("Prévision météo mise à jour : {Id}", id);
-                    
+
                     // La notification SignalR est automatiquement gérée par le SignalRForecastNotificationHandler
-                    
+
                     return RedirectToAction(nameof(Index));
-                }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogWarning(ex, "Validation échouée lors de la mise à jour");
-                    ModelState.AddModelError("", ex.Message);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erreur lors de la mise à jour de la prévision météo");
-                    ModelState.AddModelError("", "Une erreur est survenue lors de la mise à jour.");
+                    var errorMessage = "Une erreur est survenue lors de la mise à jour de la prévision.";
+                    ModelState.AddModelError("", errorMessage);
+
+                    // Publier l'erreur pour notification temps réel
+                    await _publisher.PublishGenericErrorAsync(
+                        User,
+                        errorMessage,
+                        "Update",
+                        "WeatherForecast",
+                        id.ToString(),
+                        ex);
+
+                    return View(viewModel);
                 }
             }
 
@@ -173,7 +231,7 @@ namespace application.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var forecast = await _weatherForecastService.GetByIdAsync(id);
-            
+
             if (forecast == null)
             {
                 return NotFound();
@@ -191,22 +249,43 @@ namespace application.Controllers
             try
             {
                 var success = await _weatherForecastService.DeleteAsync(id);
-                
+
                 if (!success)
                 {
                     return NotFound();
                 }
-                
+
                 _logger.LogInformation("Prévision météo supprimée : {Id}", id);
-                
+
                 // La notification SignalR est automatiquement gérée par le SignalRForecastNotificationHandler
-                
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DomainException ex)
+            {
+                // Exception typée du domain - publier directement
+                _logger.LogError(ex, "Erreur domain lors de la suppression");
+                TempData["ErrorMessage"] = ex.Message;
+
+                await _publisher.PublishDomainExceptionAsync(User, ex);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la suppression de la prévision météo");
-                TempData["ErrorMessage"] = "Erreur lors de la suppression";
+                // Exception non gérée
+                _logger.LogError(ex, "Erreur inattendue lors de la suppression");
+                var errorMessage = "Une erreur inattendue est survenue.";
+                TempData["ErrorMessage"] = errorMessage;
+
+                await _publisher.PublishGenericErrorAsync(
+                    User,
+                    errorMessage,
+                    "Delete",
+                    "WeatherForecast",
+                    id.ToString(),
+                    ex);
+
                 return RedirectToAction(nameof(Index));
             }
         }

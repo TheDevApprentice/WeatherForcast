@@ -7,6 +7,8 @@ using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using domain.Events;
+using application.Helpers;
 
 namespace application.Controllers
 {
@@ -24,6 +26,7 @@ namespace application.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly ISessionManagementService _sessionManagementService;
         private readonly IApiKeyService _apiKeyService;
+        private readonly IPublisher _publisher;
         private readonly ILogger<AdminController> _logger;
 
         public AdminController(
@@ -32,6 +35,7 @@ namespace application.Controllers
             IUserManagementService userManagementService,
             ISessionManagementService sessionManagementService,
             IApiKeyService apiKeyService,
+            IPublisher publisher,
             ILogger<AdminController> logger)
         {
             _userManager = userManager;
@@ -39,6 +43,7 @@ namespace application.Controllers
             _userManagementService = userManagementService;
             _sessionManagementService = sessionManagementService;
             _apiKeyService = apiKeyService;
+            _publisher = publisher;
             _logger = logger;
         }
 
@@ -209,6 +214,13 @@ namespace application.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
+            {
+                model.AvailableRoles = AppRoles.All.ToList();
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
                 var (success, errors, user) = await _userManagementService.RegisterAsync(

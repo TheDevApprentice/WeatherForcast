@@ -1,7 +1,7 @@
-using System.Text.Json;
 using domain.Interfaces.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace domain.Services
 {

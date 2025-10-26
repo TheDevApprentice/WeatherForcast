@@ -4,7 +4,7 @@ using domain.Interfaces.Services;
 
 namespace application.Handlers.Mailing
 {
-    public class SendEmailHandler : 
+    public class SendEmailHandler :
         INotificationHandler<UserRegisteredEvent>
     {
         private readonly IEmailService _emailService;

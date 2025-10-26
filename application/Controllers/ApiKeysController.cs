@@ -5,6 +5,10 @@ using domain.Entities;
 using domain.Interfaces.Services;
 using domain.Constants;
 using application.Authorization;
+using application.Validators;
+using domain.Events;
+using domain.Exceptions;
+using application.Helpers;
 
 namespace application.Controllers
 {
@@ -13,15 +17,18 @@ namespace application.Controllers
     {
         private readonly IApiKeyService _apiKeyService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPublisher _publisher;
         private readonly ILogger<ApiKeysController> _logger;
 
         public ApiKeysController(
             IApiKeyService apiKeyService,
             UserManager<ApplicationUser> userManager,
+            IPublisher publisher,
             ILogger<ApiKeysController> logger)
         {
             _apiKeyService = apiKeyService;
             _userManager = userManager;
+            _publisher = publisher;
             _logger = logger;
         }
 
@@ -50,7 +57,7 @@ namespace application.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission(AppClaims.ApiKeyManage)]
-        public async Task<IActionResult> Create(string name, int? expirationDays)
+        public async Task<IActionResult> Create(CreateApiKeyRequest request)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -58,9 +65,22 @@ namespace application.Controllers
                 return Unauthorized();
             }
 
-            if (string.IsNullOrWhiteSpace(name))
+            // ✅ Validation FluentValidation via ModelState
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("name", "Le nom est requis");
+                // Publier l'erreur pour notification SignalR
+                var errors = string.Join(", ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+
+                await _publisher.PublishValidationErrorAsync(
+                    User,
+                    errors,
+                    "Create",
+                    "ApiKey",
+                    null,
+                    null);
+
                 return View();
             }
 
@@ -68,8 +88,8 @@ namespace application.Controllers
             {
                 var (apiKey, plainSecret) = await _apiKeyService.GenerateApiKeyAsync(
                     user.Id, 
-                    name, 
-                    expirationDays);
+                    request.Name, 
+                    request.ExpirationDays);
 
                 _logger.LogInformation("Clé API créée pour {Email}: {Key}", user.Email, apiKey.Key);
 
@@ -80,10 +100,31 @@ namespace application.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+            catch (DomainException ex)
+            {
+                // ✅ Autre exception domain (Database, etc.)
+                _logger.LogError(ex, "Erreur domain lors de la création de la clé API");
+                TempData["ErrorMessage"] = ex.Message;
+                
+                await _publisher.PublishDomainExceptionAsync(User, ex);
+                
+                return RedirectToAction(nameof(Index));
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la création de la clé API");
-                ModelState.AddModelError(string.Empty, "Erreur lors de la création de la clé API");
+                _logger.LogError(ex, "Erreur inattendue lors de la création de la clé API");
+                var errorMessage = "Une erreur inattendue est survenue.";
+                TempData["ErrorMessage"] = errorMessage;
+                
+                // Publier l'erreur pour notification temps réel
+                await _publisher.PublishGenericErrorAsync(
+                    User,
+                    errorMessage,
+                    "Create",
+                    "ApiKey",
+                    null,
+                    ex);
+                
                 return View();
             }
         }
@@ -136,15 +177,29 @@ namespace application.Controllers
                         id, user.Email, revocationReason);
                     TempData["SuccessMessage"] = "Clé API révoquée avec succès";
                 }
-                else
-                {
-                    TempData["ErrorMessage"] = "Clé API introuvable ou déjà révoquée";
-                }
+            }
+            catch (DomainException ex)
+            {
+                // ✅ Exception typée du domain
+                _logger.LogError(ex, "Erreur domain lors de la révocation de la clé API {Id}", id);
+                TempData["ErrorMessage"] = ex.Message;
+                
+                await _publisher.PublishDomainExceptionAsync(User, ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la révocation de la clé API {Id}", id);
-                TempData["ErrorMessage"] = "Erreur lors de la révocation de la clé API";
+                _logger.LogError(ex, "Erreur inattendue lors de la révocation de la clé API {Id}", id);
+                var errorMessage = "Erreur lors de la révocation de la clé API";
+                TempData["ErrorMessage"] = errorMessage;
+                
+                // Publier l'erreur pour notification temps réel (bufferisée car redirect)
+                await _publisher.PublishGenericErrorAsync(
+                    User,
+                    errorMessage,
+                    "Revoke",
+                    "ApiKey",
+                    id.ToString(),
+                    ex);
             }
 
             return RedirectToAction(nameof(Index));
