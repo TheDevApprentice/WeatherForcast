@@ -2,7 +2,7 @@
 
 ## 📋 Architecture
 
-Cette application utilise le **Domain Events Pattern** avec un **EventPublisher custom** (remplace MediatR) pour implémenter les notifications en temps réel et l'extensibilité du système.
+Cette application utilise le **Domain Events Pattern** avec un **EventPublisher custom** pour implémenter les notifications en temps réel et l'extensibilité du système.
 
 ### Structure
 
@@ -79,7 +79,7 @@ public async Task<WeatherForecast> CreateAsync(WeatherForecast forecast)
 }
 ```
 
-#### 3️⃣ **MediatR** dispatche vers tous les handlers
+#### 3️⃣ **Event bus** dispatche vers tous les handlers
 
 #### 4️⃣ **Handlers** réagissent à l'event
 
@@ -282,7 +282,6 @@ Une seule application avec :
 
 ## 📚 Ressources
 
-- [MediatR Documentation](https://github.com/jbogard/MediatR)
 - [SignalR with Redis Backplane](https://learn.microsoft.com/en-us/aspnet/core/signalr/redis-backplane)
 - [Domain Events Pattern](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation)
 
@@ -290,14 +289,9 @@ Une seule application avec :
 
 ## 🎉 Résumé
 
-**Domain Events avec MediatR** = Architecture propre, découplée et extensible
+**Domain Events** = Architecture propre, découplée et extensible
 
 - ✅ Services domain ne dépendent pas de l'infrastructure
 - ✅ Facile d'ajouter des comportements (handlers)
 - ✅ Testable et maintenable
 - ✅ Pattern recommandé pour les applications enterprise
-
-**Prêt pour la production avec** :
-- Redis Backplane (SignalR multi-instances)
-- Message Broker (communication inter-services)
-- Monitoring et observabilité

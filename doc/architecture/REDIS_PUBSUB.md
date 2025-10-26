@@ -4,7 +4,7 @@
 
 Cette implémentation utilise **Redis Pub/Sub** avec un **EventPublisher custom** pour permettre la communication entre l'API et l'Application Web, afin que les clients Web reçoivent les notifications en temps réel même lorsque les modifications proviennent de l'API.
 
-> **Note :** Ce système utilise un EventPublisher custom au lieu de MediatR pour plus de simplicité et de performance.
+> **Note :** Ce système utilise un EventPublisher custom pour plus de simplicité et de performance.
 
 ### Flux Complet
 
@@ -136,7 +136,7 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 ```
 User (Web) → Create Forecast
     ↓
-Web Controller → Service → MediatR
+Web Controller → Service → EventPublisher
     ↓
 ┌─────────────────────────────┐
 │ SignalRHandler (Web)        │ → Clients Web reçoivent ✅
@@ -153,7 +153,7 @@ Web Controller → Service → MediatR
 ```
 API Client → POST /api/weatherforecast
     ↓
-API Controller → Service → MediatR
+API Controller → Service → EventPublisher
     ↓
 ┌─────────────────────────────┐
 │ RedisBrokerHandler (API)    │ → Publish Redis
@@ -211,7 +211,7 @@ Redis Pub/Sub peut être écouté par :
 2. Dans navigateur 1 : Créer une prévision
 3. Dans navigateur 2 : **Notification apparaît instantanément** ✅
 
-**Flow** : Web Controller → MediatR → SignalRHandler → Clients
+**Flow** : Web Controller → EventPublisher → SignalRHandler → Clients
 
 ---
 
@@ -221,7 +221,7 @@ Redis Pub/Sub peut être écouté par :
 2. Via Postman/Swagger : `POST https://localhost:7252/api/weatherforecast`
 3. Dans navigateur : **Notification apparaît instantanément** ✅
 
-**Flow** : API Controller → MediatR → RedisBrokerHandler → Redis → RedisSubscriber → SignalR → Clients
+**Flow** : API Controller → EventPublisher → RedisBrokerHandler → Redis → RedisSubscriber → SignalR → Clients
 
 ---
 
@@ -337,50 +337,3 @@ POST https://localhost:7252/api/weatherforecast
 
 # Vérifier dans le navigateur que la notification arrive ✅
 ```
-
----
-
-## 🛠️ Troubleshooting
-
-### **Problème : Clients Web ne reçoivent pas les notifications depuis l'API**
-
-**Vérifier** :
-1. Redis est démarré : `docker ps`
-2. RedisSubscriberService est démarré (logs Web)
-3. Pas d'erreur dans les logs API/Web
-4. Connection string Redis correcte
-
----
-
-### **Problème : Erreur "Redis connection failed"**
-
-**Solution** :
-```powershell
-# Redémarrer Redis
-docker restart weatherforecast-redis
-
-# Vérifier les logs
-docker logs weatherforecast-redis
-```
-
----
-
-## 📦 Packages Installés
-
-- **StackExchange.Redis** (API + Web) - Client Redis pour Pub/Sub
-- **MediatR** (Domain + API + Web) - Domain Events
-- **Microsoft.AspNetCore.SignalR** (Web) - WebSocket temps réel
-
----
-
-## 🎯 Conclusion
-
-**Architecture complète et production-ready** :
-- ✅ Clean Architecture respectée
-- ✅ Domain Events (MediatR)
-- ✅ Communication inter-process (Redis Pub/Sub)
-- ✅ Notifications temps réel (SignalR)
-- ✅ Extensible et maintenable
-- ✅ Testable
-
-**Les clients Web reçoivent les notifications en temps réel depuis l'API ET depuis le Web !** 🎉

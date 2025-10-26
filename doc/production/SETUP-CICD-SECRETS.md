@@ -525,57 +525,6 @@ steps:
 
 ---
 
-## 🆘 Dépannage
-
-### **Erreur : Secret not found**
-
-**GitHub Actions** :
-```bash
-# Vérifier que le secret existe
-Settings → Secrets and variables → Actions
-```
-
-**Azure DevOps** :
-```bash
-# Vérifier que le groupe de variables est lié
-azure-pipelines.yml → variables: - group: production-secrets
-```
-
-### **Erreur : Permission denied (SSH)**
-
-```bash
-# Tester la connexion SSH manuellement
-ssh -i ~/.ssh/deploy_key user@server-ip
-
-# Vérifier les permissions de la clé
-chmod 600 ~/.ssh/deploy_key
-
-# Vérifier que la clé publique est sur le serveur
-cat ~/.ssh/authorized_keys  # Sur le serveur
-```
-
-### **Erreur : Certificate password incorrect**
-
-```bash
-# Vérifier le mot de passe localement
-openssl pkcs12 -in cert.pfx -noout -password pass:YourPassword
-
-# Si erreur : le mot de passe est incorrect
-```
-
-### **Secret visible dans les logs**
-
-**GitHub Actions** :
-```yaml
-# Masquer automatiquement
-echo "::add-mask::$SECRET_VALUE"
-```
-
-**Azure DevOps** :
-- Variables marquées comme "secret" sont automatiquement masquées
-
----
-
 ## 📚 Ressources
 
 - [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
@@ -611,7 +560,3 @@ docker-compose ps
 docker-compose logs web | grep "Data Protection"
 # Devrait afficher : [Production] Data Protection using certificate: A1B2C3D4...
 ```
-
----
-
-**✅ Configuration des secrets terminée ! Vous êtes prêt pour la production ! 🚀**

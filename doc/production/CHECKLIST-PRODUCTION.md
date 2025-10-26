@@ -294,14 +294,6 @@ docker-compose exec web printenv | grep DATAPROTECTION
 
 ---
 
-## 📞 Support
-
-- Documentation : `SETUP-PRODUCTION-CERTIFICATE.md`
-- Variables : `.env.example`
-- Code : Voir commentaires dans `Program.cs`
-
----
-
 **✅ Pour DEV : Tout est prêt ! Lance juste `docker-compose up -d postgres` puis `dotnet run`**
 
 **⚠️ Pour PROD : Génère le certificat, configure `.env`, puis `docker-compose up -d`**

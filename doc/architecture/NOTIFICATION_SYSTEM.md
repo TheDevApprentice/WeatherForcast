@@ -1,9 +1,5 @@
 # 🚀 Système de Notifications Inter-Process - WeatherForecast
 
-**Auteur :** TheDevApprentice  
-**Date :** 25 octobre 2025  
-**Architecture :** EventPublisher Custom + Redis Pub/Sub + SignalR
-
 ---
 
 ## 📋 Vue d'Ensemble
@@ -90,7 +86,7 @@ Ce système permet la **communication temps réel** entre l'**API REST** et l'**
 
 **Fichier :** `shared/Messaging/EventPublisher.cs`
 
-**Rôle :** Remplace MediatR avec une implémentation sur mesure plus simple et performante.
+**Rôle :** Equivalent MediatR avec une implémentation sur mesure plus simple et performante.
 
 ```csharp
 public class EventPublisher : IPublisher
@@ -408,5 +404,3 @@ Chaque événement a un `CorrelationId` unique pour tracer son parcours à trave
 ## 🎯 Conclusion
 
 Ce système de notifications offre une **communication temps réel robuste** entre l'API et l'Application Web, avec une architecture **simple**, **performante** et **résiliente**. 
-
-L'utilisation d'un **EventPublisher custom** au lieu de MediatR permet un contrôle total sur le comportement et les performances, tout en gardant une complexité minimale.

@@ -21,7 +21,7 @@ Application complète démontrant une **Clean Architecture** avec communication 
 Cette application démontre une architecture de production complète pour des applications ASP.NET Core modernes avec :
 
 - **Clean Architecture** avec séparation stricte des responsabilités (Domain, Application, Infrastructure, API)
-- **Domain Events** avec Event Bus custom (remplace MediatR)
+- **Domain Events** avec Event Bus custom
 - **Communication temps réel** via SignalR et Redis Pub/Sub (11 canaux)
 - **Authentification multi-niveaux** (JWT pour API, API Keys OAuth2, Identity pour Web)
 - **Notifications temps réel** entre clients avec exclusion émetteur
@@ -230,6 +230,17 @@ await _publisher.Publish(new ForecastCreatedEvent(forecast));
 - ✅ **Session Validation** : Vérification DB à chaque requête
 - ✅ **Redis authentifié** : Mot de passe fort requis
 
+### 🛡️ Gestion d'Erreurs
+
+- ✅ **Exceptions typées** : ValidationException, EntityNotFoundException, DatabaseException
+- ✅ **Middleware global** : Filet de sécurité pour erreurs non gérées
+- ✅ **Notifications temps réel** : SignalR avec déduplication (CorrelationId)
+- ✅ **Bufferisation Redis** : Intelligente (pas pour Validation)
+- ✅ **AJAX** : Soumission sans rechargement pour UX fluide
+- ✅ **Logs structurés** : Audit complet avec contexte
+- ✅ **Fail-Fast** : Validation au plus tôt (constructeurs, Value Objects)
+- ✅ **Observabilité** : Traçabilité complète des erreurs
+
 ---
 
 ## 🚀 Démarrage Rapide
@@ -433,7 +444,7 @@ WeatherForecast/
 │   │   ├── AdminHub.cs
 │   │   └── UsersHub.cs
 │   └── Messaging/                  # Event Bus custom
-│       ├── EventPublisher.cs       # Remplace MediatR
+│       ├── EventPublisher.cs       
 │       └── ServiceCollectionExtensions.cs
 │
 ├── 📂 tests/                       # 18 Fichiers de tests
@@ -525,7 +536,7 @@ public class WeatherForecastService
 ### 3. Domain Events (Architecture Événementielle)
 
 ```csharp
-// Event Bus custom (remplace MediatR)
+// Event Bus custom
 await _publisher.Publish(new ForecastCreatedEvent(forecast));
     ↓
 // Handlers s'exécutent en PARALLÈLE (Task.WhenAll)
@@ -959,6 +970,7 @@ docker ps | grep redis
 - **[doc/architecture/DOMAIN_EVENTS.md](doc/architecture/DOMAIN_EVENTS.md)** - Système d'événements
 - **[doc/architecture/REDIS_PUBSUB.md](doc/architecture/REDIS_PUBSUB.md)** - Communication Redis
 - **[doc/architecture/NOTIFICATION_SYSTEM.md](doc/architecture/NOTIFICATION_SYSTEM.md)** - Notifications temps réel
+- **[doc/architecture/ERROR_HANDLING.md](doc/architecture/ERROR_HANDLING.md)** - Gestion d'erreurs complète
 - **[doc/code/Readme.md](doc/code/Readme.md)** - Analyse technique complète
 - **[doc/production/CHECKLIST-PRODUCTION.md](doc/production/CHECKLIST-PRODUCTION.md)** - Checklist déploiement
 
@@ -1022,19 +1034,6 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 - **Stack Exchange** pour StackExchange.Redis
 - **La communauté .NET** pour les nombreuses ressources et outils
 - **OWASP** pour les recommandations de sécurité
-
----
-
-## 📊 Statistiques du Projet
-
-- **136 fichiers C#** (~15,000 lignes de code)
-- **5 entités riches** avec encapsulation
-- **11 services métier** découplés
-- **19 événements domaine** avec handlers
-- **20+ design patterns** implémentés
-- **18 fichiers de tests** (NUnit)
-- **3 SignalR Hubs** pour temps réel
-- **11 canaux Redis** Pub/Sub
 
 ---
 

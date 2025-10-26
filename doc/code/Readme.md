@@ -100,6 +100,12 @@ Le projet WeatherForecast implémente une **Clean Architecture** avec une sépar
 - `CreateWeatherForecastRequest`, `UpdateWeatherForecastRequest`
 - `ErrorResponse`
 
+#### Validators FluentValidation (5)
+- **`CreateWeatherForecastRequestValidator`** : Validation Date, Summary, TemperatureC
+- **`UpdateWeatherForecastRequestValidator`** : Validation Date, Summary, TemperatureC
+- **`RegisterRequestValidator`** : Validation FirstName, LastName, Email, Password
+- **`LoginRequestValidator`** : Validation Email, Password
+
 #### Handlers (5 handlers)
 **WeatherForecast (2)**
 - `RedisBrokerHandler` : Publie événements vers Redis Pub/Sub
@@ -134,6 +140,13 @@ Le projet WeatherForecast implémente une **Clean Architecture** avec une sépar
 #### ViewModels (7)
 - `LoginViewModel`, `RegisterViewModel`, `WeatherForecastViewModel`
 - `CreateUserViewModel`, `EditRolesViewModel`, `UserDetailsViewModel`, `UserListViewModel`
+
+#### Validators FluentValidation (5)
+- **`WeatherForecastViewModelValidator`** : Validation Date, Summary, TemperatureC
+- **`CreateApiKeyRequestValidator`** : Validation Name, ExpirationDays
+- **`RegisterViewModelValidator`** : Validation FirstName, LastName, Email, Password, ConfirmPassword
+- **`LoginViewModelValidator`** : Validation Email, Password
+- **`CreateUserViewModelValidator`** : Validation FirstName, LastName, Email, Password, SelectedRoles, CustomClaims
 
 #### Handlers (7 handlers)
 **WeatherForecast (2)**
@@ -247,7 +260,7 @@ public class WeatherForecastService : IWeatherForecastService
 
 #### Patterns implémentés correctement
 - **Repository Pattern** avec Unit of Work et lazy loading
-- **Domain Events** avec Event Bus custom (remplace MediatR) et corrélation
+- **Domain Events** avec Event Bus custom et corrélation
 - **Value Objects** (Temperature, ApiKeyScopes) immutables avec validation intégrée
 - **Rich Domain Entities** avec encapsulation forte (setters privés, méthodes métier)
 - **CQRS léger** : Séparation lecture (AsNoTracking) / écriture (tracking)
@@ -378,7 +391,7 @@ Redis Pub/Sub → RedisSubscriberService → SignalR Hubs → Clients Web
 **Fonctionnalités temps réel implémentées :**
 - ✅ **3 SignalR Hubs** : WeatherForecastHub, AdminHub, UsersHub
 - ✅ **Redis Pub/Sub** : 11 canaux pour communication inter-processus
-- ✅ **Event Bus custom** : Remplace MediatR avec métriques et corrélation
+- ✅ **Event Bus custom** : avec métriques et corrélation
 - ✅ **Handlers parallèles** : Exécution Task.WhenAll pour performance
 - ✅ **Reconnexion automatique** : Côté client JavaScript avec retry exponentiel
 - ✅ **Exclusion émetteur** : SignalRConnectionService pour éviter les boucles
@@ -554,15 +567,15 @@ public class WeatherForecastController : ControllerBase
 
 ### Forces du projet
 
-#### 1. Architecture (19/20)
+#### 1. Architecture
 - ✅ **Clean Architecture** exemplaire avec séparation stricte des couches
 - ✅ **DDD** : Entités riches, Value Objects, Domain Events, Aggregates
 - ✅ **SOLID** : Respect rigoureux des 5 principes
 - ✅ **Patterns** : 20+ patterns implémentés correctement
-- ✅ **Découplage** : Event Bus custom remplace MediatR avec succès
+- ✅ **Découplage** : Event Bus custom
 - ⚠️ **Amélioration possible** : Ajouter CQRS complet avec handlers séparés
 
-#### 2. Sécurité (18/20)
+#### 2. Sécurité
 - ✅ **Argon2id** : Hashing moderne (64MB RAM, 4 iterations) recommandé OWASP 2024
 - ✅ **Constant-time comparison** : Protection contre timing attacks
 - ✅ **Rate Limiting** : Redis distribué avec brute force protection
@@ -571,7 +584,7 @@ public class WeatherForecastController : ControllerBase
 - ✅ **Data Protection** : Clés chiffrées avec X.509 en production
 - ⚠️ **Amélioration possible** : Ajouter 2FA/MFA
 
-#### 3. Performance (18/20)
+#### 3. Performance
 - ✅ **DbContext Pooling** : Pool de 256 instances
 - ✅ **Index composites** : 6+ index optimisés
 - ✅ **AsNoTracking** : Requêtes read-only optimisées
@@ -580,7 +593,7 @@ public class WeatherForecastController : ControllerBase
 - ✅ **Lazy loading** : Repositories instanciés à la demande
 - ⚠️ **Amélioration possible** : Ajouter cache applicatif (IMemoryCache)
 
-#### 4. Temps réel (19/20)
+#### 4. Temps réel
 - ✅ **SignalR** : 3 hubs avec reconnexion automatique
 - ✅ **Redis Pub/Sub** : 11 canaux pour communication inter-processus
 - ✅ **Event Bus** : Handlers parallèles avec métriques
@@ -588,7 +601,7 @@ public class WeatherForecastController : ControllerBase
 - ✅ **Logout forcé** : SessionRevokedEvent déclenche déconnexion immédiate
 - ✅ **Connection Mapping** : Redis pour notifications ciblées
 
-#### 5. Maintenabilité (19/20)
+#### 5. Maintenabilité
 - ✅ **Séparation des préoccupations** : Chaque service a une responsabilité unique
 - ✅ **Injection de dépendances** : Généralisée avec interfaces
 - ✅ **Testabilité** : Toutes les dépendances mockables
@@ -596,13 +609,200 @@ public class WeatherForecastController : ControllerBase
 - ✅ **Conventions** : Nommage cohérent et clair
 - ✅ **Refactoring** : Services séparés (UserManagement, SessionManagement, Authentication)
 
-#### 6. Tests (17/20)
+#### 6. Tests
 - ✅ **Tests unitaires** : 18 fichiers de tests (Entities, Services, ValueObjects)
 - ✅ **NUnit + FluentAssertions** : Stack de test moderne
 - ✅ **Tests repositories** : Validation de la couche infra
 - ✅ **Tests middleware** : ApiKeyAuthenticationMiddlewareTests
 - ⚠️ **Amélioration possible** : Ajouter tests d'intégration (WebApplicationFactory)
 - ⚠️ **Amélioration possible** : Augmenter la couverture de code (>80%)
+
+## 🛡️ Gestion d'Erreurs
+
+### Architecture Complète
+
+Le système de gestion d'erreurs implémente une architecture production-ready avec :
+
+#### 1. **Exceptions Typées (Domain Layer)**
+
+```csharp
+DomainException (abstract)
+├── ValidationException      // Données invalides
+├── EntityNotFoundException  // Entité introuvable
+├── DatabaseException        // Erreurs base de données
+└── ExternalServiceException // Services externes
+```
+
+**Exemple** :
+```csharp
+// domain/Entities/WeatherForecast.cs
+private static void ValidateSummary(string? summary)
+{
+    if (string.IsNullOrWhiteSpace(summary) || summary == "-- Sélectionnez --")
+    {
+        throw new ValidationException(
+            "Veuillez sélectionner un résumé météo valide.",
+            "Validation",
+            "WeatherForecast",
+            null);
+    }
+}
+```
+
+#### 2. **Middleware Global (Filet de Sécurité)**
+
+```csharp
+// application/Middleware/GlobalErrorHandlerMiddleware.cs
+public async Task InvokeAsync(HttpContext context, IPublisher publisher)
+{
+    try
+    {
+        await _next(context);
+    }
+    catch (DomainException ex)
+    {
+        // Exception typée → Log + Redirect avec message
+        _logger.LogWarning(ex, "[GlobalErrorHandler] DomainException non catchée");
+        context.Response.Redirect($"/Home/Error?message={ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        // Exception non gérée → Log + Redirect générique
+        _logger.LogError(ex, "[GlobalErrorHandler] Exception non gérée");
+        context.Response.Redirect("/Home/Error");
+    }
+}
+```
+
+**Rôle** : Catcher les exceptions **non gérées** dans les controllers (bugs, erreurs inattendues).
+
+#### 3. **Gestion dans les Controllers**
+
+```csharp
+// application/Controllers/WeatherForecastController.cs
+try
+{
+    var forecast = new WeatherForecast(date, temperature, summary);
+    await _service.CreateAsync(forecast);
+    return RedirectToAction(nameof(Index));
+}
+catch (ValidationException ex)
+{
+    // Validation → Rester sur la page
+    ModelState.AddModelError("", ex.Message);
+    await _publisher.PublishDomainExceptionAsync(User, ex);
+    return View(viewModel);
+}
+catch (DomainException ex)
+{
+    // Autre erreur → Redirect avec notification
+    TempData["ErrorMessage"] = ex.Message;
+    await _publisher.PublishDomainExceptionAsync(User, ex);
+    return RedirectToAction(nameof(Index));
+}
+```
+
+#### 4. **Notifications Temps Réel (SignalR)**
+
+```csharp
+// application/Handlers/Error/SignalRErrorHandler.cs
+public async Task Handle(ErrorOccurredEvent notification, CancellationToken ct)
+{
+    // 1. Envoyer notification SignalR
+    await _usersHub.Clients.User(userId).SendAsync("ErrorOccurred", payload);
+    
+    // 2. Bufferiser dans Redis UNIQUEMENT pour erreurs avec redirect
+    if (notification.ErrorType != ErrorType.Validation)
+    {
+        await _pending.AddAsync("error", userId, "ErrorOccurred", payloadJson, TimeSpan.FromMinutes(2));
+    }
+}
+```
+
+**Bufferisation Intelligente** :
+- ✅ **Validation** : PAS de bufferisation (user reste sur la page)
+- ✅ **Database, NotFound** : Bufferisation (redirect → reconnexion SignalR)
+
+#### 5. **AJAX pour UX Fluide**
+
+```javascript
+// application/Views/WeatherForecast/Edit.cshtml
+document.getElementById('editForm').addEventListener('submit', async function(e) {
+    e.preventDefault();  // Empêcher le submit classique
+    
+    const response = await fetch(form.action, { method: 'POST', body: formData });
+    
+    if (response.redirected) {
+        window.location.href = response.url;  // Succès
+    } else {
+        // Erreur → Afficher message dans le formulaire
+        // ✅ Notification SignalR affichée automatiquement (connexion active)
+    }
+});
+```
+
+**Avantages** :
+- ✅ Pas de rechargement de page
+- ✅ SignalR reste connecté
+- ✅ Notification affichée immédiatement
+- ✅ Formulaire conservé
+
+#### 6. **Déduplication (CorrelationId)**
+
+```javascript
+// application/wwwroot/js/hubs/user-realtime.js
+usersConnection.on("ErrorOccurred", (payload) => {
+    const cId = payload?.CorrelationId;
+    
+    if (hasProcessedCorrelation(cId)) {
+        console.warn(`⚠️ Erreur déjà traitée (CorrelationId: ${cId})`);
+        return;
+    }
+    
+    showNotification(title, message, "danger");
+    markProcessedCorrelation(cId);
+});
+```
+
+### Flux Complet
+
+```
+User saisit données invalides
+   ↓
+AJAX POST (pas de rechargement)
+   ↓
+WeatherForecast constructor → throw ValidationException
+   ↓
+Controller catch (ValidationException ex)
+   ↓
+ModelState.AddModelError() + PublishDomainExceptionAsync()
+   ↓
+return View(viewModel) → Réponse HTML
+   ↓
+SignalRErrorHandler:
+  - SendAsync("ErrorOccurred") ✅
+  - PAS de bufferisation Redis ✅
+   ↓
+Client JavaScript (connexion active):
+  - Reçoit "ErrorOccurred"
+  - Déduplication (CorrelationId)
+  - showNotification() ✅ UNE SEULE FOIS
+   ↓
+AJAX parse HTML → Affiche message dans formulaire
+   ↓
+✅ User voit : Notification toast + Message formulaire
+```
+
+### Documentation Détaillée
+
+Voir **[doc/architecture/ERROR_HANDLING.md](../architecture/ERROR_HANDLING.md)** pour :
+- Architecture complète
+- Tous les types d'exceptions
+- Exemples de code
+- Scénarios de test
+- Flux détaillés
+
+---
 
 ### Conclusion finale
 
@@ -612,6 +812,7 @@ Le projet **WeatherForecast** constitue un **exemple de référence** d'applicat
 ✅ **Sécurité robuste** : Argon2id, Rate Limiting, Session Validation  
 ✅ **Performance optimisée** : DbContext Pooling, Index, Redis  
 ✅ **Temps réel avancé** : SignalR + Redis Pub/Sub avec 11 canaux  
+✅ **Gestion d'erreurs complète** : Exceptions typées, Middleware global, Notifications temps réel  
 ✅ **Code maintenable** : Services découplés, testabilité maximale  
 ✅ **Patterns avancés** : 20+ patterns correctement implémentés  
 
