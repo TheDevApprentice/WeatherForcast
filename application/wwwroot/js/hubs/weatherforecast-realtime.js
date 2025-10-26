@@ -214,15 +214,15 @@ function updateForecastRow(forecast) {
     const tempF = Math.round((forecast.temperatureC * 9/5) + 32);
     
     // Déterminer le badge de température
-    let tempBadge = '';
+    let tempBadgeSpan;
     if (forecast.temperatureC >= 30) {
-        tempBadge = '<span class="badge bg-danger">🔥 Chaud</span>';
+        tempBadgeSpan = el("span", "badge bg-danger", "🔥 Chaud");
     } else if (forecast.temperatureC >= 20) {
-        tempBadge = '<span class="badge bg-warning">☀️ Agréable</span>';
+        tempBadgeSpan = el("span", "badge bg-warning", "☀️ Agréable");
     } else if (forecast.temperatureC >= 10) {
-        tempBadge = '<span class="badge bg-info">🌤️ Frais</span>';
+        tempBadgeSpan = el("span", "badge bg-info", "🌤️ Frais");
     } else {
-        tempBadge = '<span class="badge bg-primary">❄️ Froid</span>';
+        tempBadgeSpan = el("span", "badge bg-primary", "❄️ Froid");
     }
     
     col.classList.add("updated-row"); // Animation

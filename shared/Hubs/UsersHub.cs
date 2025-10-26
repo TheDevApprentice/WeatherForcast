@@ -96,5 +96,24 @@ namespace shared.Hubs
             // Retourne un tableau d'objets anonymes { type, payload }
             return items.Select(i => new { type = i.Type, payload = i.PayloadJson }).Cast<object>().ToArray();
         }
+
+        /// <summary>
+        /// Récupère les notifications en attente (erreurs, etc.) pour un utilisateur puis purge le buffer.
+        /// </summary>
+        public async Task<object[]> GetPendingNotifications(string notificationType, string userId)
+        {
+            if (string.IsNullOrWhiteSpace(notificationType) || string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogWarning("[UsersHub] GetPendingNotifications: paramètres invalides pour ConnId={ConnId}", Context.ConnectionId);
+                return Array.Empty<object>();
+            }
+
+            _logger.LogInformation("[UsersHub] GetPendingNotifications: Type={Type} UserId={UserId} ConnId={ConnId}", 
+                notificationType, userId, Context.ConnectionId);
+            
+            var items = await _pending.FetchPendingAsync(notificationType, userId);
+            // Retourne un tableau d'objets anonymes { type, payload }
+            return items.Select(i => new { type = i.Type, payload = i.PayloadJson }).Cast<object>().ToArray();
+        }
     }
 }

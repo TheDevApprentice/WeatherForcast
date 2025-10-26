@@ -16,7 +16,7 @@ namespace application.Controllers
     /// Controller WeatherForecast avec Clean Architecture
     /// Utilise IWeatherForecastService (pas de dépendance directe à Infrastructure)
     /// Nécessite une authentification
-    /// Les notifications temps réel sont gérées automatiquement par les Domain Events (MediatR)
+    /// Les notifications temps réel sont gérées automatiquement par les Domain Events
     /// </summary>
     [Authorize]
     public class WeatherForecastController : Controller

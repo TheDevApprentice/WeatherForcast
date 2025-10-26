@@ -46,14 +46,12 @@ namespace api.Validators
                 .WithMessage("Le mot de passe doit contenir au moins 6 caractères")
                 .MaximumLength(100)
                 .WithMessage("Le mot de passe ne peut pas dépasser 100 caractères")
-                .Matches("[A-Z]")
-                .WithMessage("Le mot de passe doit contenir au moins une majuscule")
-                .Matches("[a-z]")
-                .WithMessage("Le mot de passe doit contenir au moins une minuscule")
-                .Matches("[0-9]")
-                .WithMessage("Le mot de passe doit contenir au moins un chiffre")
-                .Matches("[^a-zA-Z0-9]")
-                .WithMessage("Le mot de passe doit contenir au moins un caractère spécial");
+                .Must(password => string.IsNullOrEmpty(password) || 
+                    (password.Any(char.IsUpper) && 
+                     password.Any(char.IsLower) && 
+                     password.Any(char.IsDigit) && 
+                     password.Any(ch => !char.IsLetterOrDigit(ch))))
+                .WithMessage("Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial");
         }
     }
 }

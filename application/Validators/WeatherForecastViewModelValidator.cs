@@ -11,11 +11,11 @@ namespace application.Validators
     {
         public WeatherForecastViewModelValidator()
         {
-            // Validation de la date
+            // Validation de la date (utilise Must pour éviter les problèmes client-side)
             RuleFor(x => x.Date)
-                .GreaterThanOrEqualTo(DateTime.UtcNow.AddYears(-1))
+                .Must(date => date.Date >= DateTime.UtcNow.Date.AddYears(-1))
                 .WithMessage("La date ne peut pas être antérieure à 1 an")
-                .LessThanOrEqualTo(DateTime.UtcNow.AddYears(1))
+                .Must(date => date.Date <= DateTime.UtcNow.Date.AddYears(1))
                 .WithMessage("La date ne peut pas être supérieure à 1 an dans le futur");
 
             // Validation du résumé
