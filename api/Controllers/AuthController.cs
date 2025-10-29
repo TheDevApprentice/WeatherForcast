@@ -67,25 +67,17 @@ namespace api.Controllers
             // Assigner le rôle MobileUser
             await _userManager.AddToRoleAsync(user, AppRoles.MobileUser);
 
-            // Générer le token JWT (avec rôles et claims)
-            var token = await _jwtService.GenerateTokenAsync(user);
-
-            // Récupérer les informations de la requête
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-
-            var response = new AuthResponse
-            {
-                Token = token,
-                Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-                ExpiresAt = DateTime.UtcNow.AddHours(24)
-            };
-
             _logger.LogInformation("Nouvel utilisateur mobile enregistré: {Email}", user.Email);
 
-            return Ok(response);
+            // Retourner seulement les infos utilisateur, pas de token
+            // L'utilisateur doit se connecter via /api/auth/login pour obtenir un token
+            return Ok(new
+            {
+                Message = "Compte créé avec succès. Veuillez vous connecter.",
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            });
         }
 
         /// <summary>
@@ -188,6 +180,49 @@ namespace api.Controllers
                 user.LastName,
                 user.CreatedAt
             });
+        }
+
+        /// <summary>
+        /// Déconnexion d'un utilisateur mobile (révoque la session API)
+        /// </summary>
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur depuis le token JWT
+                var userId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                // Récupérer le token JWT depuis l'en-tête Authorization
+                var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+                var token = authHeader.Replace("Bearer ", "");
+
+                // Révoquer uniquement la session API correspondant à ce token
+                var activeSessions = await _sessionManagementService.GetActiveSessionsAsync(userId);
+                var currentSession = activeSessions.FirstOrDefault(s => s.Token == token && s.Type == domain.Entities.SessionType.Api);
+
+                if (currentSession != null)
+                {
+                    await _sessionManagementService.RevokeAsync(currentSession.Id, "Déconnexion utilisateur", userId);
+                }
+
+                _logger.LogInformation("Utilisateur mobile déconnecté: {UserId}", userId);
+
+                return Ok(new { Message = "Déconnexion réussie" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la déconnexion");
+                return StatusCode(500, new { Message = "Erreur lors de la déconnexion" });
+            }
         }
     }
 }

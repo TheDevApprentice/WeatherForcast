@@ -55,30 +55,30 @@ namespace application.Controllers
                 return View(model);
             }
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
+            //{
+            var (success, errors, user) = await _userManagementService.RegisterAsync(
+                model.Email,
+                model.Password,
+                model.FirstName,
+                model.LastName);
+
+            if (success && user != null)
             {
-                var (success, errors, user) = await _userManagementService.RegisterAsync(
-                    model.Email,
-                    model.Password,
-                    model.FirstName,
-                    model.LastName);
+                // Assigner le rôle "User" par défaut
+                await _userManager.AddToRoleAsync(user, AppRoles.User);
 
-                if (success && user != null)
-                {
-                    // Assigner le rôle "User" par défaut
-                    await _userManager.AddToRoleAsync(user, AppRoles.User);
-
-                    // Ne pas auto-login après registration
-                    // Rediriger vers la page de login
-                    TempData["SuccessMessage"] = "Compte créé avec succès. Veuillez vous connecter.";
-                    return RedirectToAction("Login");
-                }
-
-                foreach (var error in errors)
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                }
+                // Ne pas auto-login après registration
+                // Rediriger vers la page de login
+                TempData["SuccessMessage"] = "Compte créé avec succès. Veuillez vous connecter.";
+                return RedirectToAction("Login");
             }
+
+            foreach (var error in errors)
+            {
+                ModelState.AddModelError(string.Empty, error);
+            }
+            //}
 
             return View(model);
         }

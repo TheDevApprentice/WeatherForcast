@@ -68,16 +68,19 @@ namespace mobile.PageModels.Auth
                     Password = Password
                 };
 
-                var response = await _apiService.RegisterAsync(request);
+                var success = await _apiService.RegisterAsync(request);
 
-                if (response != null)
+                if (success)
                 {
-                    // Sauvegarder le token et les infos utilisateur
-                    await _secureStorage.SaveTokenAsync(response.Token);
-                    await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
-
-                    // Navigation vers l'application principale
-                    await Shell.Current.GoToAsync("///main");
+                    // L'inscription a réussi, mais pas de token retourné
+                    // L'utilisateur doit maintenant se connecter
+                    ShowError("Compte créé avec succès ! Veuillez vous connecter.");
+                    
+                    // Attendre un peu pour que l'utilisateur lise le message
+                    await Task.Delay(2000);
+                    
+                    // Navigation vers la page de connexion
+                    await Shell.Current.GoToAsync("..");
                 }
                 else
                 {

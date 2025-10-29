@@ -13,6 +13,7 @@ namespace mobile.Services
         public async Task SaveTokenAsync(string token)
         {
             await SecureStorage.SetAsync(TOKEN_KEY, token);
+            Console.WriteLine("Token saved !!!!!!!!: " + token);
         }
 
         public async Task<string?> GetTokenAsync()

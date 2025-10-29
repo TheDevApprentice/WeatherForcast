@@ -10,7 +10,7 @@ namespace mobile.Services
     {
         // Authentification
         Task<AuthResponse?> LoginAsync(LoginRequest request);
-        Task<AuthResponse?> RegisterAsync(RegisterRequest request);
+        Task<bool> RegisterAsync(RegisterRequest request);
         Task<bool> ValidateTokenAsync();
         Task<bool> LogoutAsync();
 

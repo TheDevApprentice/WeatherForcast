@@ -49,7 +49,7 @@ namespace mobile.Services
             }
         }
 
-        public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
+        public async Task<bool> RegisterAsync(RegisterRequest request)
         {
             try
             {
@@ -57,11 +57,12 @@ namespace mobile.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
+                    _logger.LogInformation("Inscription réussie pour {Email}", request.Email);
+                    return true;
                 }
 
                 _logger.LogWarning("Échec de l'inscription: {StatusCode}", response.StatusCode);
-                return null;
+                return false;
             }
             catch (Exception ex)
             {
