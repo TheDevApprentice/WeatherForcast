@@ -13,7 +13,8 @@ namespace mobile.Services
         /// <param name="ex">Exception.</param>
         public void HandleError(Exception ex)
         {
-            DisplayAlert(ex).FireAndForgetSafeAsync();
+            // Fire and forget - ne pas attendre la tâche
+            _ = DisplayAlert(ex);
         }
 
         async Task DisplayAlert(Exception ex)

@@ -1,5 +1,6 @@
-﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using mobile.Pages.Auth;
 using Font = Microsoft.Maui.Font;
 
 namespace mobile
@@ -11,6 +12,9 @@ namespace mobile
             InitializeComponent();
             var currentTheme = Application.Current!.RequestedTheme;
             ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
+
+            // Enregistrer les routes pour la navigation
+            Routing.RegisterRoute("register", typeof(RegisterPage));
         }
         public static async Task DisplaySnackbarAsync(string message)
         {

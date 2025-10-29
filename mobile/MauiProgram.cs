@@ -1,6 +1,13 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
+using mobile.Services;
+using mobile.Services.Handlers;
+using mobile.Pages.Auth;
+using mobile.PageModels.Auth;
+using mobile.Pages;
+using mobile.PageModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace mobile
 {
@@ -32,18 +39,29 @@ namespace mobile
     		builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
 
-            builder.Services.AddSingleton<ProjectRepository>();
-            builder.Services.AddSingleton<TaskRepository>();
-            builder.Services.AddSingleton<CategoryRepository>();
-            builder.Services.AddSingleton<TagRepository>();
-            builder.Services.AddSingleton<SeedDataService>();
+            // Services
+            builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
             builder.Services.AddSingleton<ModalErrorHandler>();
-            builder.Services.AddSingleton<MainPageModel>();
-            builder.Services.AddSingleton<ProjectListPageModel>();
-            builder.Services.AddSingleton<ManageMetaPageModel>();
 
-            builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
-            builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
+            // HttpClient avec authentification
+            builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();
+            builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+            {
+                var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7252";
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler<AuthenticatedHttpClientHandler>();
+
+            // Pages et ViewModels d'authentification
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<LoginPageModel>();
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<RegisterPageModel>();
+
+            // Page principale
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<MainPageModel>();
 
             return builder.Build();
         }

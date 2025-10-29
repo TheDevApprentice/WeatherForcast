@@ -1,6 +1,4 @@
 global using Fonts;
-global using mobile.Data;
-global using mobile.PageModels;
-global using mobile.Pages;
+global using mobile.PageModels.Auth;
+global using mobile.Pages.Auth;
 global using mobile.Services;
-global using mobile.Utilities;
