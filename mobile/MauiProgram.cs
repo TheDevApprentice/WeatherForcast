@@ -47,7 +47,7 @@ namespace mobile
             builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
-                var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7252";
+                var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
