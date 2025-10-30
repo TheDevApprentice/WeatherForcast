@@ -1,13 +1,11 @@
 using CommunityToolkit.Maui;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Syncfusion.Maui.Toolkit.Hosting;
-using mobile.Services;
-using mobile.Services.Handlers;
-using mobile.Pages.Auth;
-using mobile.PageModels.Auth;
-using mobile.Pages;
 using mobile.PageModels;
-using Microsoft.Extensions.DependencyInjection;
+using mobile.Pages;
+using mobile.Services.Handlers;
+using Syncfusion.Maui.Toolkit.Hosting;
+using System.Reflection;
 
 namespace mobile
 {
@@ -35,9 +33,22 @@ namespace mobile
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
-    		builder.Services.AddLogging(configure => configure.AddDebug());
+            builder.Logging.AddDebug();
+            builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
+
+            // Charger appsettings.json depuis les ressources embarquées
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream("mobile.Resources.Raw.appsettings.json");
+
+            if (stream != null)
+            {
+                var config = new ConfigurationBuilder()
+                    .AddJsonStream(stream)
+                    .Build();
+
+                builder.Configuration.AddConfiguration(config);
+            }
 
             // Services
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
@@ -48,6 +59,7 @@ namespace mobile
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
                 var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
