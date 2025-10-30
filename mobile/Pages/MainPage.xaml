@@ -40,10 +40,6 @@
                            FontAttributes="Bold"
                            TextColor="{StaticResource DarkOnLightBackground}" />
                     
-                    <Label Text="• Liste des prévisions météo" FontSize="14" />
-                    <Label Text="• Détail d'une prévision" FontSize="14" />
-                    <Label Text="• Création de prévisions" FontSize="14" />
-                    <Label Text="• Modification et suppression" FontSize="14" />
                     <Label Text="• Synchronisation temps réel" FontSize="14" />
                 </VerticalStackLayout>
             </Frame>

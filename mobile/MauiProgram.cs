@@ -1,8 +1,6 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using mobile.PageModels;
-using mobile.Pages;
 using mobile.Services.Handlers;
 using Syncfusion.Maui.Toolkit.Hosting;
 using System.Reflection;
@@ -58,7 +56,22 @@ namespace mobile
             builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
-                var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+                var baseUrl = "";
+#if ANDROID
+                // Utilise BaseUrlDevice pour téléphone réel, BaseUrlEmulator pour émulateur
+                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"]
+                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
+#elif IOS
+                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"] 
+                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
+#elif WINDOWS
+                baseUrl = builder.Configuration["ApiSettings:BaseUrlWindows"];
+#endif
+
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new InvalidOperationException("ApiSettings:BaseUrl* n'est pas configuré.");
+                }
 
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
