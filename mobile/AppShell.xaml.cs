@@ -40,6 +40,40 @@ namespace mobile
             {
                 loginItem.FlyoutItemIsVisible = false;
             }
+
+            // Bouton de déconnexion visible seulement si connecté
+            LogoutButton.IsVisible = isAuthenticated;
+        }
+
+        private async void OnLogoutClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                // Récupérer les services
+                var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
+                var apiService = Handler?.MauiContext?.Services.GetService<IApiService>();
+
+                if (secureStorage != null && apiService != null)
+                {
+                    // Appeler l'API pour déconnecter
+                    await apiService.LogoutAsync();
+
+                    // Supprimer les données locales
+                    await secureStorage.ClearAllAsync();
+
+                    // Mettre à jour l'UI
+                    UpdateAuthenticationUI(false);
+
+                    // Rediriger vers la page de connexion
+                    await Shell.Current.GoToAsync("///login");
+
+                    await DisplayToastAsync("Déconnexion réussie");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplaySnackbarAsync($"Erreur lors de la déconnexion: {ex.Message}");
+            }
         }
 
         protected override void OnNavigated(ShellNavigatedEventArgs args)

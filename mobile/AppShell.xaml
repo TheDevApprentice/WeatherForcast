@@ -16,15 +16,28 @@
         ContentTemplate="{DataTemplate pages:MainPage}"
         Route="main" />
 
-    <!-- Page de connexion -->
+    <!-- Page de connexion (jamais visible dans le menu) -->
     <ShellContent
+        x:Name="LoginItem"
         Title="Connexion"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate auth:LoginPage}"
-        Route="login" />
+        Route="login"
+        FlyoutItemIsVisible="False" />
 
     <Shell.FlyoutFooter>
-        <Grid Padding="15">
+        <VerticalStackLayout Padding="15" Spacing="15">
+            <!-- Bouton de déconnexion (visible seulement si connecté) -->
+            <Button x:Name="LogoutButton"
+                    Text="Déconnexion"
+                    BackgroundColor="{StaticResource Danger}"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    Clicked="OnLogoutClicked"
+                    IsVisible="False"/>
+            
+            <!-- Sélecteur de thème -->
             <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
                 VerticalOptions="Center" HorizontalOptions="Center" SelectionChanged="SfSegmentedControl_SelectionChanged"
                 SegmentWidth="40" SegmentHeight="40">
@@ -35,7 +48,7 @@
                     </x:Array>
                 </sf:SfSegmentedControl.ItemsSource>
             </sf:SfSegmentedControl>
-        </Grid>
+        </VerticalStackLayout>
     </Shell.FlyoutFooter>
 
 </Shell>
