@@ -34,6 +34,13 @@ namespace mobile
                 dashboardItem.IsVisible = isAuthenticated;
             }
 
+            // Prévisions visibles seulement si connecté
+            var forecastsItem = Items.FirstOrDefault(i => i.Route == "forecasts");
+            if (forecastsItem != null)
+            {
+                forecastsItem.IsVisible = isAuthenticated;
+            }
+
             // Connexion toujours masquée du flyout
             var loginItem = Items.FirstOrDefault(i => i.Route == "login");
             if (loginItem != null)

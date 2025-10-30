@@ -16,7 +16,7 @@ namespace mobile.Services.Handlers
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, 
+            HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             // Récupérer le token JWT

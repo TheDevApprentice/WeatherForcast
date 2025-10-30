@@ -2,27 +2,40 @@ namespace mobile.Models
 {
     /// <summary>
     /// Modèle de prévision météo (synchronisé avec l'API)
+    /// Correspond à l'entité domain.Entities.WeatherForecast
     /// </summary>
     public class WeatherForecast
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }
+        
+        /// <summary>
+        /// Température en Celsius (correspond à TemperatureC de l'API)
+        /// </summary>
         public int TemperatureC { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        
+        /// <summary>
+        /// Température en Fahrenheit (correspond à TemperatureF de l'API)
+        /// </summary>
+        public int TemperatureF { get; set; }
+        
         public string? Summary { get; set; }
 
         /// <summary>
         /// Indique si la température est chaude (>= 20°C)
+        /// Propriété calculée côté client
         /// </summary>
         public bool IsHot => TemperatureC >= 20;
 
         /// <summary>
         /// Indique si la température est froide (<= 0°C)
+        /// Propriété calculée côté client
         /// </summary>
         public bool IsCold => TemperatureC <= 0;
 
         /// <summary>
         /// Couleur associée à la température pour l'affichage
+        /// Propriété calculée côté client
         /// </summary>
         public string TemperatureColor
         {

@@ -75,6 +75,10 @@ namespace mobile
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageModel>();
 
+            // Page des prévisions météo
+            builder.Services.AddTransient<ForecastsPage>();
+            builder.Services.AddTransient<ForecastsPageModel>();
+
             return builder.Build();
         }
     }

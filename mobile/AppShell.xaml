@@ -6,8 +6,7 @@
     xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
     xmlns:auth="clr-namespace:mobile.Pages.Auth"
     xmlns:pages="clr-namespace:mobile.Pages"
-    Shell.FlyoutBehavior="Flyout"
-    Title="mobile">
+    Shell.FlyoutBehavior="Flyout">
 
     <!-- Header du menu latéral -->
     <Shell.FlyoutHeader>
@@ -47,15 +46,19 @@
 
     <!-- Page principale (Dashboard) -->
     <ShellContent
-        Title="Dashboard"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:MainPage}"
         Route="main" />
 
+    <!-- Page des prévisions météo -->
+    <ShellContent
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pages:ForecastsPage}"
+        Route="forecasts" />
+
     <!-- Page de connexion (jamais visible dans le menu) -->
     <ShellContent
         x:Name="LoginItem"
-        Title="Connexion"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate auth:LoginPage}"
         Route="login"
