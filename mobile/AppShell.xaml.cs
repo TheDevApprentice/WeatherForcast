@@ -43,6 +43,41 @@ namespace mobile
 
             // Bouton de déconnexion visible seulement si connecté
             LogoutButton.IsVisible = isAuthenticated;
+
+            // Mettre à jour les informations utilisateur dans le header
+            if (isAuthenticated)
+            {
+                var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
+                if (secureStorage != null)
+                {
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        var userInfo = await secureStorage.GetUserInfoAsync();
+                        UserFullNameLabel.Text = $"{userInfo.FirstName} {userInfo.LastName}";
+                        UserEmailLabel.Text = userInfo.Email;
+                        
+                        // Générer les initiales (première lettre du prénom + première lettre du nom)
+                        var initials = GetInitials(userInfo.FirstName, userInfo.LastName);
+                        UserInitialsLabel.Text = initials;
+                    });
+                }
+            }
+            else
+            {
+                UserFullNameLabel.Text = string.Empty;
+                UserEmailLabel.Text = string.Empty;
+                UserInitialsLabel.Text = string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Génère les initiales à partir du prénom et du nom
+        /// </summary>
+        private string GetInitials(string firstName, string lastName)
+        {
+            var firstInitial = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
+            var lastInitial = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
+            return firstInitial + lastInitial;
         }
 
         private async void OnLogoutClicked(object sender, EventArgs e)

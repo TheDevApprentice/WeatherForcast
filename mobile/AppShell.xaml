@@ -9,6 +9,42 @@
     Shell.FlyoutBehavior="Flyout"
     Title="mobile">
 
+    <!-- Header du menu latéral -->
+    <Shell.FlyoutHeader>
+        <Grid Padding="20" BackgroundColor="{StaticResource Primary}" HeightRequest="120">
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <!-- Avatar avec initiales -->
+                <Border StrokeShape="RoundRectangle 35"
+                        BackgroundColor="White"
+                        WidthRequest="70"
+                        HeightRequest="70"
+                        StrokeThickness="3"
+                        Stroke="{StaticResource Secondary}">
+                    <Label x:Name="UserInitialsLabel"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource Primary}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"/>
+                </Border>
+                
+                <!-- Nom et prénom de l'utilisateur -->
+                <VerticalStackLayout VerticalOptions="Center" Spacing="5" MaximumWidthRequest="180">
+                    <Label x:Name="UserFullNameLabel"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           LineBreakMode="TailTruncation"/>
+                    <Label x:Name="UserEmailLabel"
+                           FontSize="13"
+                           TextColor="White"
+                           Opacity="0.9"
+                           LineBreakMode="TailTruncation"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
     <!-- Page principale (Dashboard) -->
     <ShellContent
         Title="Dashboard"
