@@ -46,6 +46,12 @@ namespace mobile.PageModels
                     // Supprimer toutes les données stockées localement
                     await _secureStorage.ClearAllAsync();
 
+                    // Mettre à jour l'UI du Shell
+                    if (Shell.Current is AppShell appShell)
+                    {
+                        appShell.UpdateAuthenticationUI(false);
+                    }
+
                     // Retourner à la page de connexion
                     await Shell.Current.GoToAsync("///login");
                 }
@@ -54,6 +60,13 @@ namespace mobile.PageModels
             {
                 // En cas d'erreur, supprimer quand même les données locales
                 await _secureStorage.ClearAllAsync();
+
+                // Mettre à jour l'UI du Shell
+                if (Shell.Current is AppShell appShell)
+                {
+                    appShell.UpdateAuthenticationUI(false);
+                }
+
                 await Shell.Current.GoToAsync("///login");
             }
             finally

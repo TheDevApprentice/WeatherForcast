@@ -20,6 +20,11 @@ namespace mobile
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 var isAuthenticated = await _secureStorage.IsAuthenticatedAsync();
+                
+                // Mettre à jour l'UI du Shell selon l'état d'authentification
+                shell.UpdateAuthenticationUI(isAuthenticated);
+                
+                // Naviguer vers la bonne page
                 if (isAuthenticated)
                 {
                     await shell.GoToAsync("///main");

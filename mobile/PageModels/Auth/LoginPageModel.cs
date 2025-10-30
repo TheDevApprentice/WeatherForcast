@@ -71,6 +71,12 @@ namespace mobile.PageModels.Auth
                     await _secureStorage.SaveTokenAsync(response.Token);
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
 
+                    // Mettre à jour l'UI du Shell
+                    if (Shell.Current is AppShell appShell)
+                    {
+                        appShell.UpdateAuthenticationUI(true);
+                    }
+
                     // Navigation vers l'application principale
                     await Shell.Current.GoToAsync("///main");
                 }
