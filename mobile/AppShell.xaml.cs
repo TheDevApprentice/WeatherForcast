@@ -1,7 +1,5 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
-using mobile.Pages.Auth;
-using mobile.Services;
 using Font = Microsoft.Maui.Font;
 
 namespace mobile
@@ -16,6 +14,64 @@ namespace mobile
 
             // Enregistrer les routes pour la navigation
             Routing.RegisterRoute("register", typeof(RegisterPage));
+
+            // Écouter l'ouverture/fermeture du flyout pour animer
+            this.PropertyChanged += OnShellPropertyChanged;
+        }
+
+        /// <summary>
+        /// Détecte quand le flyout s'ouvre pour déclencher les animations
+        /// </summary>
+        private void OnShellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FlyoutIsPresented) && FlyoutIsPresented)
+            {
+                // Le flyout vient de s'ouvrir, démarrer les animations
+                _ = AnimateFlyoutOpen();
+            }
+        }
+
+        /// <summary>
+        /// Anime l'apparition des éléments du flyout
+        /// </summary>
+        private async Task AnimateFlyoutOpen()
+        {
+            try
+            {
+                // Les éléments sont déjà initialisés à Opacity=0 dans le XAML
+                // Pas besoin de les réinitialiser ici
+
+                // Petit délai pour s'assurer que le flyout est bien visible
+                await Task.Delay(50);
+
+                // Animation 1 : Avatar apparait avec scale + fade (effet pop)
+                await Task.WhenAll(
+                    UserInitialsLabel.FadeTo(1, 400, Easing.CubicOut),
+                    UserInitialsLabel.ScaleTo(1, 400, Easing.SpringOut)
+                );
+
+                // Animation 2 : Nom glisse de gauche + fade
+                await Task.WhenAll(
+                    UserFullNameLabel.FadeTo(1, 300, Easing.CubicOut),
+                    UserFullNameLabel.TranslateTo(0, 0, 300, Easing.CubicOut)
+                );
+
+                // Animation 3 : Email glisse de gauche + fade
+                await Task.WhenAll(
+                    UserEmailLabel.FadeTo(1, 300, Easing.CubicOut),
+                    UserEmailLabel.TranslateTo(0, 0, 300, Easing.CubicOut)
+                );
+            }
+            catch
+            {
+                // Si erreur, remettre tout visible
+                UserInitialsLabel.Opacity = 1;
+                UserInitialsLabel.Scale = 1;
+                UserFullNameLabel.Opacity = 1;
+                UserFullNameLabel.TranslationX = 0;
+                UserEmailLabel.Opacity = 1;
+                UserEmailLabel.TranslationX = 0;
+            }
         }
 
         /// <summary>
@@ -62,7 +118,7 @@ namespace mobile
                         var userInfo = await secureStorage.GetUserInfoAsync();
                         UserFullNameLabel.Text = $"{userInfo.FirstName} {userInfo.LastName}";
                         UserEmailLabel.Text = userInfo.Email;
-                        
+
                         // Générer les initiales (première lettre du prénom + première lettre du nom)
                         var initials = GetInitials(userInfo.FirstName, userInfo.LastName);
                         UserInitialsLabel.Text = initials;
@@ -84,7 +140,7 @@ namespace mobile
         {
             var firstInitial = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
             var lastInitial = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
-            return firstInitial + lastInitial;
+            return $"{firstInitial}{lastInitial}";
         }
 
         private async void OnLogoutClicked(object sender, EventArgs e)
@@ -121,7 +177,7 @@ namespace mobile
         protected override void OnNavigated(ShellNavigatedEventArgs args)
         {
             base.OnNavigated(args);
-            
+
             // Mettre à jour l'UI à chaque navigation
             var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
             if (secureStorage != null)

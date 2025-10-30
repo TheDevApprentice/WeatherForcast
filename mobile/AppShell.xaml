@@ -8,119 +8,139 @@
     xmlns:pages="clr-namespace:mobile.Pages"
     Shell.FlyoutBehavior="Flyout">
 
-    <!-- 🎨 Fluent Design - Template des Items du Menu -->
+    <!-- 🎨 Menu Items - Modern Card Style -->
     <Shell.ItemTemplate>
         <DataTemplate>
-            <Grid Padding="16,8" ColumnDefinitions="Auto,*" ColumnSpacing="16">
+            <Grid Padding="12,4">
+                <Border x:Name="ItemCard"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                        StrokeThickness="0"
+                        Margin="12,6"
+                        Padding="16,14"
+                        HeightRequest="60"
+                        StrokeShape="RoundRectangle 12">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.08" Radius="12" Offset="0,2" />
+                    </Border.Shadow>
+                    
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Grid.Column="0"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light=#F5F5F7, Dark=#2C2C2E}"
+                                StrokeShape="RoundRectangle 10">
+                            <Image x:Name="MenuIcon"
+                                   Source="{Binding FlyoutIcon}"
+                                   WidthRequest="22"
+                                   HeightRequest="22"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   Opacity="0.85"/>
+                        </Border>
+                        
+                        <Label Grid.Column="1"
+                               x:Name="MenuTitle"
+                               Text="{Binding Title}"
+                               FontSize="16"
+                               FontAttributes="None"
+                               TextColor="{AppThemeBinding Light=#1C1C1E, Dark=#F5F5F7}"
+                               VerticalOptions="Center"/>
+                        
+                        <Label Grid.Column="2"
+                               x:Name="SelectionChevron"
+                               Text="›"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="#667eea"
+                               VerticalOptions="Center"
+                               Opacity="0"/>
+                    </Grid>
+                </Border>
+                
                 <Grid.Triggers>
-                    <!-- Trigger pour l'état sélectionné -->
-                    <DataTrigger TargetType="Grid" 
-                                Binding="{Binding IsChecked}" 
-                                Value="True">
-                        <Setter Property="BackgroundColor" Value="#F0F0FF"/>
-                        <Setter TargetName="SelectionIndicator" Property="BoxView.Opacity" Value="1"/>
+                    <DataTrigger TargetType="Grid" Binding="{Binding IsChecked}" Value="True">
+                        <Setter TargetName="ItemCard" Property="Border.BackgroundColor" Value="#EEF0FF"/>
+                        <Setter TargetName="ItemCard" Property="Border.Stroke" Value="#667eea"/>
+                        <Setter TargetName="ItemCard" Property="Border.StrokeThickness" Value="2"/>
+                        <Setter TargetName="MenuIcon" Property="Image.Opacity" Value="1"/>
+                        <Setter TargetName="MenuTitle" Property="Label.FontAttributes" Value="Bold"/>
+                        <Setter TargetName="MenuTitle" Property="Label.TextColor" Value="#667eea"/>
+                        <Setter TargetName="SelectionChevron" Property="Label.Opacity" Value="1"/>
                     </DataTrigger>
                 </Grid.Triggers>
-                
-                <!-- Indicateur de sélection (barre verticale) -->
-                <BoxView Grid.Column="0"
-                         WidthRequest="4"
-                         HeightRequest="32"
-                         CornerRadius="2"
-                         VerticalOptions="Center"
-                         BackgroundColor="#667eea"
-                         Opacity="0"
-                         x:Name="SelectionIndicator"/>
-                
-                <!-- Contenu de l'item -->
-                <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                    <!-- Icône -->
-                    <Image Grid.Column="0"
-                           Source="{Binding FlyoutIcon}"
-                           WidthRequest="24"
-                           HeightRequest="24"
-                           VerticalOptions="Center"/>
-                    
-                    <!-- Titre -->
-                    <Label Grid.Column="1"
-                           Text="{Binding Title}"
-                           FontSize="15"
-                           FontAttributes="None"
-                           TextColor="#404040"
-                           VerticalOptions="Center"/>
-                </Grid>
             </Grid>
         </DataTemplate>
     </Shell.ItemTemplate>
 
-    <!-- Fluent Design Header -->
+    <!-- Header moderne -->
     <Shell.FlyoutHeader>
-        <Grid HeightRequest="180" Padding="0">
+        <Grid HeightRequest="200" Padding="0">
             <!-- Gradient Background avec effet Acrylic -->
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#667eea" Offset="0.0" />
-                    <GradientStop Color="#764ba2" Offset="1.0" />
+                    <GradientStop Color="#5B5FC7" Offset="0.0" />
+                    <GradientStop Color="#764BA2" Offset="1.0" />
                 </LinearGradientBrush>
             </Grid.Background>
             
-            <!-- Overlay semi-transparent pour effet Acrylic -->
-            <BoxView BackgroundColor="White" Opacity="0.05" />
+            <BoxView BackgroundColor="Black" Opacity="0.15" />
             
-            <!-- Contenu du header -->
-            <Grid Padding="24,20" RowDefinitions="Auto,*,Auto">
-                <!-- Logo/Titre -->
-                <HorizontalStackLayout Grid.Row="0" Spacing="8">
-                    <Label Text="☁️" FontSize="24" VerticalOptions="Center"/>
+            <Grid Padding="24,24,24,20" RowDefinitions="Auto,*,Auto">
+                <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                    <Label Text="☁️" 
+                           FontSize="28" 
+                           VerticalOptions="Center"/>
                     <Label Text="WeatherForecast" 
-                           FontSize="16" 
+                           FontSize="17" 
                            FontAttributes="Bold"
                            TextColor="White"
-                           Opacity="0.95"
+                           Opacity="0.98"
                            VerticalOptions="Center"/>
                 </HorizontalStackLayout>
                 
-                <!-- Informations utilisateur -->
-                <HorizontalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center">
-                    <!-- Avatar Fluent avec effet de profondeur -->
-                    <Border StrokeShape="RoundRectangle 32"
+                <HorizontalStackLayout Grid.Row="1" Spacing="18" VerticalOptions="Center">
+                    <Border StrokeShape="RoundRectangle 36"
                             BackgroundColor="White"
-                            WidthRequest="64"
-                            HeightRequest="64"
-                            StrokeThickness="3"
-                            Stroke="White">
+                            WidthRequest="72"
+                            HeightRequest="72"
+                            StrokeThickness="4"
+                            Stroke="#FFFFFF">
                         <Border.Shadow>
-                            <Shadow Brush="Black" Opacity="0.25" Radius="10" Offset="0,3" />
+                            <Shadow Brush="Black" Opacity="0.3" Radius="16" Offset="0,4" />
                         </Border.Shadow>
                         <Label x:Name="UserInitialsLabel"
-                               FontSize="26"
+                               FontSize="27"
                                FontAttributes="Bold"
-                               TextColor="#667eea"
+                               TextColor="#5B5FC7"
                                HorizontalOptions="Center"
-                               VerticalOptions="Center"/>
+                               VerticalOptions="Center"
+                               Opacity="0"
+                               Scale="0.5"/>
                     </Border>
                     
-                    <!-- Nom et email -->
-                    <VerticalStackLayout VerticalOptions="Center" Spacing="4" MaximumWidthRequest="180">
+                    <VerticalStackLayout VerticalOptions="Center" Spacing="6" MaximumWidthRequest="190">
                         <Label x:Name="UserFullNameLabel"
-                               FontSize="18"
+                               FontSize="19"
                                FontAttributes="Bold"
                                TextColor="White"
-                               LineBreakMode="TailTruncation"/>
+                               LineBreakMode="TailTruncation"
+                               Opacity="0"
+                               TranslationX="-30"/>
                         <Label x:Name="UserEmailLabel"
-                               FontSize="13"
+                               FontSize="14"
                                TextColor="White"
-                               Opacity="0.85"
-                               LineBreakMode="TailTruncation"/>
+                               LineBreakMode="TailTruncation"
+                               Opacity="0"
+                               TranslationX="-30"/>
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
                 
-                <!-- Séparateur Fluent -->
                 <BoxView Grid.Row="2" 
                          HeightRequest="1" 
                          BackgroundColor="White" 
-                         Opacity="0.2"
-                         Margin="0,8,0,0"/>
+                         Opacity="0.25"
+                         Margin="0,12,0,0"/>
             </Grid>
         </Grid>
     </Shell.FlyoutHeader>
@@ -148,31 +168,28 @@
         Route="login"
         FlyoutItemIsVisible="False" />
 
-    <!-- Fluent Design Footer -->
+    <!-- Footer moderne -->
     <Shell.FlyoutFooter>
-        <Grid Padding="20,16,20,20" RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
-            <!-- Séparateur supérieur -->
+        <Grid Padding="24,20,24,24" RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
             <BoxView Grid.Row="0" 
                      HeightRequest="1" 
-                     BackgroundColor="{StaticResource Gray200}" 
-                     Opacity="0.5"
-                     Margin="0,0,0,4"/>
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark=#2C2C2E}" 
+                     Opacity="0.6"
+                     Margin="0,0,0,8"/>
             
-            <!-- Sélecteur de thème Fluent minimaliste -->
             <HorizontalStackLayout Grid.Row="1" 
-                                  Spacing="12" 
+                                  Spacing="14" 
                                   HorizontalOptions="Center">
-                <Label 
-                       FontSize="14"
+                <Label FontSize="15"
                        FontAttributes="Bold"
                        VerticalOptions="Center"
-                       TextColor="{StaticResource Gray600}"/>
+                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
                 
                 <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
                                       VerticalOptions="Center" 
                                       SelectionChanged="SfSegmentedControl_SelectionChanged"
-                                      SegmentWidth="40" 
-                                      SegmentHeight="40">
+                                      SegmentWidth="44" 
+                                      SegmentHeight="44">
                     <sf:SfSegmentedControl.ItemsSource>
                         <x:Array Type="{x:Type sf:SfSegmentItem}">
                             <sf:SfSegmentItem ImageSource="{StaticResource IconLight}"/>
@@ -182,28 +199,24 @@
                 </sf:SfSegmentedControl>
             </HorizontalStackLayout>
             
-            <!-- Bouton de déconnexion Fluent compact -->
             <Border Grid.Row="2"
                     x:Name="LogoutButton"
-                    StrokeShape="RoundRectangle 8"
+                    StrokeShape="RoundRectangle 12"
                     StrokeThickness="0"
-                    HeightRequest="44"
+                    HeightRequest="52"
                     IsVisible="False">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnLogoutClicked"/>
                 </Border.GestureRecognizers>
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#ef4444" Offset="0.0" />
-                        <GradientStop Color="#dc2626" Offset="1.0" />
-                    </LinearGradientBrush>
+                    <SolidColorBrush Color="#DC362E"/>
                 </Border.Background>
                 <Border.Shadow>
-                    <Shadow Brush="#ef4444" Opacity="0.25" Radius="6" Offset="0,2" />
+                    <Shadow Brush="#DC362E" Opacity="0.3" Radius="10" Offset="0,3" />
                 </Border.Shadow>
                 
                 <Label Text="Déconnexion" 
-                       FontSize="14"
+                       FontSize="16"
                        FontAttributes="Bold"
                        TextColor="White"
                        HorizontalOptions="Center"
