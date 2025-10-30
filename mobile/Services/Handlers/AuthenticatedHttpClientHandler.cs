@@ -22,10 +22,18 @@ namespace mobile.Services.Handlers
             // Récupérer le token JWT
             var token = await _secureStorage.GetTokenAsync();
 
+            Console.WriteLine($"[AuthHandler] Token récupéré: {(string.IsNullOrEmpty(token) ? "VIDE" : $"{token.Substring(0, Math.Min(20, token.Length))}...")}");
+            Console.WriteLine($"[AuthHandler] Request URL: {request.RequestUri}");
+
             // Ajouter le header Authorization si le token existe
             if (!string.IsNullOrEmpty(token))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                Console.WriteLine($"[AuthHandler] Authorization header ajouté");
+            }
+            else
+            {
+                Console.WriteLine($"[AuthHandler] ATTENTION: Token vide, pas d'Authorization header");
             }
 
             return await base.SendAsync(request, cancellationToken);

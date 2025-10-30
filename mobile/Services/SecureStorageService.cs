@@ -18,7 +18,9 @@ namespace mobile.Services
 
         public async Task<string?> GetTokenAsync()
         {
-            return await SecureStorage.GetAsync(TOKEN_KEY);
+            var token = await SecureStorage.GetAsync(TOKEN_KEY);
+            Console.WriteLine($"Token retrieved from SecureStorage: {(string.IsNullOrEmpty(token) ? "NULL/EMPTY" : $"{token.Substring(0, Math.Min(30, token.Length))}...")}");
+            return token;
         }
 
         public async Task RemoveTokenAsync()

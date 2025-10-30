@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using mobile.Services;
 
 namespace mobile.PageModels
 {
@@ -40,13 +39,16 @@ namespace mobile.PageModels
                 IsLoading = true;
 
                 // Appeler l'API pour déconnecter (invalider la session côté serveur)
-                await _apiService.LogoutAsync();
+                bool result = await _apiService.LogoutAsync();
 
-                // Supprimer toutes les données stockées localement
-                await _secureStorage.ClearAllAsync();
+                if (result)
+                {
+                    // Supprimer toutes les données stockées localement
+                    await _secureStorage.ClearAllAsync();
 
-                // Retourner à la page de connexion
-                await Shell.Current.GoToAsync("///login");
+                    // Retourner à la page de connexion
+                    await Shell.Current.GoToAsync("///login");
+                }
             }
             catch (Exception ex)
             {
