@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -412,7 +412,7 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}" />
     </Style>
 
-    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+    <!-- <Style TargetType="Shell" ApplyToDerivedTypes="True">
         <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}" />
         <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
         <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
@@ -423,7 +423,7 @@
         <Setter Property="Shell.TabBarForegroundColor" Value="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}" />
         <Setter Property="Shell.TabBarTitleColor" Value="{AppThemeBinding Light={StaticResource DarkOnLightBackground}, Dark={StaticResource LightOnDarkBackground}}" />
         <Setter Property="Shell.TabBarUnselectedColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
-    </Style>
+    </Style> -->
 
     <Style TargetType="NavigationPage">
         <Setter Property="BarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
@@ -442,5 +442,65 @@
         <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightSecondaryBackground}, Dark={StaticResource DarkSecondaryBackground}}" />
         <Setter Property="WaveColor" Value="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}" />
     </Style>
+
+    <!-- 🎨 Fluent Design - Shell Styles -->
+    <Style TargetType="Shell" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="White" />
+        <Setter Property="Shell.ForegroundColor" Value="#667eea" />
+        <Setter Property="Shell.TitleColor" Value="#0D0D0D" />
+        <Setter Property="Shell.DisabledColor" Value="#C8C8C8" />
+        <Setter Property="Shell.UnselectedColor" Value="#919191" />
+        <Setter Property="Shell.NavBarHasShadow" Value="False" />
+        <Setter Property="Shell.TabBarBackgroundColor" Value="White" />
+        <Setter Property="Shell.TabBarForegroundColor" Value="#667eea" />
+        <Setter Property="Shell.TabBarTitleColor" Value="#667eea" />
+        <Setter Property="Shell.TabBarUnselectedColor" Value="#212121" />
+    </Style>
+
+    <!-- 🎨 Fluent Design - FlyoutItem Style moderne -->
+    <Style TargetType="FlyoutItem" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="Transparent" />
+        <Setter Property="Shell.ForegroundColor" Value="#667eea" />
+        <Setter Property="Shell.TitleColor" Value="#404040" />
+        <Setter Property="Shell.TabBarIsVisible" Value="False" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="Shell.BackgroundColor" Value="Transparent" />
+                            <Setter Property="Shell.ForegroundColor" Value="#919191" />
+                            <Setter Property="Shell.TitleColor" Value="#404040" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Selected">
+                        <VisualState.Setters>
+                            <Setter Property="Shell.BackgroundColor" Value="#F0F0FF" />
+                            <Setter Property="Shell.ForegroundColor" Value="#667eea" />
+                            <Setter Property="Shell.TitleColor" Value="#667eea" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+    
+    <!-- 🎨 Fluent Design - ShellContent Style -->
+    <Style TargetType="ShellContent" ApplyToDerivedTypes="True">
+        <Setter Property="Shell.BackgroundColor" Value="Transparent" />
+        <Setter Property="Shell.ForegroundColor" Value="#667eea" />
+        <Setter Property="Shell.TitleColor" Value="#404040" />
+    </Style>
+
+    <!-- 🎨 Fluent Design - Gradient Brush -->
+    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#667eea" Offset="0.0" />
+        <GradientStop Color="#764ba2" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="DangerGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#ef4444" Offset="0.0" />
+        <GradientStop Color="#dc2626" Offset="1.0" />
+    </LinearGradientBrush>
 
 </ResourceDictionary>

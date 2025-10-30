@@ -8,39 +8,120 @@
     xmlns:pages="clr-namespace:mobile.Pages"
     Shell.FlyoutBehavior="Flyout">
 
-    <!-- Header du menu latéral -->
-    <Shell.FlyoutHeader>
-        <Grid Padding="20" BackgroundColor="{StaticResource Primary}" HeightRequest="120">
-            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                <!-- Avatar avec initiales -->
-                <Border StrokeShape="RoundRectangle 35"
-                        BackgroundColor="White"
-                        WidthRequest="70"
-                        HeightRequest="70"
-                        StrokeThickness="3"
-                        Stroke="{StaticResource Secondary}">
-                    <Label x:Name="UserInitialsLabel"
-                           FontSize="28"
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource Primary}"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"/>
-                </Border>
+    <!-- 🎨 Fluent Design - Template des Items du Menu -->
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="16,8" ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                <Grid.Triggers>
+                    <!-- Trigger pour l'état sélectionné -->
+                    <DataTrigger TargetType="Grid" 
+                                Binding="{Binding IsChecked}" 
+                                Value="True">
+                        <Setter Property="BackgroundColor" Value="#F0F0FF"/>
+                        <Setter TargetName="SelectionIndicator" Property="BoxView.Opacity" Value="1"/>
+                    </DataTrigger>
+                </Grid.Triggers>
                 
-                <!-- Nom et prénom de l'utilisateur -->
-                <VerticalStackLayout VerticalOptions="Center" Spacing="5" MaximumWidthRequest="180">
-                    <Label x:Name="UserFullNameLabel"
-                           FontSize="18"
+                <!-- Indicateur de sélection (barre verticale) -->
+                <BoxView Grid.Column="0"
+                         WidthRequest="4"
+                         HeightRequest="32"
+                         CornerRadius="2"
+                         VerticalOptions="Center"
+                         BackgroundColor="#667eea"
+                         Opacity="0"
+                         x:Name="SelectionIndicator"/>
+                
+                <!-- Contenu de l'item -->
+                <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <!-- Icône -->
+                    <Image Grid.Column="0"
+                           Source="{Binding FlyoutIcon}"
+                           WidthRequest="24"
+                           HeightRequest="24"
+                           VerticalOptions="Center"/>
+                    
+                    <!-- Titre -->
+                    <Label Grid.Column="1"
+                           Text="{Binding Title}"
+                           FontSize="15"
+                           FontAttributes="None"
+                           TextColor="#404040"
+                           VerticalOptions="Center"/>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <!-- Fluent Design Header -->
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="180" Padding="0">
+            <!-- Gradient Background avec effet Acrylic -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#667eea" Offset="0.0" />
+                    <GradientStop Color="#764ba2" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+            
+            <!-- Overlay semi-transparent pour effet Acrylic -->
+            <BoxView BackgroundColor="White" Opacity="0.05" />
+            
+            <!-- Contenu du header -->
+            <Grid Padding="24,20" RowDefinitions="Auto,*,Auto">
+                <!-- Logo/Titre -->
+                <HorizontalStackLayout Grid.Row="0" Spacing="8">
+                    <Label Text="☁️" FontSize="24" VerticalOptions="Center"/>
+                    <Label Text="WeatherForecast" 
+                           FontSize="16" 
                            FontAttributes="Bold"
                            TextColor="White"
-                           LineBreakMode="TailTruncation"/>
-                    <Label x:Name="UserEmailLabel"
-                           FontSize="13"
-                           TextColor="White"
-                           Opacity="0.9"
-                           LineBreakMode="TailTruncation"/>
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
+                           Opacity="0.95"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+                
+                <!-- Informations utilisateur -->
+                <HorizontalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center">
+                    <!-- Avatar Fluent avec effet de profondeur -->
+                    <Border StrokeShape="RoundRectangle 32"
+                            BackgroundColor="White"
+                            WidthRequest="64"
+                            HeightRequest="64"
+                            StrokeThickness="3"
+                            Stroke="White">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.25" Radius="10" Offset="0,3" />
+                        </Border.Shadow>
+                        <Label x:Name="UserInitialsLabel"
+                               FontSize="26"
+                               FontAttributes="Bold"
+                               TextColor="#667eea"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </Border>
+                    
+                    <!-- Nom et email -->
+                    <VerticalStackLayout VerticalOptions="Center" Spacing="4" MaximumWidthRequest="180">
+                        <Label x:Name="UserFullNameLabel"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               LineBreakMode="TailTruncation"/>
+                        <Label x:Name="UserEmailLabel"
+                               FontSize="13"
+                               TextColor="White"
+                               Opacity="0.85"
+                               LineBreakMode="TailTruncation"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+                
+                <!-- Séparateur Fluent -->
+                <BoxView Grid.Row="2" 
+                         HeightRequest="1" 
+                         BackgroundColor="White" 
+                         Opacity="0.2"
+                         Margin="0,8,0,0"/>
+            </Grid>
         </Grid>
     </Shell.FlyoutHeader>
 
@@ -67,30 +148,68 @@
         Route="login"
         FlyoutItemIsVisible="False" />
 
+    <!-- Fluent Design Footer -->
     <Shell.FlyoutFooter>
-        <VerticalStackLayout Padding="15" Spacing="15">
-            <!-- Bouton de déconnexion (visible seulement si connecté) -->
-            <Button x:Name="LogoutButton"
-                    Text="Déconnexion"
-                    BackgroundColor="{StaticResource Danger}"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="45"
-                    Clicked="OnLogoutClicked"
-                    IsVisible="False"/>
+        <Grid Padding="20,16,20,20" RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
+            <!-- Séparateur supérieur -->
+            <BoxView Grid.Row="0" 
+                     HeightRequest="1" 
+                     BackgroundColor="{StaticResource Gray200}" 
+                     Opacity="0.5"
+                     Margin="0,0,0,4"/>
             
-            <!-- Sélecteur de thème -->
-            <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
-                VerticalOptions="Center" HorizontalOptions="Center" SelectionChanged="SfSegmentedControl_SelectionChanged"
-                SegmentWidth="40" SegmentHeight="40">
-                <sf:SfSegmentedControl.ItemsSource>
-                    <x:Array Type="{x:Type sf:SfSegmentItem}">
-                        <sf:SfSegmentItem ImageSource="{StaticResource IconLight}"/>
-                        <sf:SfSegmentItem ImageSource="{StaticResource IconDark}"/>
-                    </x:Array>
-                </sf:SfSegmentedControl.ItemsSource>
-            </sf:SfSegmentedControl>
-        </VerticalStackLayout>
+            <!-- Sélecteur de thème Fluent minimaliste -->
+            <HorizontalStackLayout Grid.Row="1" 
+                                  Spacing="12" 
+                                  HorizontalOptions="Center">
+                <Label 
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       TextColor="{StaticResource Gray600}"/>
+                
+                <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
+                                      VerticalOptions="Center" 
+                                      SelectionChanged="SfSegmentedControl_SelectionChanged"
+                                      SegmentWidth="40" 
+                                      SegmentHeight="40">
+                    <sf:SfSegmentedControl.ItemsSource>
+                        <x:Array Type="{x:Type sf:SfSegmentItem}">
+                            <sf:SfSegmentItem ImageSource="{StaticResource IconLight}"/>
+                            <sf:SfSegmentItem ImageSource="{StaticResource IconDark}"/>
+                        </x:Array>
+                    </sf:SfSegmentedControl.ItemsSource>
+                </sf:SfSegmentedControl>
+            </HorizontalStackLayout>
+            
+            <!-- Bouton de déconnexion Fluent compact -->
+            <Border Grid.Row="2"
+                    x:Name="LogoutButton"
+                    StrokeShape="RoundRectangle 8"
+                    StrokeThickness="0"
+                    HeightRequest="44"
+                    IsVisible="False">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLogoutClicked"/>
+                </Border.GestureRecognizers>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#ef4444" Offset="0.0" />
+                        <GradientStop Color="#dc2626" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Shadow>
+                    <Shadow Brush="#ef4444" Opacity="0.25" Radius="6" Offset="0,2" />
+                </Border.Shadow>
+                
+                <Label Text="Déconnexion" 
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+            </Border>
+        </Grid>
     </Shell.FlyoutFooter>
 
 </Shell>
