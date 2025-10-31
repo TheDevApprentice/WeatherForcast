@@ -230,22 +230,28 @@ namespace api
                 {
                     Title = "WeatherForecast API - Public REST API",
                     Version = "v1",
-                    Description = @"API REST publique en lecture seule avec authentification par clé API (OAuth2 Client Credentials).
-                    
-**Comment obtenir une clé API :**
-1. Créez un compte sur l'application Web : https://weatherforecast.com
-2. Connectez-vous et allez dans ""Mes Clés API""
-3. Générez une nouvelle clé (Client ID + Client Secret)
-4. Utilisez-la avec l'authentification Basic Auth
+                    Description = @"API REST avec deux modes d'authentification :
+
+**1. API Key (Basic Auth) - Pour consommateurs externes**
+- Lecture seule (GET uniquement)
+- Obtenez une clé API depuis l'application Web
+- Format : Basic Auth avec Client ID + Client Secret
+- Rate limiting : 100 requêtes/minute
+
+**2. JWT Bearer - Pour utilisateurs authentifiés (Mobile/Web)**
+- Accès complet (CRUD)
+- Connectez-vous via `/api/auth/login` ou `/api/auth/register`
+- Format : Bearer Token (JWT)
+- Permissions basées sur les rôles
 
 **Endpoints disponibles :**
+- POST /api/auth/login - Connexion utilisateur (obtenir JWT)
+- POST /api/auth/register - Inscription utilisateur
 - GET /api/weatherforecast - Liste toutes les prévisions
 - GET /api/weatherforecast/{id} - Récupère une prévision
-
-**Limites :**
-- Lecture seule (pas de POST/PUT/DELETE)
-- Rate limiting : 100 requêtes/minute
-- Format : JSON uniquement",
+- POST /api/weatherforecast - Crée une prévision (JWT requis)
+- PUT /api/weatherforecast/{id} - Met à jour une prévision (JWT requis)
+- DELETE /api/weatherforecast/{id} - Supprime une prévision (JWT requis)",
                     Contact = new Microsoft.OpenApi.Models.OpenApiContact
                     {
                         Name = "WeatherForecast Support",
@@ -275,6 +281,28 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
 **Swagger UI :** Cliquez sur 'Authorize' et entrez votre Client ID et Client Secret."
                 });
 
+                // Configuration Bearer JWT pour les utilisateurs authentifiés (Mobile/Web)
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = @"Authentification JWT pour utilisateurs (Mobile/Web).
+                    
+Obtenez un token JWT via l'endpoint `/api/auth/login` avec vos identifiants.
+
+Format : `Bearer {votre_token_jwt}`
+
+**Exemple avec cURL :**
+```
+curl -H ""Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."" https://api.weatherforecast.com/api/weatherforecast
+```
+
+**Swagger UI :** Cliquez sur 'Authorize' et entrez votre token JWT (sans le préfixe 'Bearer')."
+                });
+
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
                 {
                     {
@@ -284,6 +312,17 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
                             {
                                 Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
                                 Id = "Basic"
+                            }
+                        },
+                        Array.Empty<string>()
+                    },
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
                             }
                         },
                         Array.Empty<string>()
