@@ -46,20 +46,20 @@ namespace application.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("🔔 Redis Subscriber Service démarré");
+            _logger.LogInformation("🔔 WEB - Redis Subscriber Service démarré");
 
             // Vérifier que Redis est connecté
             if (!_redis.IsConnected)
             {
-                _logger.LogWarning("⚠️ Redis non connecté au démarrage. Attente de la connexion...");
+                _logger.LogWarning("⚠️ WEB - Redis non connecté au démarrage. Attente de la connexion...");
 
                 // Attendre un peu que la connexion s'établisse
                 await Task.Delay(2000, stoppingToken);
 
                 if (!_redis.IsConnected)
                 {
-                    _logger.LogError("❌ Redis non connecté. Le service ne pourra pas recevoir les events de l'API.");
-                    _logger.LogInformation("ℹ️ Les notifications depuis l'Application Web fonctionneront toujours via SignalR direct.");
+                    _logger.LogError("❌ WEB - Redis non connecté. Le service ne pourra pas recevoir les events de l'API.");
+                    _logger.LogInformation("ℹ️ WEB - Les notifications depuis l'Application Web fonctionneront toujours via SignalR direct.");
                     return;
                 }
             }
@@ -106,7 +106,7 @@ namespace application.BackgroundServices
 
 
                 _logger.LogInformation(
-                    "✅ Abonné aux canaux Redis: {Channels}",
+                    "✅ WEB - Abonné aux canaux Redis: {Channels}",
                     string.Join(", ", new[] { ChannelForecastCreated, ChannelForecastUpdated, ChannelForecastDeleted, ChUserRegistered, ChUserLoggedIn, ChUserLoggedOut, ChSessionCreated, ChApiKeyCreated, ChApiKeyRevoked, ChUserRoleChanged, ChUserClaimChanged }));
 
                 // Attendre indéfiniment (le service tourne en background)
@@ -114,7 +114,7 @@ namespace application.BackgroundServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur dans Redis Subscriber Service");
+                _logger.LogError(ex, "WEB - Erreur dans Redis Subscriber Service");
             }
         }
 
@@ -125,12 +125,29 @@ namespace application.BackgroundServices
         {
             try
             {
-                var forecast = JsonSerializer.Deserialize<WeatherForecast>(message.ToString());
+                using var doc = JsonDocument.Parse(message.ToString());
+                var root = doc.RootElement;
+
+                // Vérifier la source de l'événement
+                var sourceApp = root.TryGetProperty("SourceApp", out var source)
+                    ? source.GetString()
+                    : "Unknown";
+
+                // Ignorer si c'est notre propre événement
+                if (sourceApp == "WEB")
+                {
+                    _logger.LogDebug("WEB - Événement ForecastCreated ignoré (source: WEB)");
+                    return;
+                }
+
+                var forecast = JsonSerializer.Deserialize<WeatherForecast>(
+                    root.GetProperty("Forecast").GetRawText());
 
                 if (forecast != null)
                 {
                     _logger.LogInformation(
-                        "📥 [Redis Sub] Event reçu sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                        "📥 WEB - [Redis Sub] Event reçu de {Source} sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                        sourceApp,
                         ChannelForecastCreated,
                         forecast.Id);
 
@@ -151,12 +168,29 @@ namespace application.BackgroundServices
         {
             try
             {
-                var forecast = JsonSerializer.Deserialize<WeatherForecast>(message.ToString());
+                using var doc = JsonDocument.Parse(message.ToString());
+                var root = doc.RootElement;
+
+                // Vérifier la source de l'événement
+                var sourceApp = root.TryGetProperty("SourceApp", out var source)
+                    ? source.GetString()
+                    : "Unknown";
+
+                // Ignorer si c'est notre propre événement
+                if (sourceApp == "WEB")
+                {
+                    _logger.LogDebug("WEB - Événement ForecastUpdated ignoré (source: WEB)");
+                    return;
+                }
+
+                var forecast = JsonSerializer.Deserialize<WeatherForecast>(
+                    root.GetProperty("Forecast").GetRawText());
 
                 if (forecast != null)
                 {
                     _logger.LogInformation(
-                        "📥 [Redis Sub] Event reçu sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                        "📥 WEB - [Redis Sub] Event reçu de {Source} sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                        sourceApp,
                         ChannelForecastUpdated,
                         forecast.Id);
 
@@ -177,10 +211,25 @@ namespace application.BackgroundServices
             try
             {
                 using var doc = JsonDocument.Parse(message.ToString());
-                var id = doc.RootElement.GetProperty("Id").GetInt32();
+                var root = doc.RootElement;
+
+                // Vérifier la source de l'événement
+                var sourceApp = root.TryGetProperty("SourceApp", out var source)
+                    ? source.GetString()
+                    : "Unknown";
+
+                // Ignorer si c'est notre propre événement
+                if (sourceApp == "WEB")
+                {
+                    _logger.LogDebug("WEB - Événement ForecastDeleted ignoré (source: WEB)");
+                    return;
+                }
+
+                var id = root.GetProperty("Id").GetInt32();
 
                 _logger.LogInformation(
-                    "📥 [Redis Sub] Event reçu sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                    "📥 WEB - [Redis Sub] Event reçu de {Source} sur '{Channel}' - ID: {Id} → Broadcasting via SignalR",
+                    sourceApp,
                     ChannelForecastDeleted,
                     id);
 

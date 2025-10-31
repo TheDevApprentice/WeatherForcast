@@ -15,14 +15,14 @@ namespace api.Handlers.WeatherForecast
     /// Pour cette démo, ce handler log simplement les events.
     /// Les notifications temps réel fonctionnent uniquement depuis l'application Web.
     /// </summary>
-    public class ApiAuditLogHandler :
+    public class AuditLogForecastHandler :
         INotificationHandler<ForecastCreatedEvent>,
         INotificationHandler<ForecastUpdatedEvent>,
         INotificationHandler<ForecastDeletedEvent>
     {
-        private readonly ILogger<ApiAuditLogHandler> _logger;
+        private readonly ILogger<AuditLogForecastHandler> _logger;
 
-        public ApiAuditLogHandler(ILogger<ApiAuditLogHandler> logger)
+        public AuditLogForecastHandler(ILogger<AuditLogForecastHandler> logger)
         {
             _logger = logger;
         }

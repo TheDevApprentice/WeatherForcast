@@ -49,7 +49,7 @@ namespace application.Handlers.Error
                     cancellationToken);
 
                 _logger.LogInformation(
-                    "[SignalR] Notification d'erreur envoyée à l'utilisateur {UserId} | Action={Action} | Type={ErrorType} | CorrelationId={CorrelationId}",
+                    "WEB - [SignalR] Notification d'erreur envoyée à l'utilisateur {UserId} | Action={Action} | Type={ErrorType} | CorrelationId={CorrelationId}",
                     notification.UserId,
                     notification.Action,
                     notification.ErrorType,
@@ -71,14 +71,14 @@ namespace application.Handlers.Error
                         cancellationToken);
 
                     _logger.LogDebug(
-                        "[Redis] Notification d'erreur bufferisée pour {UserId} | CorrelationId={CorrelationId}",
+                        "WEB - [Redis] Notification d'erreur bufferisée pour {UserId} | CorrelationId={CorrelationId}",
                         notification.UserId,
                         notification.CorrelationId);
                 }
                 else
                 {
                     _logger.LogDebug(
-                        "[Redis] Notification de validation NON bufferisée (user reste sur la page) | CorrelationId={CorrelationId}",
+                        "WEB - [Redis] Notification de validation NON bufferisée (user reste sur la page) | CorrelationId={CorrelationId}",
                         notification.CorrelationId);
                 }
             }
@@ -87,7 +87,7 @@ namespace application.Handlers.Error
                 // Ne pas propager l'exception pour éviter de casser le flux principal
                 _logger.LogError(
                     ex,
-                    "Erreur lors de la notification SignalR d'erreur pour {UserId} | Action={Action} | CorrelationId={CorrelationId}",
+                    "WEB - Erreur lors de la notification SignalR d'erreur pour {UserId} | Action={Action} | CorrelationId={CorrelationId}",
                     notification.UserId,
                     notification.Action,
                     notification.CorrelationId);

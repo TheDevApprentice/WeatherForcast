@@ -20,7 +20,7 @@ namespace application.Handlers.Mailing
 
         public Task Handle(EmailSentToUser notification, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("📧 [Audit Email] Sent to {Email} | Subject: {Subject}",
+            _logger.LogInformation("📧 WEB - [Audit Email] Sent to {Email} | Subject: {Subject}",
                 notification.ToEmail,
                 notification.Subject);
             return Task.CompletedTask;
@@ -28,7 +28,7 @@ namespace application.Handlers.Mailing
 
         public Task Handle(VerificationEmailSentToUser notification, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("✅ [Audit Email] Verification email sent to {Email}",
+            _logger.LogInformation("✅ WEB - [Audit Email] Verification email sent to {Email}",
                 notification.ToEmail);
             return Task.CompletedTask;
         }

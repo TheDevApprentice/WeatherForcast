@@ -42,18 +42,18 @@ namespace api.Handlers.Admin
             {
                 if (!_redis.IsConnected)
                 {
-                    _logger.LogWarning("⚠️ [Redis Pub] Redis non connecté. Event non publié sur {Channel}", channel);
+                    _logger.LogWarning("⚠️ API - [Redis Pub] Redis non connecté. Event non publié sur {Channel}", channel);
                     return;
                 }
 
                 var subscriber = _redis.GetSubscriber();
                 var message = JsonSerializer.Serialize(payload);
                 await subscriber.PublishAsync(new RedisChannel(channel, RedisChannel.PatternMode.Literal), message);
-                _logger.LogInformation("📤 [Redis Pub] Event publié sur canal '{Channel}'", channel);
+                _logger.LogInformation("📤 API - [Redis Pub] Event publié sur canal '{Channel}'", channel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la publication Redis sur {Channel}", channel);
+                _logger.LogError(ex, "API - Erreur lors de la publication Redis sur {Channel}", channel);
             }
         }
 

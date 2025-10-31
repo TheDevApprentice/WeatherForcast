@@ -3,7 +3,7 @@ using domain.Events.Admin;
 using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
 
-namespace application.Handlers.Session
+namespace api.Handlers.Session
 {
     /// <summary>
     /// Handler qui notifie l'utilisateur concerné via SignalR quand sa session est révoquée
@@ -29,7 +29,7 @@ namespace application.Handlers.Session
         public async Task Handle(SessionRevokedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "WEB - [UsersHub] Forcing logout for user {Email} - Session {SessionId} revoked by {RevokedBy}",
+                "API - [UsersHub] Forcing logout for user {Email} - Session {SessionId} revoked by {RevokedBy}",
                 notification.Email,
                 notification.SessionId,
                 notification.RevokedBy ?? "System");
@@ -61,13 +61,13 @@ namespace application.Handlers.Session
                     cancellationToken);
 
                 _logger.LogInformation(
-                    "✅ WEB - [UsersHub] Logout notification sent to user {Email}",
+                    "✅ API - [UsersHub] Logout notification sent to user {Email}",
                     notification.Email);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "❌ WEB - [UsersHub] Erreur lors de la notification de révocation de session pour {Email}",
+                    "❌ API - [UsersHub] Erreur lors de la notification de révocation de session pour {Email}",
                     notification.Email);
             }
         }

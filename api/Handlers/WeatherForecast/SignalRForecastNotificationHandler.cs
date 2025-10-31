@@ -3,7 +3,7 @@ using domain.Events.WeatherForecast;
 using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
 
-namespace application.Handlers.WeatherForecast
+namespace api.Handlers.WeatherForecast
 {
     /// <summary>
     /// Handler qui broadcaste les events de prévisions météo via SignalR
@@ -31,7 +31,7 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastCreatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 WEB - [SignalR] Broadcasting ForecastCreated: ID={Id}, TriggeredBy={User}, ExcludedConnectionId={ConnectionId}",
+                "📢 API - [SignalR] Broadcasting ForecastCreated: ID={Id}, TriggeredBy={User}, ExcludedConnectionId={ConnectionId}",
                 notification.Forecast.Id,
                 notification.TriggeredBy ?? "System",
                 notification.ExcludedConnectionId ?? "None");
@@ -47,7 +47,7 @@ namespace application.Handlers.WeatherForecast
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (ForecastCreated)");
+                _logger.LogError(ex, "API - Erreur lors du broadcast SignalR (ForecastCreated)");
                 // Ne pas throw pour ne pas bloquer les autres handlers
             }
         }
@@ -58,7 +58,7 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastUpdatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 WEB - [SignalR] Broadcasting ForecastUpdated: ID={Id}, ExcludedConnectionId={ConnectionId}",
+                "📢 API - [SignalR] Broadcasting ForecastUpdated: ID={Id}, ExcludedConnectionId={ConnectionId}",
                 notification.Forecast.Id,
                 notification.ExcludedConnectionId ?? "None");
 
@@ -73,7 +73,7 @@ namespace application.Handlers.WeatherForecast
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (ForecastUpdated)");
+                _logger.LogError(ex, "API - Erreur lors du broadcast SignalR (ForecastUpdated)");
             }
         }
 
@@ -83,7 +83,7 @@ namespace application.Handlers.WeatherForecast
         public async Task Handle(ForecastDeletedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📢 WEB - [SignalR] Broadcasting ForecastDeleted: ID={Id}, ExcludedConnectionId={ConnectionId}",
+                "📢 API - [SignalR] Broadcasting ForecastDeleted: ID={Id}, ExcludedConnectionId={ConnectionId}",
                 notification.Id,
                 notification.ExcludedConnectionId ?? "None");
 
@@ -98,7 +98,7 @@ namespace application.Handlers.WeatherForecast
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (ForecastDeleted)");
+                _logger.LogError(ex, "API - Erreur lors du broadcast SignalR (ForecastDeleted)");
             }
         }
     }

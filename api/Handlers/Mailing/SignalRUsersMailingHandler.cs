@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using shared.Hubs;
 using System.Text.Json;
 
-namespace application.Handlers.Mailing
+namespace api.Handlers.Mailing
 {
     /// <summary>
     /// Handler qui notifie l'utilisateur via SignalR lors des envois d'emails
@@ -42,14 +42,14 @@ namespace application.Handlers.Mailing
                 if (user != null)
                 {
                     await _usersHub.Clients.User(user.Id).SendAsync(
-                        "WEB - EmailSentToUser",
+                        "EmailSentToUser",
                         new { notification.Subject, CorrelationId = correlationId },
                         cancellationToken);
                 }
 
                 // Notifier aussi le groupe par email (pour utilisateurs non authentifiés)
                 await _usersHub.Clients.Group(notification.ToEmail).SendAsync(
-                    "WEB - EmailSentToUser",
+                    "EmailSentToUser",
                     new { notification.Subject, CorrelationId = correlationId },
                     cancellationToken);
 
@@ -59,7 +59,7 @@ namespace application.Handlers.Mailing
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WEB - Erreur lors de la notification SignalR (EmailSentToUser) pour {Email}", notification.ToEmail);
+                _logger.LogError(ex, "API - Erreur lors de la notification SignalR (EmailSentToUser) pour {Email}", notification.ToEmail);
             }
         }
 
@@ -90,7 +90,7 @@ namespace application.Handlers.Mailing
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WEB - Erreur lors de la notification SignalR (VerificationEmailSentToUser) pour {Email}", notification.ToEmail);
+                _logger.LogError(ex, "API - Erreur lors de la notification SignalR (VerificationEmailSentToUser) pour {Email}", notification.ToEmail);
             }
         }
     }

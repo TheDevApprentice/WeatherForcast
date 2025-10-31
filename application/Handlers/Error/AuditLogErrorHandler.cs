@@ -22,7 +22,7 @@ namespace application.Handlers.Error
             {
                 _logger.LogError(
                     notification.Exception,
-                    "[AUDIT ERROR] UserId={UserId} | Action={Action} | ErrorType={ErrorType} | Entity={EntityType}:{EntityId} | Message={Message} | CorrelationId={CorrelationId}",
+                    "WEB - [AUDIT ERROR] UserId={UserId} | Action={Action} | ErrorType={ErrorType} | Entity={EntityType}:{EntityId} | Message={Message} | CorrelationId={CorrelationId}",
                     notification.UserId,
                     notification.Action,
                     notification.ErrorType,
@@ -34,7 +34,7 @@ namespace application.Handlers.Error
             else
             {
                 _logger.LogWarning(
-                    "[AUDIT ERROR] UserId={UserId} | Action={Action} | ErrorType={ErrorType} | Entity={EntityType}:{EntityId} | Message={Message} | CorrelationId={CorrelationId}",
+                    "WEB - [AUDIT ERROR] UserId={UserId} | Action={Action} | ErrorType={ErrorType} | Entity={EntityType}:{EntityId} | Message={Message} | CorrelationId={CorrelationId}",
                     notification.UserId,
                     notification.Action,
                     notification.ErrorType,

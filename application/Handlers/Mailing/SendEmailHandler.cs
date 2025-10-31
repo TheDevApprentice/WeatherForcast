@@ -23,11 +23,11 @@ namespace application.Handlers.Mailing
             try
             {
                 await _emailService.SendEmailConfirmationAsync(notification.Email, cancellationToken);
-                _logger.LogInformation("Email de vérification envoyé à {Email}", notification.Email);
+                _logger.LogInformation("WEB - Email de vérification envoyé à {Email}", notification.Email);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de l'envoi de l'email de vérification pour {Email}", notification.Email);
+                _logger.LogError(ex, "WEB - Erreur lors de l'envoi de l'email de vérification pour {Email}", notification.Email);
             }
         }
     }

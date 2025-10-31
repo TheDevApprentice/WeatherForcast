@@ -1,6 +1,5 @@
 using domain.Events;
 using domain.Events.Mailing;
-using Microsoft.Extensions.Logging;
 
 namespace api.Handlers.Mailing
 {
@@ -20,7 +19,7 @@ namespace api.Handlers.Mailing
 
         public Task Handle(EmailSentToUser notification, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("📧 [Audit Email] Sent to {Email} | Subject: {Subject}",
+            _logger.LogInformation("📧 API - [Audit Email] Sent to {Email} | Subject: {Subject}",
                 notification.ToEmail,
                 notification.Subject);
             return Task.CompletedTask;
@@ -28,7 +27,7 @@ namespace api.Handlers.Mailing
 
         public Task Handle(VerificationEmailSentToUser notification, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("✅ [Audit Email] Verification email sent to {Email}",
+            _logger.LogInformation("✅ API - [Audit Email] Verification email sent to {Email}",
                 notification.ToEmail);
             return Task.CompletedTask;
         }

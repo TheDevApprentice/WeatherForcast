@@ -41,26 +41,30 @@ namespace api.Handlers.WeatherForecast
                 if (!_redis.IsConnected)
                 {
                     _logger.LogWarning(
-                        "⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
+                        "API - ⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
                         notification.Forecast.Id);
                     return;
                 }
 
                 var subscriber = _redis.GetSubscriber();
-                var message = JsonSerializer.Serialize(notification.Forecast);
+                var message = JsonSerializer.Serialize(new
+                {
+                    SourceApp = "API",
+                    Forecast = notification.Forecast
+                });
 
                 await subscriber.PublishAsync(
                     new RedisChannel(ChannelForecastCreated, RedisChannel.PatternMode.Literal),
                     message);
 
                 _logger.LogInformation(
-                    "📤 [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
+                    "📤 API - [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
                     ChannelForecastCreated,
                     notification.Forecast.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la publication Redis (ForecastCreated)");
+                _logger.LogError(ex, "API - Erreur lors de la publication Redis (ForecastCreated)");
                 // Ne pas throw pour ne pas bloquer les autres handlers
             }
         }
@@ -76,26 +80,30 @@ namespace api.Handlers.WeatherForecast
                 if (!_redis.IsConnected)
                 {
                     _logger.LogWarning(
-                        "⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
+                        "API - ⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
                         notification.Forecast.Id);
                     return;
                 }
 
                 var subscriber = _redis.GetSubscriber();
-                var message = JsonSerializer.Serialize(notification.Forecast);
+                var message = JsonSerializer.Serialize(new
+                {
+                    SourceApp = "API",
+                    Forecast = notification.Forecast
+                });
 
                 await subscriber.PublishAsync(
                     new RedisChannel(ChannelForecastUpdated, RedisChannel.PatternMode.Literal),
                     message);
 
                 _logger.LogInformation(
-                    "📤 [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
+                    "📤 API - [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
                     ChannelForecastUpdated,
                     notification.Forecast.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la publication Redis (ForecastUpdated)");
+                _logger.LogError(ex, "API - Erreur lors de la publication Redis (ForecastUpdated)");
             }
         }
 
@@ -110,28 +118,32 @@ namespace api.Handlers.WeatherForecast
                 if (!_redis.IsConnected)
                 {
                     _logger.LogWarning(
-                        "⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
+                        "API - ⚠️ [Redis Pub] Redis non connecté. Event non publié - ID: {Id}",
                         notification.Id);
                     return;
                 }
 
                 var subscriber = _redis.GetSubscriber();
 
-                // Pour la suppression, on envoie juste l'ID
-                var message = JsonSerializer.Serialize(new { Id = notification.Id });
+                // Pour la suppression, on envoie l'ID + la source
+                var message = JsonSerializer.Serialize(new
+                {
+                    SourceApp = "API",
+                    Id = notification.Id
+                });
 
                 await subscriber.PublishAsync(
                     new RedisChannel(ChannelForecastDeleted, RedisChannel.PatternMode.Literal),
                     message);
 
                 _logger.LogInformation(
-                    "📤 [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
+                    "📤 API - [Redis Pub] Event publié sur canal '{Channel}' - ID: {Id}",
                     ChannelForecastDeleted,
                     notification.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la publication Redis (ForecastDeleted)");
+                _logger.LogError(ex, "API - Erreur lors de la publication Redis (ForecastDeleted)");
             }
         }
     }

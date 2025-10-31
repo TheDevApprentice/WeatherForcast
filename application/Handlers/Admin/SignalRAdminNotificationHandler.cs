@@ -37,7 +37,7 @@ namespace application.Handlers.Admin
         public async Task Handle(UserRegisteredEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting UserRegistered: {Email} from {IpAddress}",
+                "🔐 WEB - [AdminHub] Broadcasting UserRegistered: {Email} from {IpAddress}",
                 notification.Email,
                 notification.IpAddress ?? "Unknown");
 
@@ -57,7 +57,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (UserRegistered)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (UserRegistered)");
             }
         }
 
@@ -67,7 +67,7 @@ namespace application.Handlers.Admin
         public async Task Handle(UserLoggedInEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting UserLoggedIn: {Email} from {IpAddress}",
+                "🔐 WEB - [AdminHub] Broadcasting UserLoggedIn: {Email} from {IpAddress}",
                 notification.Email,
                 notification.IpAddress ?? "Unknown");
 
@@ -88,7 +88,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (UserLoggedIn)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (UserLoggedIn)");
             }
         }
 
@@ -98,7 +98,7 @@ namespace application.Handlers.Admin
         public async Task Handle(UserLoggedOutEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting UserLoggedOut: {Email}",
+                "🔐 WEB - [AdminHub] Broadcasting UserLoggedOut: {Email}",
                 notification.Email);
 
             try
@@ -115,7 +115,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (UserLoggedOut)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (UserLoggedOut)");
             }
         }
 
@@ -125,7 +125,7 @@ namespace application.Handlers.Admin
         public async Task Handle(SessionCreatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting SessionCreated: {Email} - Session {SessionId}",
+                "🔐 WEB - [AdminHub] Broadcasting SessionCreated: {Email} - Session {SessionId}",
                 notification.Email,
                 notification.SessionId);
 
@@ -147,7 +147,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (SessionCreated)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (SessionCreated)");
             }
         }
 
@@ -157,7 +157,7 @@ namespace application.Handlers.Admin
         public async Task Handle(SessionRevokedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting SessionRevoked: {Email} - Session {SessionId}",
+                "🔐 WEB - [AdminHub] Broadcasting SessionRevoked: {Email} - Session {SessionId}",
                 notification.Email,
                 notification.SessionId);
 
@@ -178,7 +178,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (SessionRevoked)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (SessionRevoked)");
             }
         }
 
@@ -188,7 +188,7 @@ namespace application.Handlers.Admin
         public async Task Handle(ApiKeyCreatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting ApiKeyCreated: {Email} - Key '{KeyName}'",
+                "🔐 WEB - [AdminHub] Broadcasting ApiKeyCreated: {Email} - Key '{KeyName}'",
                 notification.Email,
                 notification.KeyName);
 
@@ -209,7 +209,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (ApiKeyCreated)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (ApiKeyCreated)");
             }
         }
 
@@ -219,7 +219,7 @@ namespace application.Handlers.Admin
         public async Task Handle(ApiKeyRevokedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting ApiKeyRevoked: {Email} - Key '{KeyName}'",
+                "🔐 WEB - [AdminHub] Broadcasting ApiKeyRevoked: {Email} - Key '{KeyName}'",
                 notification.Email,
                 notification.KeyName);
 
@@ -240,7 +240,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (ApiKeyRevoked)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (ApiKeyRevoked)");
             }
         }
 
@@ -250,7 +250,7 @@ namespace application.Handlers.Admin
         public async Task Handle(UserRoleChangedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting UserRoleChanged: {Email} - Role '{Role}' {Action}",
+                "🔐 WEB - [AdminHub] Broadcasting UserRoleChanged: {Email} - Role '{Role}' {Action}",
                 notification.Email,
                 notification.RoleName,
                 notification.IsAdded ? "added" : "removed");
@@ -272,7 +272,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (UserRoleChanged)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (UserRoleChanged)");
             }
         }
 
@@ -282,7 +282,7 @@ namespace application.Handlers.Admin
         public async Task Handle(UserClaimChangedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "🔐 [AdminHub] Broadcasting UserClaimChanged: {Email} - Claim '{ClaimType}={ClaimValue}' {Action}",
+                "🔐 WEB - [AdminHub] Broadcasting UserClaimChanged: {Email} - Claim '{ClaimType}={ClaimValue}' {Action}",
                 notification.Email,
                 notification.ClaimType,
                 notification.ClaimValue,
@@ -306,7 +306,7 @@ namespace application.Handlers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du broadcast SignalR (UserClaimChanged)");
+                _logger.LogError(ex, "WEB - Erreur lors du broadcast SignalR (UserClaimChanged)");
             }
         }
     }

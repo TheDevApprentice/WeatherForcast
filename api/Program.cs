@@ -118,6 +118,9 @@ namespace api
             // 4. Event Bus - enregistre automatiquement les handlers
             builder.Services.AddEventBus(typeof(Program).Assembly);
 
+            // 4.1 Redis Subscriber Service - Écoute les events de l'Application Web
+            builder.Services.AddHostedService<api.BackgroundServices.RedisSubscriberService>();
+
             // 5. Services (Domain - Logique métier)
             // Nouveaux services séparés (SRP)
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();

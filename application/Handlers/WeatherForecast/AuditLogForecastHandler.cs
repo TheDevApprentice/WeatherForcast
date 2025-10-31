@@ -23,7 +23,7 @@ namespace application.Handlers.WeatherForecast
         public Task Handle(ForecastCreatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📋 [Audit] Forecast Created - ID: {Id}, Date: {Date}, Temp: {Temp}°C, By: {User}, At: {Timestamp}",
+                "📋 WEB - [Audit] Forecast Created - ID: {Id}, Date: {Date}, Temp: {Temp}°C, By: {User}, At: {Timestamp}",
                 notification.Forecast.Id,
                 notification.Forecast.Date.ToString("yyyy-MM-dd"),
                 notification.Forecast.TemperatureC,
@@ -39,7 +39,7 @@ namespace application.Handlers.WeatherForecast
         public Task Handle(ForecastUpdatedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📋 [Audit] Forecast Updated - ID: {Id}, Date: {Date}, Temp: {Temp}°C, By: {User}, At: {Timestamp}",
+                "📋 WEB - [Audit] Forecast Updated - ID: {Id}, Date: {Date}, Temp: {Temp}°C, By: {User}, At: {Timestamp}",
                 notification.Forecast.Id,
                 notification.Forecast.Date.ToString("yyyy-MM-dd"),
                 notification.Forecast.TemperatureC,
@@ -52,7 +52,7 @@ namespace application.Handlers.WeatherForecast
         public Task Handle(ForecastDeletedEvent notification, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
-                "📋 [Audit] Forecast Deleted - ID: {Id}, By: {User}, At: {Timestamp}",
+                "📋 WEB - [Audit] Forecast Deleted - ID: {Id}, By: {User}, At: {Timestamp}",
                 notification.Id,
                 notification.TriggeredBy ?? "System",
                 notification.Timestamp);
