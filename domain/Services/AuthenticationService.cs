@@ -107,8 +107,19 @@ namespace domain.Services
                 return (false, null);
             }
 
-            // 2. Révoquer toutes les anciennes sessions
-            await _sessionManagementService.RevokeAllByUserIdAsync(user.Id);
+            // 2. Révoquer SEULEMENT les anciennes sessions du même type
+            // Les sessions API ne révoquent pas les autres sessions API (multi-device)
+            // Les sessions Web révoquent les autres sessions Web (single device)
+            if (!isApiSession)
+            {
+                // Pour les sessions Web, révoquer toutes les autres sessions Web
+                await _sessionManagementService.RevokeAllByUserIdAndTypeAsync(user.Id, SessionType.Web);
+            }
+            // else {
+            // // 2. Révoquer toutes les anciennes sessions
+            // await _sessionManagementService.RevokeAllByUserIdAsync(user.Id);
+            // }
+            // Pour les sessions API, on ne révoque rien (multi-device support)
 
             // 3. Créer la nouvelle session
             if (isApiSession)

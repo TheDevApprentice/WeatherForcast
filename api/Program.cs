@@ -378,7 +378,8 @@ curl -u ""wf_live_xxx:wf_secret_yyy"" https://api.weatherforecast.com/api/weathe
             // Rate Limiting & Brute Force Protection
             app.UseMiddleware<RateLimitMiddleware>();
 
-            // 4. API Key Authentication (remplace JWT pour l'API publique)
+            // 4. Authentication (JWT + API Key)
+            app.UseAuthentication(); // ← CRITIQUE : Doit être AVANT UseAuthorization
             app.UseMiddleware<ApiKeyAuthenticationMiddleware>();
 
             app.UseAuthorization();

@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Nouveau profil",
+    "Projects": [
+      {
+        "Path": "api\\api.csproj",
+        "Action": "Start",
+        "DebugTarget": "Container (Dockerfile)"
+      },
+      {
+        "Path": "Mobile\\Mobile.csproj",
+        "Action": "Start",
+        "DebugTarget": "Xiaomi 23117RA68G (Android 15.0 - API 35)"
+      }
+    ]
+  }
+]

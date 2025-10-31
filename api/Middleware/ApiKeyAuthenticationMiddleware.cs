@@ -54,10 +54,17 @@ namespace api.Middleware
 
             var authHeaderValue = authHeader.ToString();
 
+            // Si c'est un token Bearer (JWT), laisser passer - c'est géré par UseAuthentication()
+            if (authHeaderValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                await _next(context);
+                return;
+            }
+
             // Format attendu: "Basic base64(key:secret)"
             if (!authHeaderValue.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
             {
-                await UnauthorizedResponse(context, "Invalid Authorization header format. Expected: Basic base64(key:secret)");
+                await UnauthorizedResponse(context, "Invalid Authorization header format. Expected: Basic base64(key:secret) or Bearer <token>");
                 return;
             }
 

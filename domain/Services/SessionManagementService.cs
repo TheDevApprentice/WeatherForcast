@@ -139,6 +139,24 @@ namespace domain.Services
             return sessionCount;
         }
 
+        public async Task<int> RevokeAllByUserIdAndTypeAsync(string userId, SessionType sessionType)
+        {
+            // Récupérer toutes les sessions actives d'un type spécifique
+            var activeSessions = await _unitOfWork.Sessions.GetActiveSessionsByUserIdAsync(userId);
+            var sessionsToRevoke = activeSessions.Where(s => s.Type == sessionType).ToList();
+            var sessionCount = sessionsToRevoke.Count;
+
+            // Supprimer chaque session individuellement
+            foreach (var session in sessionsToRevoke)
+            {
+                await _unitOfWork.Sessions.DeleteAsync(session.Id);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return sessionCount;
+        }
+
         public async Task<bool> DeleteAsync(Guid sessionId)
         {
             var result = await _unitOfWork.Sessions.DeleteAsync(sessionId);

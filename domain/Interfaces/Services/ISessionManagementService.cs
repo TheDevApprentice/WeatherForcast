@@ -39,6 +39,11 @@ namespace domain.Interfaces.Services
         Task<int> RevokeAllByUserIdAsync(string userId);
 
         /// <summary>
+        /// Révoquer toutes les sessions d'un type spécifique pour un utilisateur
+        /// </summary>
+        Task<int> RevokeAllByUserIdAndTypeAsync(string userId, SessionType sessionType);
+
+        /// <summary>
         /// Supprimer une session
         /// </summary>
         Task<bool> DeleteAsync(Guid sessionId);
