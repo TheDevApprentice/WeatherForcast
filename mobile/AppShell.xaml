@@ -80,8 +80,8 @@
             <!-- Gradient Background avec effet Acrylic -->
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#5B5FC7" Offset="0.0" />
-                    <GradientStop Color="#764BA2" Offset="1.0" />
+                    <GradientStop Color="{AppThemeBinding Light=#5B5FC7, Dark=#2C2C2E}" Offset="0.0" />
+                    <GradientStop Color="{AppThemeBinding Light=#5764BA2, Dark=#2C2C2E}" Offset="1.0" />
                 </LinearGradientBrush>
             </Grid.Background>
             

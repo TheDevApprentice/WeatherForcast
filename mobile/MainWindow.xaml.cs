@@ -22,8 +22,22 @@ namespace mobile
         /// </summary>
         public void UpdateAccountButton(string firstName, string lastName)
         {
+            // Générer les initiales
+            var initials = GetInitials(firstName, lastName);
+            AccountButton.Text = initials;
             AccountButton.IsVisible = true;
-            _logger?.LogInformation("✅ Bouton Account affiché pour: {Name}", $"{firstName} {lastName}");
+
+            _logger?.LogInformation("✅ Bouton Account affiché pour: {Name} ({Initials})", $"{firstName} {lastName}", initials);
+        }
+
+        /// <summary>
+        /// Génère les initiales à partir du prénom et du nom
+        /// </summary>
+        private string GetInitials(string firstName, string lastName)
+        {
+            var firstInitial = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
+            var lastInitial = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
+            return firstInitial + lastInitial;
         }
 
         /// <summary>
@@ -86,32 +100,7 @@ namespace mobile
 
                 if (this.Page != null)
                 {
-                    // var action = await this.Page.DisplayActionSheet(
-                    //     "Mon Compte",
-                    //     "Annuler",
-                    //     null,
-                    //     "👤 Profil",
-                    //     "⚙️ Paramètres",
-                    //     "🚪 Déconnexion"
-                    // );
-
-                    // _logger?.LogInformation("Action sélectionnée: {Action}", action);
-
-                    // switch (action)
-                    // {
-                    //     case "👤 Profil":
-                    //         await this.Page.DisplayAlert("Profil", "Page de profil (à implémenter)", "OK");
-                    //         break;
-
-                    //     case "⚙️ Paramètres":
-                    //         await this.Page.DisplayAlert("Paramètres", "Page de paramètres (à implémenter)", "OK");
-                    //         break;
-
-                    //     case "🚪 Déconnexion":
-                    //         // TODO: Appeler la méthode de déconnexion
-                    //         await this.Page.DisplayAlert("Déconnexion", "Déconnexion (à implémenter)", "OK");
-                    //         break;
-                    // }
+                    await this.Page.DisplayAlert("Account", "Page de Account (à implémenter)", "OK");
                 }
             }
             catch (Exception ex)

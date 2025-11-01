@@ -1,6 +1,4 @@
-using mobile.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls.Shapes;
 
 namespace mobile
 {

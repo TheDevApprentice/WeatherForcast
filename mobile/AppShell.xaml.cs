@@ -122,6 +122,14 @@ namespace mobile
                         // Générer les initiales (première lettre du prénom + première lettre du nom)
                         var initials = GetInitials(userInfo.FirstName, userInfo.LastName);
                         UserInitialsLabel.Text = initials;
+
+#if WINDOWS || MACCATALYST
+                        // Synchroniser avec la titlebar
+                        if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                        {
+                            mw.UpdateAccountButton(userInfo.FirstName, userInfo.LastName);
+                        }
+#endif
                     });
                 }
             }
