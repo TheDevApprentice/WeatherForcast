@@ -6,6 +6,7 @@
     xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
     xmlns:auth="clr-namespace:mobile.Pages.Auth"
     xmlns:pages="clr-namespace:mobile.Pages"
+    xmlns:controls="clr-namespace:mobile.Controls"
     Shell.FlyoutBehavior="Flyout">
 
     <!-- 🎨 Menu Items - Modern Card Style -->

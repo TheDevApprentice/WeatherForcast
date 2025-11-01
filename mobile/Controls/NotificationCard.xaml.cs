@@ -1,0 +1,167 @@
+namespace mobile.Controls
+{
+    /// <summary>
+    /// Carte de notification individuelle avec timer et animations
+    /// </summary>
+    public partial class NotificationCard : Frame
+    {
+        private CancellationTokenSource? _cancellationTokenSource;
+        private bool _isClosing = false;
+        public event EventHandler? Closed;
+
+        public string NotificationId { get; set; } = Guid.NewGuid().ToString();
+
+        public NotificationCard()
+        {
+            InitializeComponent();
+        }
+
+        /// <summary>
+        /// Affiche la notification avec animation et timer
+        /// </summary>
+        public async Task ShowAsync(string title, string message, NotificationType type, int durationMs = 5000)
+        {
+            // Configurer l'apparence
+            ConfigureAppearance(title, message, type);
+
+            // Animation d'entrée
+            await AnimateInAsync();
+
+            // Démarrer le timer avec barre de progression
+            _cancellationTokenSource = new CancellationTokenSource();
+            _ = StartTimerAsync(durationMs, _cancellationTokenSource.Token);
+        }
+
+        /// <summary>
+        /// Configure l'apparence selon le type
+        /// </summary>
+        private void ConfigureAppearance(string title, string message, NotificationType type)
+        {
+            TitleLabel.Text = title;
+            MessageLabel.Text = message;
+
+            switch (type)
+            {
+                case NotificationType.Success:
+                    ColorBar.BackgroundColor = Color.FromArgb("#10B981"); // Vert
+                    TitleLabel.TextColor = Color.FromArgb("#059669");
+                    break;
+
+                case NotificationType.Error:
+                    ColorBar.BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
+                    TitleLabel.TextColor = Color.FromArgb("#DC2626");
+                    break;
+
+                case NotificationType.Warning:
+                    ColorBar.BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
+                    TitleLabel.TextColor = Color.FromArgb("#D97706");
+                    break;
+
+                case NotificationType.Info:
+                    ColorBar.BackgroundColor = Color.FromArgb("#3B82F6"); // Bleu
+                    TitleLabel.TextColor = Color.FromArgb("#2563EB");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Animation d'entrée (slide from right + fade in)
+        /// </summary>
+        private async Task AnimateInAsync()
+        {
+            IsVisible = true;
+            Opacity = 0;
+            TranslationX = 400;
+
+            await Task.WhenAll(
+                this.FadeTo(1, 400, Easing.CubicOut),
+                this.TranslateTo(0, 0, 400, Easing.CubicOut)
+            );
+        }
+
+        /// <summary>
+        /// Animation de sortie (slide to right + fade out)
+        /// </summary>
+        private async Task AnimateOutAsync()
+        {
+            if (_isClosing) return;
+            _isClosing = true;
+
+            await Task.WhenAll(
+                this.FadeTo(0, 300, Easing.CubicIn),
+                this.TranslateTo(400, 0, 300, Easing.CubicIn)
+            );
+
+            IsVisible = false;
+            Closed?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Démarre le timer avec barre de progression
+        /// </summary>
+        private async Task StartTimerAsync(int durationMs, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var startTime = DateTime.Now;
+                var endTime = startTime.AddMilliseconds(durationMs);
+
+                while (DateTime.Now < endTime && !cancellationToken.IsCancellationRequested)
+                {
+                    var elapsed = (DateTime.Now - startTime).TotalMilliseconds;
+                    var progress = elapsed / durationMs;
+
+                    // Mettre à jour la barre de progression
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        if (ProgressBar.Width > 0)
+                        {
+                            var width = ProgressBar.Width * progress;
+                            ProgressClip.Rect = new Rect(0, 0, width, 2);
+                        }
+                    });
+
+                    await Task.Delay(16, cancellationToken); // ~60 FPS
+                }
+
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    await AnimateOutAsync();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Timer annulé (fermeture manuelle)
+            }
+        }
+
+        /// <summary>
+        /// Fermer manuellement la notification
+        /// </summary>
+        private void OnCloseTapped(object? sender, EventArgs e)
+        {
+            _cancellationTokenSource?.Cancel();
+            _ = AnimateOutAsync();
+        }
+
+        /// <summary>
+        /// Nettoyer les ressources
+        /// </summary>
+        public void Dispose()
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Types de notification
+    /// </summary>
+    public enum NotificationType
+    {
+        Success,
+        Error,
+        Warning,
+        Info
+    }
+}

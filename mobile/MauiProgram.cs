@@ -27,7 +27,7 @@ namespace mobile
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("SegoeUI-Semibold.ttf", "SegoeSemibold");
-                    fonts.AddFont("FluentSystemIcons-Regular.ttf", FluentUI.FontFamily);
+                    fonts.AddFont("FluentSystemIcons-Filled.ttf", "FluentIcons");
                 });
 
 #if DEBUG
@@ -50,7 +50,14 @@ namespace mobile
 
             // Services
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
-            builder.Services.AddSingleton<ModalErrorHandler>();
+            builder.Services.AddSingleton<ISignalRService, SignalRService>();
+
+            // Service de notification - Toasts personnalisés:
+            builder.Services.AddSingleton<INotificationService, NotificationService>();
+
+            // Gestion des erreurs
+            builder.Services.AddSingleton<IErrorHandler, ModalErrorHandler>();
+            builder.Services.AddSingleton<GlobalExceptionHandler>();
 
             // HttpClient avec authentification
             builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();

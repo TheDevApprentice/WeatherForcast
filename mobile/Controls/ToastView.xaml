@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Frame xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="mobile.Controls.ToastView"
+       x:Name="ToastFrame"
+       Padding="16,12"
+       CornerRadius="8"
+       HasShadow="True"
+       BorderColor="Transparent"
+       BackgroundColor="#2D3748"
+       HorizontalOptions="Center"
+       VerticalOptions="End"
+       Margin="20,0,20,80"
+       MaximumWidthRequest="400"
+       IsVisible="False"
+       Opacity="0">
+    
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <!-- Icône -->
+        <Label x:Name="IconLabel"
+               Grid.Column="0"
+               FontSize="20"
+               VerticalOptions="Center"
+               TextColor="White"/>
+        
+        <!-- Message -->
+        <Label x:Name="MessageLabel"
+               Grid.Column="1"
+               FontSize="14"
+               VerticalOptions="Center"
+               TextColor="White"
+               LineBreakMode="WordWrap"
+               MaxLines="3"/>
+        
+        <!-- Bouton Fermer (optionnel) -->
+        <Label x:Name="CloseButton"
+               Grid.Column="2"
+               Text="✕"
+               FontSize="18"
+               VerticalOptions="Center"
+               TextColor="#A0AEC0"
+               IsVisible="False">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnCloseTapped"/>
+            </Label.GestureRecognizers>
+        </Label>
+    </Grid>
+</Frame>

@@ -10,6 +10,8 @@ namespace mobile.PageModels.Auth
     {
         private readonly IApiService _apiService;
         private readonly ISecureStorageService _secureStorage;
+        private readonly ISignalRService _signalRService;
+        private readonly INotificationService _notificationService;
 
         [ObservableProperty]
         private string firstName = string.Empty;
@@ -37,10 +39,19 @@ namespace mobile.PageModels.Auth
 
         public bool IsNotLoading => !IsLoading;
 
-        public RegisterPageModel(IApiService apiService, ISecureStorageService secureStorage)
+        public RegisterPageModel(
+            IApiService apiService, 
+            ISecureStorageService secureStorage, 
+            ISignalRService signalRService,
+            INotificationService notificationService)
         {
             _apiService = apiService;
             _secureStorage = secureStorage;
+            _signalRService = signalRService;
+            _notificationService = notificationService;
+
+            // S'abonner aux événements SignalR
+            _signalRService.VerificationEmailSent += OnVerificationEmailSent;
         }
 
         [RelayCommand]
@@ -60,6 +71,10 @@ namespace mobile.PageModels.Auth
             {
                 IsLoading = true;
 
+                // Démarrer la connexion SignalR pour recevoir les notifications
+                await _signalRService.StartUsersHubAsync();
+                await _signalRService.JoinEmailChannelAsync(Email.Trim());
+
                 var request = new RegisterRequest
                 {
                     FirstName = FirstName.Trim(),
@@ -74,10 +89,13 @@ namespace mobile.PageModels.Auth
                 {
                     // L'inscription a réussi, mais pas de token retourné
                     // L'utilisateur doit maintenant se connecter
-                    ShowError("Compte créé avec succès ! Veuillez vous connecter.");
+                    ShowError("Compte créé avec succès ! Vérifiez votre email.");
                     
-                    // Attendre un peu pour que l'utilisateur lise le message
-                    await Task.Delay(2000);
+                    // Attendre un peu pour recevoir la notification SignalR
+                    await Task.Delay(3000);
+                    
+                    // Quitter le canal email
+                    await _signalRService.LeaveEmailChannelAsync(Email.Trim());
                     
                     // Navigation vers la page de connexion
                     await Shell.Current.GoToAsync("..");
@@ -161,6 +179,14 @@ namespace mobile.PageModels.Auth
         partial void OnIsLoadingChanged(bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
+        }
+
+        private async void OnVerificationEmailSent(object? sender, EmailNotification notification)
+        {
+            // Afficher une notification toast à l'utilisateur
+            await _notificationService.ShowSuccessAsync(
+                notification.Message ?? "Email de vérification envoyé avec succès",
+                "Vérification Email");
         }
     }
 }

@@ -8,9 +8,9 @@
         "DebugTarget": "Container (Dockerfile)"
       },
       {
-        "Path": "Mobile\\Mobile.csproj",
+        "Path": "mobile\\mobile.csproj",
         "Action": "Start",
-        "DebugTarget": "Xiaomi 23117RA68G (Android 15.0 - API 35)"
+        "DebugTarget": "Windows Machine"
       }
     ]
   }
