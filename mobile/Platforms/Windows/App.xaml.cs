@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Windowing;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using WinRT.Interop;
 using WinUIColor = Windows.UI.Color;
@@ -43,25 +43,7 @@ namespace mobile.WinUI
             try
             {
                 var appWindow = GetAppWindow(window);
-                if (appWindow?.TitleBar != null)
-                {
-                    // Couleurs des boutons système (Minimize, Maximize, Close)
-                    // État normal
-                    appWindow.TitleBar.ButtonForegroundColor = WinUIColor.FromArgb(255, 255, 255, 255); // White
-                    appWindow.TitleBar.ButtonBackgroundColor = WinUIColor.FromArgb(0, 0, 0, 0); // Transparent
 
-                    // État hover (survol)
-                    appWindow.TitleBar.ButtonHoverForegroundColor = WinUIColor.FromArgb(255, 255, 255, 255); // White
-                    appWindow.TitleBar.ButtonHoverBackgroundColor = WinUIColor.FromArgb(32, 255, 255, 255); // #FFFFFF20
-
-                    // État pressed (clic)
-                    appWindow.TitleBar.ButtonPressedForegroundColor = WinUIColor.FromArgb(255, 255, 255, 255); // White
-                    appWindow.TitleBar.ButtonPressedBackgroundColor = WinUIColor.FromArgb(64, 255, 255, 255); // #FFFFFF40
-
-                    // Boutons inactifs
-                    appWindow.TitleBar.ButtonInactiveForegroundColor = WinUIColor.FromArgb(128, 255, 255, 255); // #FFFFFF80
-                    appWindow.TitleBar.ButtonInactiveBackgroundColor = WinUIColor.FromArgb(0, 0, 0, 0); // Transparent
-                }
             }
             catch (Exception ex)
             {
@@ -85,5 +67,6 @@ namespace mobile.WinUI
                 return null;
             }
         }
+
     }
 }
