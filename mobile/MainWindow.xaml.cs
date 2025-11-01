@@ -15,7 +15,30 @@ namespace mobile
                 _logger = Handler?.MauiContext?.Services.GetService<ILogger<MainWindow>>();
             }
             catch { }
+
+#if WINDOWS
+            // Appliquer le thème aux boutons système après que la fenêtre soit créée
+            this.HandlerChanged += OnHandlerChanged;
+#endif
         }
+
+#if WINDOWS
+        private void OnHandlerChanged(object? sender, EventArgs e)
+        {
+            if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
+            {
+                try
+                {
+                    Platforms.Windows.WindowsTitleBarHelper.ApplyTheme(winUIWindow);
+                    _logger?.LogInformation("✅ Thème titlebar appliqué");
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "❌ Erreur application thème titlebar");
+                }
+            }
+        }
+#endif
 
         /// <summary>
         /// Met à jour le bouton Account avec les infos utilisateur
