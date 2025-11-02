@@ -9,6 +9,7 @@ namespace mobile.PageModels.Auth
     {
         private readonly IApiService _apiService;
         private readonly ISecureStorageService _secureStorage;
+        private readonly IAuthenticationStateService _authState;
 
         [ObservableProperty]
         private string email = string.Empty;
@@ -27,10 +28,14 @@ namespace mobile.PageModels.Auth
 
         public bool IsNotLoading => !IsLoading;
 
-        public LoginPageModel(IApiService apiService, ISecureStorageService secureStorage)
+        public LoginPageModel(
+            IApiService apiService, 
+            ISecureStorageService secureStorage,
+            IAuthenticationStateService authState)
         {
             _apiService = apiService;
             _secureStorage = secureStorage;
+            _authState = authState;
         }
 
         [RelayCommand]
@@ -70,6 +75,21 @@ namespace mobile.PageModels.Auth
                     // Sauvegarder le token et les infos utilisateur
                     await _secureStorage.SaveTokenAsync(response.Token);
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
+
+                    // Récupérer l'ID utilisateur depuis l'API
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    
+                    if (currentUser != null)
+                    {
+                        // Sauvegarder l'état d'authentification centralisé
+                        var authState = Models.AuthenticationState.Authenticated(
+                            currentUser.Id,
+                            currentUser.Email,
+                            currentUser.FirstName,
+                            currentUser.LastName
+                        );
+                        await _authState.SetStateAsync(authState);
+                    }
 
                     // Mettre à jour l'UI du Shell
                     if (Shell.Current is AppShell appShell)
