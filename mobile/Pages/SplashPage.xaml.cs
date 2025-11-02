@@ -7,16 +7,19 @@ namespace mobile.Pages
     {
         private readonly IStartupService _startupService;
         private readonly ISecureStorageService _secureStorage;
+        private readonly IAuthenticationStateService _authState;
         private readonly ILogger<SplashPage> _logger;
 
         public SplashPage(
             IStartupService startupService,
             ISecureStorageService secureStorage,
+            IAuthenticationStateService authState,
             ILogger<SplashPage> logger)
         {
             InitializeComponent();
             _startupService = startupService;
             _secureStorage = secureStorage;
+            _authState = authState;
             _logger = logger;
         }
 
@@ -139,13 +142,19 @@ namespace mobile.Pages
 
         private async Task NavigateToAppropriatePageAsync()
         {
-            // Vérifier si l'utilisateur est authentifié
-            var isAuthenticated = await _secureStorage.IsAuthenticatedAsync();
+            // Récupérer l'état d'authentification (déjà validé par les procédures de démarrage)
+            var authState = await _authState.GetStateAsync();
 
-            _logger.LogInformation("Navigation vers {Page}", isAuthenticated ? "MainPage" : "LoginPage");
+            _logger.LogInformation("Navigation vers {Page}", authState.IsAuthenticated ? "MainPage" : "LoginPage");
+
+            // Mettre à jour l'UI du Shell
+            if (Shell.Current is AppShell shell)
+            {
+                shell.UpdateAuthenticationUI(authState.IsAuthenticated);
+            }
 
             // Naviguer vers la page appropriée
-            if (isAuthenticated)
+            if (authState.IsAuthenticated)
             {
                 await Shell.Current.GoToAsync("///main");
             }

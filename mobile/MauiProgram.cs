@@ -51,6 +51,7 @@ namespace mobile
 
             // Services
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
+            builder.Services.AddSingleton<IAuthenticationStateService, AuthenticationStateService>();
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
             builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
             builder.Services.AddSingleton<IStartupService, StartupService>();

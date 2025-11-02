@@ -158,19 +158,38 @@ namespace api.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetCurrentUser()
         {
+            // 1. Vérifier que le claim email existe dans le JWT
             var email = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
 
             if (string.IsNullOrEmpty(email))
             {
-                return Unauthorized();
+                _logger.LogWarning("Tentative d'accès à /me sans claim email");
+                return Unauthorized(new { message = "Token invalide : email manquant" });
             }
 
+            // 2. Vérifier que l'utilisateur existe
             var user = await _userManagementService.GetByEmailAsync(email);
 
             if (user == null)
             {
-                return NotFound();
+                _logger.LogWarning("Utilisateur {Email} introuvable", email);
+                return Unauthorized(new { message = "Utilisateur introuvable" });
             }
+
+            // 3. Vérifier que l'utilisateur a au moins une session API active et valide
+            var activeSessions = await _sessionManagementService.GetActiveSessionsAsync(user.Id);
+            var hasValidApiSession = activeSessions.Any(s =>
+                s.Type == domain.Entities.SessionType.Api &&
+                s.ExpiresAt > DateTime.UtcNow &&
+                !s.IsRevoked);
+
+            if (!hasValidApiSession)
+            {
+                _logger.LogWarning("Aucune session API valide pour l'utilisateur {Email}", email);
+                return Unauthorized(new { message = "Session expirée ou invalide" });
+            }
+
+            _logger.LogInformation("Accès autorisé à /me pour {Email}", email);
 
             return Ok(new
             {

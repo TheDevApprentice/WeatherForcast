@@ -13,6 +13,7 @@ namespace mobile.Services
         private readonly IApiService _apiService;
         private readonly ISessionValidationService _sessionValidation;
         private readonly ISecureStorageService _secureStorage;
+        private readonly IAuthenticationStateService _authState;
         private readonly List<StartupProcedure> _procedures;
 
         public IReadOnlyList<StartupProcedure> Procedures => _procedures.AsReadOnly();
@@ -20,10 +21,12 @@ namespace mobile.Services
         public StartupService(
             ILogger<StartupService> logger,
             IServiceProvider serviceProvider,
-            ISecureStorageService secureStorage)
+            ISecureStorageService secureStorage,
+            IAuthenticationStateService authState)
         {
             _logger = logger;
             _secureStorage = secureStorage;
+            _authState = authState;
 
             // Résoudre les services via ServiceProvider pour éviter les problèmes de lifetime
             using var scope = serviceProvider.CreateScope();
@@ -230,6 +233,7 @@ namespace mobile.Services
                 // Valider la session via l'API
                 using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
                 var sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
+                var apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
                 
                 var isValid = await sessionValidation.ValidateSessionAsync();
 
@@ -237,10 +241,28 @@ namespace mobile.Services
                 {
                     _logger.LogWarning("Session invalide, nettoyage...");
                     await sessionValidation.ClearSessionAsync();
+                    await _authState.ClearStateAsync();
                     return StartupProcedureResult.Ok(); // Pas d'erreur, juste session invalide
                 }
 
-                _logger.LogInformation("Session valide");
+                // Session valide : récupérer les infos utilisateur et sauvegarder l'état
+                _logger.LogInformation("Session valide, récupération des informations utilisateur...");
+                var currentUser = await apiService.GetCurrentUserAsync();
+
+                if (currentUser != null)
+                {
+                    // Sauvegarder l'état d'authentification
+                    var authState = AuthenticationState.Authenticated(
+                        currentUser.Id,
+                        currentUser.Email,
+                        currentUser.FirstName,
+                        currentUser.LastName
+                    );
+
+                    await _authState.SetStateAsync(authState);
+                    _logger.LogInformation("État d'authentification sauvegardé pour {Email}", currentUser.Email);
+                }
+
                 return StartupProcedureResult.Ok();
             }
             catch (Exception ex)
