@@ -24,6 +24,28 @@ namespace mobile
         {
             var shell = new AppShell();
 
+            // Désactiver le flyout pendant le splash
+            shell.FlyoutBehavior = FlyoutBehavior.Disabled;
+            
+            // Masquer l'icône du flyout (hamburger menu)
+            Shell.SetFlyoutBehavior(shell, FlyoutBehavior.Disabled);
+            shell.FlyoutIsPresented = false;
+
+#if WINDOWS || MACCATALYST
+            // Utiliser MainWindow avec TitleBar personnalisée (Windows et Mac)
+            var window = new MainWindow
+            {
+                Page = shell
+            };
+
+            // Masquer les éléments de la title bar AVANT la navigation vers le splash
+            window.HideTitleBarElements();
+            _logger.LogInformation("🔒 Éléments de la title bar masqués avant le splash");
+#else
+            // Utiliser Window standard (Android, iOS)
+            var window = new Window(shell);
+#endif
+
             // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -39,17 +61,6 @@ namespace mobile
                     await shell.GoToAsync("///login");
                 }
             });
-
-#if WINDOWS || MACCATALYST
-            // Utiliser MainWindow avec TitleBar personnalisée (Windows et Mac)
-            var window = new MainWindow
-            {
-                Page = shell
-            };
-#else
-            // Utiliser Window standard (Android, iOS)
-            var window = new Window(shell);
-#endif
 
             return window;
         }

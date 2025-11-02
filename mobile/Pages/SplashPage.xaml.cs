@@ -27,6 +27,7 @@ namespace mobile.Pages
         {
             base.OnAppearing();
 
+            // Les éléments de la title bar sont déjà masqués dans App.xaml.cs
             // Lancer les procédures de démarrage
             await ExecuteStartupAsync();
         }
@@ -147,11 +148,19 @@ namespace mobile.Pages
 
             _logger.LogInformation("Navigation vers {Page}", authState.IsAuthenticated ? "MainPage" : "LoginPage");
 
-            // Mettre à jour l'UI du Shell
+            // Mettre à jour l'UI du Shell (sans toucher à la title bar)
             if (Shell.Current is AppShell shell)
             {
-                shell.UpdateAuthenticationUI(authState.IsAuthenticated);
+                shell.UpdateAuthenticationUI(authState.IsAuthenticated, updateTitleBar: false);
             }
+
+            // Afficher les éléments de la title bar après le splash
+#if WINDOWS || MACCATALYST
+            if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+            {
+                mw.ShowTitleBarElements(authState.IsAuthenticated);
+            }
+#endif
 
             // Naviguer vers la page appropriée
             if (authState.IsAuthenticated)

@@ -77,7 +77,9 @@ namespace mobile
         /// <summary>
         /// Met à jour la visibilité du menu selon l'état d'authentification
         /// </summary>
-        public void UpdateAuthenticationUI(bool isAuthenticated)
+        /// <param name="isAuthenticated">État d'authentification</param>
+        /// <param name="updateTitleBar">Si false, ne met pas à jour la title bar (utilisé pendant le splash)</param>
+        public void UpdateAuthenticationUI(bool isAuthenticated, bool updateTitleBar = true)
         {
             // Contrôler la visibilité du Flyout
             FlyoutBehavior = isAuthenticated ? FlyoutBehavior.Flyout : FlyoutBehavior.Disabled;
@@ -124,8 +126,8 @@ namespace mobile
                             UserInitialsLabel.Text = authState.GetInitials();
 
 #if WINDOWS || MACCATALYST
-                            // Synchroniser avec la titlebar
-                            if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                            // Synchroniser avec la titlebar (sauf si on est dans le splash)
+                            if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
                             {
                                 mw.UpdateAccountButton(authState.FirstName, authState.LastName);
                             }
@@ -141,8 +143,8 @@ namespace mobile
                 UserInitialsLabel.Text = string.Empty;
 
 #if WINDOWS || MACCATALYST
-                // Masquer le bouton Account et afficher l'icône People dans la titlebar
-                if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                // Masquer le bouton Account et afficher l'icône People dans la titlebar (sauf si on est dans le splash)
+                if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
                 {
                     mw.ClearAccountButton();
                 }
@@ -199,6 +201,9 @@ namespace mobile
         {
             base.OnNavigated(args);
 
+            // Ne pas mettre à jour la title bar si on est sur le splash
+            bool isOnSplash = args.Current?.Location?.OriginalString?.Contains("splash") ?? false;
+
             // Mettre à jour l'UI à chaque navigation (utilise l'état centralisé)
             var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
             if (authStateService != null)
@@ -206,7 +211,8 @@ namespace mobile
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     var isAuthenticated = await authStateService.IsAuthenticatedAsync();
-                    UpdateAuthenticationUI(isAuthenticated);
+                    // Ne pas mettre à jour la title bar pendant le splash
+                    UpdateAuthenticationUI(isAuthenticated, updateTitleBar: !isOnSplash);
                 });
             }
         }
