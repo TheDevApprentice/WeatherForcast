@@ -6,14 +6,17 @@ namespace mobile
     {
         private readonly GlobalExceptionHandler _exceptionHandler;
         private readonly ILogger<App> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
         public App(
             GlobalExceptionHandler exceptionHandler,
-            ILogger<App> logger)
+            ILogger<App> logger,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _exceptionHandler = exceptionHandler;
             _logger = logger;
+            _serviceProvider = serviceProvider;
 
             // Initialiser le gestionnaire global d'exceptions
             _exceptionHandler.Initialize();
@@ -22,14 +25,23 @@ namespace mobile
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            var shell = new AppShell();
+            Shell shell;
 
+#if ANDROID || IOS
+            // Sur mobile : utiliser AppShellMobile avec TabBar
+            shell = new AppShellMobile();
+            _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
+#else
+            // Sur desktop : utiliser AppShell avec Flyout
+            shell = new AppShell();
+            
             // Désactiver le flyout pendant le splash
             shell.FlyoutBehavior = FlyoutBehavior.Disabled;
-            
-            // Masquer l'icône du flyout (hamburger menu)
             Shell.SetFlyoutBehavior(shell, FlyoutBehavior.Disabled);
             shell.FlyoutIsPresented = false;
+            
+            _logger.LogInformation("🖥️ AppShell chargé (Flyout pour desktop)");
+#endif
 
 #if WINDOWS || MACCATALYST
             // Utiliser MainWindow avec TitleBar personnalisée (Windows et Mac)
@@ -52,13 +64,27 @@ namespace mobile
                 try
                 {
                     _logger.LogInformation("🚀 Démarrage de l'application");
+                    
+#if ANDROID || IOS
+                    // Sur mobile avec TabBar : masquer le TabBar et afficher Splash en modal
+                    Shell.SetTabBarIsVisible(shell, false);
+                    var splashPage = _serviceProvider.GetRequiredService<Pages.SplashPage>();
+                    await shell.Navigation.PushModalAsync(splashPage, false);
+#else
+                    // Sur desktop avec Flyout : navigation globale vers splash
                     await shell.GoToAsync("///splash");
+#endif
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Erreur lors de la navigation vers SplashPage");
                     // En cas d'erreur, rediriger vers login par sécurité
+#if ANDROID || IOS
+                    var loginPage = _serviceProvider.GetRequiredService<Pages.Auth.LoginPage>();
+                    await shell.Navigation.PushModalAsync(loginPage, false);
+#else
                     await shell.GoToAsync("///login");
+#endif
                 }
             });
 

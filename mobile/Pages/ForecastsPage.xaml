@@ -7,9 +7,9 @@
              x:DataType="viewmodels:ForecastsPageModel">
     
     <!-- TitleView vide pour masquer le titre mais garder le burger menu -->
-    <Shell.TitleView>
+    <!--<Shell.TitleView>
         <Grid />
-    </Shell.TitleView>
+    </Shell.TitleView>-->
 
     <Grid RowDefinitions="Auto,*">
         <!-- Header -->

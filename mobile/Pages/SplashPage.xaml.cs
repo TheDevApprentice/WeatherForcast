@@ -165,11 +165,30 @@ namespace mobile.Pages
             // Naviguer vers la page appropriée
             if (authState.IsAuthenticated)
             {
+#if ANDROID || IOS
+                // Sur mobile : fermer le splash modal, réafficher le TabBar
+                Shell.SetTabBarIsVisible(Shell.Current, true);
+                await Navigation.PopModalAsync(false);
+                // Le TabBar affichera automatiquement le premier onglet (Dashboard)
+#else
+                // Sur desktop : navigation globale
                 await Shell.Current.GoToAsync("///main");
+#endif
             }
             else
             {
+#if ANDROID || IOS
+                // Sur mobile : remplacer splash par login (modal)
+                var loginPage = Handler?.MauiContext?.Services.GetService<Auth.LoginPage>();
+                if (loginPage != null)
+                {
+                    await Navigation.PopModalAsync(false); // Fermer splash
+                    await Shell.Current.Navigation.PushModalAsync(loginPage, false); // Ouvrir login
+                }
+#else
+                // Sur desktop : navigation globale
                 await Shell.Current.GoToAsync("///login");
+#endif
             }
         }
     }

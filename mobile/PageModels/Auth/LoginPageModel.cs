@@ -126,7 +126,15 @@ namespace mobile.PageModels.Auth
                     }
 
                     // Navigation vers l'application principale
+#if ANDROID || IOS
+                    // Sur mobile : fermer le login modal, réafficher le TabBar
+                    Shell.SetTabBarIsVisible(Shell.Current, true);
+                    await Application.Current!.MainPage!.Navigation.PopModalAsync(false);
+                    // Le TabBar affichera automatiquement le premier onglet (Dashboard)
+#else
+                    // Sur desktop : navigation globale
                     await Shell.Current.GoToAsync("///main");
+#endif
                 }
                 else
                 {

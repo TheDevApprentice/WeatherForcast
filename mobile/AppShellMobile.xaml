@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="mobile.AppShellMobile"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:auth="clr-namespace:mobile.Pages.Auth"
+    xmlns:pages="clr-namespace:mobile.Pages"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.TabBarIsVisible="True">
+
+    <!-- TabBar pour iOS et Android -->
+    <TabBar>
+        <!-- Tab Dashboard -->
+        <Tab Title="Dashboard" Icon="{StaticResource IconDashboard}">
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:MainPage}"
+                Route="main" />
+        </Tab>
+
+        <!-- Tab Prévisions -->
+        <Tab Title="Prévisions" Icon="{StaticResource IconForecasts}">
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:ForecastsPage}"
+                Route="forecasts" />
+        </Tab>
+    </TabBar>
+
+</Shell>
