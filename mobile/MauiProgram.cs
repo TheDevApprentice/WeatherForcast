@@ -107,6 +107,10 @@ namespace mobile
             builder.Services.AddTransient<ForecastsPage>();
             builder.Services.AddTransient<ForecastsPageModel>();
 
+            // Page de profil
+            builder.Services.AddTransient<ProfilePage>();
+            builder.Services.AddTransient<ProfilePageModel>();
+
             return builder.Build();
         }
     }

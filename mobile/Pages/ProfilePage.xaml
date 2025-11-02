@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Pages.ProfilePage"
+             xmlns:viewmodels="clr-namespace:mobile.PageModels"
+             x:DataType="viewmodels:ProfilePageModel">
+
+    <Grid>
+        <!-- Contenu principal -->
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="20">
+                
+                <!-- Header Profil -->
+                <Border StrokeShape="RoundRectangle 16" 
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                        Padding="20"
+                        StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.1" Radius="20" Offset="0,4" />
+                    </Border.Shadow>
+                    
+                    <VerticalStackLayout Spacing="16">
+                        <!-- Avatar -->
+                        <Border WidthRequest="80"
+                                HeightRequest="80"
+                                StrokeShape="RoundRectangle 40"
+                                BackgroundColor="{StaticResource Primary}"
+                                HorizontalOptions="Center"
+                                StrokeThickness="0">
+                            <Label Text="👤"
+                                   FontSize="40"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+                        
+                        <!-- Nom utilisateur -->
+                        <Label Text="{Binding UserName}"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                        
+                        <!-- Email -->
+                        <Label Text="{Binding UserEmail}"
+                               FontSize="15"
+                               HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Menu Options -->
+                <VerticalStackLayout Spacing="12">
+                    
+                    <!-- Bouton Paramètres -->
+                    <Border StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                            StrokeThickness="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                        </Border.GestureRecognizers>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.08" Radius="12" Offset="0,2" />
+                        </Border.Shadow>
+                        
+                        <Grid Padding="16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border Grid.Column="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{AppThemeBinding Light=#F5F5F7, Dark=#2C2C2E}"
+                                    StrokeThickness="0">
+                                <Label Text="⚙️"
+                                       FontSize="20"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            
+                            <Label Grid.Column="1"
+                                   Text="Paramètres"
+                                   FontSize="16"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                            
+                            <Label Grid.Column="2"
+                                   Text="›"
+                                   FontSize="24"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark=#8E8E93}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Bouton Thème -->
+                    <Border StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                            StrokeThickness="0">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.08" Radius="12" Offset="0,2" />
+                        </Border.Shadow>
+                        
+                        <Grid Padding="16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border Grid.Column="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{AppThemeBinding Light=#F5F5F7, Dark=#2C2C2E}"
+                                    StrokeThickness="0">
+                                <Label Text="🌓"
+                                       FontSize="20"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            
+                            <Label Grid.Column="1"
+                                   Text="Thème"
+                                   FontSize="16"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                            
+                            <Switch Grid.Column="2"
+                                    x:Name="ThemeSwitch"
+                                    VerticalOptions="Center"
+                                    Toggled="ThemeSwitch_Toggled"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Bouton Déconnexion -->
+                    <Border StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#DC362E"
+                            StrokeThickness="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                        </Border.GestureRecognizers>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.15" Radius="12" Offset="0,2" />
+                        </Border.Shadow>
+                        
+                        <Grid Padding="16" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Border Grid.Column="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="#00000020"
+                                    StrokeThickness="0">
+                                <Label Text="🚪"
+                                       FontSize="20"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            
+                            <Label Grid.Column="1"
+                                   Text="Déconnexion"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   TextColor="White"/>
+                        </Grid>
+                    </Border>
+                    
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
