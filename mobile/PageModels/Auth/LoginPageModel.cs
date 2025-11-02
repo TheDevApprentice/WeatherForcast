@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using mobile.Models;
 using mobile.Models.DTOs;
 using mobile.Services;
+using System.Collections.ObjectModel;
 
 namespace mobile.PageModels.Auth
 {
@@ -10,6 +12,7 @@ namespace mobile.PageModels.Auth
         private readonly IApiService _apiService;
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
+        private readonly ISavedProfilesService _savedProfiles;
 
         [ObservableProperty]
         private string email = string.Empty;
@@ -26,16 +29,31 @@ namespace mobile.PageModels.Auth
         [ObservableProperty]
         private bool hasError;
 
+        [ObservableProperty]
+        private ObservableCollection<SavedUserProfile> savedProfiles = new();
+
+        [ObservableProperty]
+        private bool hasSavedProfiles;
+
+        [ObservableProperty]
+        private SavedUserProfile? selectedProfile;
+
+        [ObservableProperty]
+        private bool showProfileSelection = true;
+
         public bool IsNotLoading => !IsLoading;
+        public bool ShowClassicLogin => !ShowProfileSelection && SelectedProfile == null;
 
         public LoginPageModel(
             IApiService apiService, 
             ISecureStorageService secureStorage,
-            IAuthenticationStateService authState)
+            IAuthenticationStateService authState,
+            ISavedProfilesService savedProfilesService)
         {
             _apiService = apiService;
             _secureStorage = secureStorage;
             _authState = authState;
+            _savedProfiles = savedProfilesService;
         }
 
         [RelayCommand]
@@ -89,6 +107,16 @@ namespace mobile.PageModels.Auth
                             currentUser.LastName
                         );
                         await _authState.SetStateAsync(authState);
+
+                        // Sauvegarder le profil pour la reconnexion rapide
+                        var profile = new SavedUserProfile
+                        {
+                            Email = currentUser.Email,
+                            FirstName = currentUser.FirstName,
+                            LastName = currentUser.LastName,
+                            LastLoginDate = DateTime.Now
+                        };
+                        await _savedProfiles.SaveProfileAsync(profile);
                     }
 
                     // Mettre à jour l'UI du Shell
@@ -130,6 +158,95 @@ namespace mobile.PageModels.Auth
         partial void OnIsLoadingChanged(bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
+        }
+
+        partial void OnShowProfileSelectionChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ShowClassicLogin));
+        }
+
+        partial void OnSelectedProfileChanged(SavedUserProfile? value)
+        {
+            OnPropertyChanged(nameof(ShowClassicLogin));
+        }
+
+        /// <summary>
+        /// Charge les profils sauvegardés au démarrage de la page
+        /// </summary>
+        public async Task LoadSavedProfilesAsync()
+        {
+            var profiles = await _savedProfiles.GetSavedProfilesAsync();
+            SavedProfiles = new ObservableCollection<SavedUserProfile>(profiles);
+            HasSavedProfiles = profiles.Count > 0;
+            ShowProfileSelection = HasSavedProfiles;
+            
+            System.Diagnostics.Debug.WriteLine($"🟢 Profils chargés : {profiles.Count}");
+            System.Diagnostics.Debug.WriteLine($"🟢 ShowProfileSelection = {ShowProfileSelection}");
+            System.Diagnostics.Debug.WriteLine($"🟢 HasSavedProfiles = {HasSavedProfiles}");
+        }
+
+        /// <summary>
+        /// Sélectionne un profil pour se connecter
+        /// </summary>
+        [RelayCommand]
+        private void SelectProfile(SavedUserProfile profile)
+        {
+            System.Diagnostics.Debug.WriteLine($"🔵 SelectProfile appelé pour : {profile.Email}");
+            SelectedProfile = profile;
+            Email = profile.Email;
+            Password = string.Empty;
+            ShowProfileSelection = false;
+            HasError = false;
+            ErrorMessage = string.Empty;
+            System.Diagnostics.Debug.WriteLine($"🔵 ShowProfileSelection = {ShowProfileSelection}, SelectedProfile = {SelectedProfile?.Email}");
+        }
+
+        /// <summary>
+        /// Retour à la sélection des profils
+        /// </summary>
+        [RelayCommand]
+        private void BackToProfiles()
+        {
+            SelectedProfile = null;
+            Email = string.Empty;
+            Password = string.Empty;
+            ShowProfileSelection = true;
+            HasError = false;
+            ErrorMessage = string.Empty;
+        }
+
+        /// <summary>
+        /// Utiliser un autre compte (affiche le formulaire classique)
+        /// </summary>
+        [RelayCommand]
+        private void UseAnotherAccount()
+        {
+            System.Diagnostics.Debug.WriteLine($"🟡 UseAnotherAccount appelé");
+            SelectedProfile = null;
+            Email = string.Empty;
+            Password = string.Empty;
+            ShowProfileSelection = false;
+            HasError = false;
+            ErrorMessage = string.Empty;
+            System.Diagnostics.Debug.WriteLine($"🟡 ShowProfileSelection = {ShowProfileSelection}");
+        }
+
+        /// <summary>
+        /// Supprime un profil sauvegardé
+        /// </summary>
+        [RelayCommand]
+        private async Task RemoveProfile(SavedUserProfile profile)
+        {
+            System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
+            await _savedProfiles.RemoveProfileAsync(profile.Email);
+            SavedProfiles.Remove(profile);
+            HasSavedProfiles = SavedProfiles.Count > 0;
+            
+            if (!HasSavedProfiles)
+            {
+                ShowProfileSelection = false;
+            }
+            System.Diagnostics.Debug.WriteLine($"🔴 Profil supprimé. Reste : {SavedProfiles.Count}");
         }
     }
 }
