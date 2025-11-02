@@ -82,7 +82,10 @@ namespace mobile.Services
                 }
 
                 _isInitialized = true;
-                _logger.LogInformation("✅ Gestionnaire de notifications initialisé");
+                
+#if DEBUG
+                _logger.LogDebug("✅ Gestionnaire de notifications initialisé");
+#endif
             });
         }
 
@@ -136,7 +139,10 @@ namespace mobile.Services
                 if (_notificationManager != null)
                 {
                     await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
-                    _logger.LogInformation("📢 MOBILE - Notification affichée: {Title} - {Message}", title, message);
+                    
+#if DEBUG
+                    _logger.LogDebug("📢 MOBILE - Notification affichée: {Title} - {Message}", title, message);
+#endif
                 }
                 else
                 {

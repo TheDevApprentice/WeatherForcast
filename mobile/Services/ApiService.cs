@@ -30,23 +30,27 @@ namespace mobile.Services
 
         public async Task<AuthResponse?> LoginAsync(LoginRequest request)
         {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
+#if DEBUG
+            _logger.LogDebug("Tentative de connexion pour {Email}", request.Email);
+#endif
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
-                }
+            // Le middleware ErrorHandlingMiddleware gère automatiquement les erreurs HTTP
+            // et les transforme en exceptions typées (NetworkException, AuthenticationException, etc.)
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
 
-                _logger.LogWarning("Échec de la connexion: {StatusCode}", response.StatusCode);
-                return null;
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogError(ex, "Erreur lors de la connexion");
-                throw;
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
+                
+#if DEBUG
+                _logger.LogDebug("Connexion réussie pour {Email}", request.Email);
+#endif
+                
+                return authResponse;
             }
+
+            _logger.LogWarning("Échec de la connexion: {StatusCode}", response.StatusCode);
+            return null;
         }
 
         public async Task<bool> RegisterAsync(RegisterRequest request)

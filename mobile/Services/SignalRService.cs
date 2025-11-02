@@ -48,14 +48,18 @@ namespace mobile.Services
             {
                 if (_usersHubConnection?.State == HubConnectionState.Connected)
                 {
-                    _logger.LogInformation("UsersHub déjà connecté");
+#if DEBUG
+                    _logger.LogDebug("UsersHub déjà connecté");
+#endif
                     return;
                 }
 
                 // Nettoyer l'ancienne connexion si elle existe (évite les doubles abonnements)
                 if (_usersHubConnection != null)
                 {
-                    _logger.LogInformation("Nettoyage de l'ancienne connexion UsersHub");
+#if DEBUG
+                    _logger.LogDebug("Nettoyage de l'ancienne connexion UsersHub");
+#endif
                     await _usersHubConnection.DisposeAsync();
                     _usersHubConnection = null;
                 }
@@ -63,7 +67,9 @@ namespace mobile.Services
                 var hubUrl = GetHubUrl("/hubs/users");
                 var token = await _secureStorage.GetTokenAsync();
 
-                _logger.LogInformation("Connexion au UsersHub: {HubUrl}", hubUrl);
+#if DEBUG
+                _logger.LogDebug("Connexion au UsersHub: {HubUrl}", hubUrl);
+#endif
 
                 _usersHubConnection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, options =>
@@ -85,7 +91,9 @@ namespace mobile.Services
 
                 _usersHubConnection.Reconnected += async connectionId =>
                 {
-                    _logger.LogInformation("UsersHub reconnecté: {ConnectionId}", connectionId);
+#if DEBUG
+                    _logger.LogDebug("UsersHub reconnecté: {ConnectionId}", connectionId);
+#endif
 
                     // Rejoindre à nouveau le canal email si nécessaire
                     if (!string.IsNullOrEmpty(_currentEmail))
@@ -111,7 +119,9 @@ namespace mobile.Services
                             CorrelationId = data.TryGetProperty("CorrelationId", out var corrId) ? corrId.GetString() : null
                         };
 
-                        _logger.LogInformation("📧 MOBILE - Email envoyé: {Subject}", notification.Subject);
+#if DEBUG
+                        _logger.LogDebug("📧 MOBILE - Email envoyé: {Subject}", notification.Subject);
+#endif
                         EmailSent?.Invoke(this, notification);
                     }
                     catch (Exception ex)
@@ -130,7 +140,9 @@ namespace mobile.Services
                             CorrelationId = data.TryGetProperty("CorrelationId", out var corrId) ? corrId.GetString() : null
                         };
 
-                        _logger.LogInformation("✅ MOBILE - Email de vérification envoyé: {Message}", notification.Message);
+#if DEBUG
+                        _logger.LogDebug("✅ MOBILE - Email de vérification envoyé: {Message}", notification.Message);
+#endif
                         VerificationEmailSent?.Invoke(this, notification);
                     }
                     catch (Exception ex)
@@ -140,7 +152,10 @@ namespace mobile.Services
                 });
 
                 await _usersHubConnection.StartAsync();
-                _logger.LogInformation("✅ MOBILE - UsersHub connecté");
+                
+#if DEBUG
+                _logger.LogDebug("✅ MOBILE - UsersHub connecté");
+#endif
 
                 // Rejoindre le canal email si fourni
                 if (!string.IsNullOrEmpty(email))
@@ -164,14 +179,18 @@ namespace mobile.Services
             {
                 if (_forecastHubConnection?.State == HubConnectionState.Connected)
                 {
-                    _logger.LogInformation("ForecastHub déjà connecté");
+#if DEBUG
+                    _logger.LogDebug("ForecastHub déjà connecté");
+#endif
                     return;
                 }
 
                 // Nettoyer l'ancienne connexion si elle existe (évite les doubles abonnements)
                 if (_forecastHubConnection != null)
                 {
-                    _logger.LogInformation("Nettoyage de l'ancienne connexion ForecastHub");
+#if DEBUG
+                    _logger.LogDebug("Nettoyage de l'ancienne connexion ForecastHub");
+#endif
                     await _forecastHubConnection.DisposeAsync();
                     _forecastHubConnection = null;
                 }
@@ -185,7 +204,9 @@ namespace mobile.Services
                     return;
                 }
 
-                _logger.LogInformation("Connexion au ForecastHub: {HubUrl}", hubUrl);
+#if DEBUG
+                _logger.LogDebug("Connexion au ForecastHub: {HubUrl}", hubUrl);
+#endif
 
                 _forecastHubConnection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, options =>
@@ -204,7 +225,9 @@ namespace mobile.Services
 
                 _forecastHubConnection.Reconnected += connectionId =>
                 {
-                    _logger.LogInformation("ForecastHub reconnecté: {ConnectionId}", connectionId);
+#if DEBUG
+                    _logger.LogDebug("ForecastHub reconnecté: {ConnectionId}", connectionId);
+#endif
                     return Task.CompletedTask;
                 };
 
@@ -217,24 +240,33 @@ namespace mobile.Services
                 // Écouter les événements de forecast
                 _forecastHubConnection.On<Models.WeatherForecast>("ForecastCreated", (forecast) =>
                 {
-                    _logger.LogInformation("📢 MOBILE - Forecast créé: ID={Id}", forecast.Id);
+#if DEBUG
+                    _logger.LogDebug("📢 MOBILE - Forecast créé: ID={Id}", forecast.Id);
+#endif
                     ForecastCreated?.Invoke(this, forecast);
                 });
 
                 _forecastHubConnection.On<Models.WeatherForecast>("ForecastUpdated", (forecast) =>
                 {
-                    _logger.LogInformation("📢 MOBILE - Forecast mis à jour: ID={Id}", forecast.Id);
+#if DEBUG
+                    _logger.LogDebug("📢 MOBILE - Forecast mis à jour: ID={Id}", forecast.Id);
+#endif
                     ForecastUpdated?.Invoke(this, forecast);
                 });
 
                 _forecastHubConnection.On<int>("ForecastDeleted", (id) =>
                 {
-                    _logger.LogInformation("📢 MOBILE - Forecast supprimé: ID={Id}", id);
+#if DEBUG
+                    _logger.LogDebug("📢 MOBILE - Forecast supprimé: ID={Id}", id);
+#endif
                     ForecastDeleted?.Invoke(this, id);
                 });
 
                 await _forecastHubConnection.StartAsync();
-                _logger.LogInformation("✅ MOBILE - ForecastHub connecté");
+                
+#if DEBUG
+                _logger.LogDebug("✅ MOBILE - ForecastHub connecté");
+#endif
             }
             catch (Exception ex)
             {
@@ -255,7 +287,10 @@ namespace mobile.Services
                     await _forecastHubConnection.StopAsync();
                     await _forecastHubConnection.DisposeAsync();
                     _forecastHubConnection = null;
-                    _logger.LogInformation("ForecastHub déconnecté");
+                    
+#if DEBUG
+                    _logger.LogDebug("ForecastHub déconnecté");
+#endif
                 }
             }
             catch (Exception ex)
@@ -282,7 +317,10 @@ namespace mobile.Services
                     await _usersHubConnection.StopAsync();
                     await _usersHubConnection.DisposeAsync();
                     _usersHubConnection = null;
-                    _logger.LogInformation("UsersHub déconnecté");
+                    
+#if DEBUG
+                    _logger.LogDebug("UsersHub déconnecté");
+#endif
                 }
 
                 await StopForecastHubAsync();
@@ -304,7 +342,10 @@ namespace mobile.Services
                 {
                     await _usersHubConnection.InvokeAsync("JoinEmailChannel", email);
                     _currentEmail = email;
-                    _logger.LogInformation("Rejoint le canal email: {Email}", email);
+                    
+#if DEBUG
+                    _logger.LogDebug("Rejoint le canal email: {Email}", email);
+#endif
                 }
             }
             catch (Exception ex)
@@ -324,7 +365,10 @@ namespace mobile.Services
                 {
                     await _usersHubConnection.InvokeAsync("LeaveEmailChannel", email);
                     _currentEmail = null;
-                    _logger.LogInformation("Quitté le canal email: {Email}", email);
+                    
+#if DEBUG
+                    _logger.LogDebug("Quitté le canal email: {Email}", email);
+#endif
                 }
             }
             catch (Exception ex)

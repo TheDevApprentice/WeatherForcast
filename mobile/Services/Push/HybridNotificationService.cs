@@ -39,7 +39,9 @@ namespace mobile.Services.Push
         {
             try
             {
-                _logger.LogInformation("🔄 Initialisation du service hybride de notifications...");
+#if DEBUG
+                _logger.LogDebug("🔄 Initialisation du service hybride de notifications...");
+#endif
 
                 // Initialiser les notifications push
                 await _pushNotificationService.InitializeAsync();
@@ -51,7 +53,9 @@ namespace mobile.Services.Push
                     await _pushNotificationService.RegisterDeviceTokenAsync(userId, deviceToken);
                 }
 
-                _logger.LogInformation("✅ Service hybride initialisé");
+#if DEBUG
+                _logger.LogDebug("✅ Service hybride initialisé");
+#endif
             }
             catch (Exception ex)
             {
@@ -74,7 +78,9 @@ namespace mobile.Services.Push
                 // Si l'app est au premier plan → Notification in-app
                 if (_isAppInForeground)
                 {
-                    _logger.LogInformation("📱 App au premier plan → Notification in-app");
+#if DEBUG
+                    _logger.LogDebug("📱 App au premier plan → Notification in-app");
+#endif
 
                     switch (type)
                     {
@@ -96,7 +102,9 @@ namespace mobile.Services.Push
                 // Si l'app est en arrière-plan ou fermée → Notification push
                 else
                 {
-                    _logger.LogInformation("📤 App en arrière-plan → Notification push");
+#if DEBUG
+                    _logger.LogDebug("📤 App en arrière-plan → Notification push");
+#endif
                     await _pushNotificationService.SendNotificationAsync(userId, title, message, data);
                 }
             }
@@ -194,7 +202,10 @@ namespace mobile.Services.Push
                 {
                     // L'app est au premier plan
                     _isAppInForeground = true;
-                    _logger.LogInformation("📱 App au premier plan");
+                    
+#if DEBUG
+                    _logger.LogDebug("📱 App au premier plan");
+#endif
                 }
             };
 
@@ -208,7 +219,9 @@ namespace mobile.Services.Push
         /// </summary>
         private async void OnPushNotificationReceived(object? sender, PushNotificationReceivedEventArgs e)
         {
-            _logger.LogInformation("📬 Notification push reçue: {Title}", e.Title);
+#if DEBUG
+            _logger.LogDebug("📬 Notification push reçue: {Title}", e.Title);
+#endif
 
             // Si l'app est ouverte, afficher une notification in-app
             if (_isAppInForeground)
@@ -222,7 +235,9 @@ namespace mobile.Services.Push
         /// </summary>
         private void OnPushNotificationTapped(object? sender, PushNotificationTappedEventArgs e)
         {
-            _logger.LogInformation("👆 Notification push cliquée: {Title}", e.Title);
+#if DEBUG
+            _logger.LogDebug("👆 Notification push cliquée: {Title}", e.Title);
+#endif
 
             // Naviguer vers la page appropriée selon le type
             if (e.Data.TryGetValue("type", out var type))
@@ -246,7 +261,9 @@ namespace mobile.Services.Push
         {
             try
             {
-                _logger.LogInformation("🧹 Nettoyage du service hybride...");
+#if DEBUG
+                _logger.LogDebug("🧹 Nettoyage du service hybride...");
+#endif
                 await _pushNotificationService.UnregisterDeviceTokenAsync(userId);
             }
             catch (Exception ex)

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace mobile.Services
 {
     /// <summary>
@@ -10,16 +12,32 @@ namespace mobile.Services
         private const string FIRSTNAME_KEY = "user_firstname";
         private const string LASTNAME_KEY = "user_lastname";
 
+        private readonly ILogger<SecureStorageService> _logger;
+
+        public SecureStorageService(ILogger<SecureStorageService> logger)
+        {
+            _logger = logger;
+        }
+
         public async Task SaveTokenAsync(string token)
         {
             await SecureStorage.SetAsync(TOKEN_KEY, token);
-            Console.WriteLine("Token saved !!!!!!!!: " + token);
+            
+#if DEBUG
+            _logger.LogDebug("Token saved to SecureStorage");
+#endif
         }
 
         public async Task<string?> GetTokenAsync()
         {
             var token = await SecureStorage.GetAsync(TOKEN_KEY);
-            Console.WriteLine($"Token retrieved from SecureStorage: {(string.IsNullOrEmpty(token) ? "NULL/EMPTY" : $"{token.Substring(0, Math.Min(30, token.Length))}...")}");
+            
+#if DEBUG
+            _logger.LogDebug(
+                "Token retrieved from SecureStorage: {Status}",
+                string.IsNullOrEmpty(token) ? "NULL/EMPTY" : $"{token.Substring(0, Math.Min(30, token.Length))}...");
+#endif
+            
             return token;
         }
 

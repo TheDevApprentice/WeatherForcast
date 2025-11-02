@@ -1,7 +1,9 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using mobile.Services.ErrorHandling;
 using mobile.Services.Handlers;
+using mobile.Services.Middleware;
 using Syncfusion.Maui.Toolkit.Hosting;
 using System.Reflection;
 
@@ -56,12 +58,15 @@ namespace mobile
             // Service de notification - Toasts personnalisés:
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
-            // Gestion des erreurs
+            // Gestion des erreurs - Nouveau système complet
             builder.Services.AddSingleton<IErrorHandler, ModalErrorHandler>();
+            builder.Services.AddSingleton<IErrorHandlingService, ErrorHandlingService>();
             builder.Services.AddSingleton<GlobalExceptionHandler>();
 
-            // HttpClient avec authentification
-            builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();
+            // HttpClient avec authentification et gestion d'erreurs
+            builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
+            builder.Services.AddTransient<ErrorHandlingMiddleware>();
+            
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
                 var baseUrl = "";
@@ -84,7 +89,8 @@ namespace mobile
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
-            .ConfigurePrimaryHttpMessageHandler<AuthenticatedHttpClientHandler>();
+            .AddHttpMessageHandler<ErrorHandlingMiddleware>()
+            .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
             // Pages et ViewModels d'authentification
             builder.Services.AddTransient<LoginPage>();
