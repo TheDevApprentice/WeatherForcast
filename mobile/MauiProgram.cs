@@ -52,6 +52,7 @@ namespace mobile
             // Services
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
+            builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
 
             // Service de notification - Toasts personnalisés:
             builder.Services.AddSingleton<INotificationService, NotificationService>();
@@ -61,7 +62,7 @@ namespace mobile
             builder.Services.AddSingleton<GlobalExceptionHandler>();
 
             // HttpClient avec authentification
-            builder.Services.AddSingleton<AuthenticatedHttpClientHandler>();
+            builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
             builder.Services.AddHttpClient<IApiService, ApiService>(client =>
             {
                 var baseUrl = "";
@@ -84,7 +85,7 @@ namespace mobile
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
-            .ConfigurePrimaryHttpMessageHandler<AuthenticatedHttpClientHandler>();
+            .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
             // Pages et ViewModels d'authentification
             builder.Services.AddTransient<LoginPage>();
