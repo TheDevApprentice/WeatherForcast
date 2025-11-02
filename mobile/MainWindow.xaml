@@ -11,25 +11,46 @@
                   ForegroundColor="{AppThemeBinding Light=White, Dark=White}"
                   HeightRequest="48">
             <TitleBar.LeadingContent>
-                <!-- Bouton Account -->
-                <Button x:Name="AccountButton"
-                        Text="HA"
-                        HeightRequest="30"
-                        WidthRequest="30"
-                        Padding="0"
-                        FontFamily="SegoeSemibold"
-                        Margin="5,0,0,0"
-                        Background="{AppThemeBinding Light=transparent, Dark=transparent}"
-                        BorderColor="White"
-                        BorderWidth="2"
-                        CornerRadius="20"
-                        Clicked="OnAccountTapped"
-                        IsVisible="True"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Center" />
+                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                    <!-- Bouton Account (visible si connecté) -->
+                    <Button x:Name="AccountButton"
+                            Text="HA"
+                            HeightRequest="30"
+                            WidthRequest="30"
+                            Padding="0"
+                            FontFamily="SegoeSemibold"
+                            Margin="5,0,0,0"
+                            Background="{AppThemeBinding Light=transparent, Dark=transparent}"
+                            BorderColor="White"
+                            BorderWidth="2"
+                            CornerRadius="20"
+                            Clicked="OnAccountTapped"
+                            IsVisible="False"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center" />
+
+                    <!-- Bouton People (visible si non connecté) -->
+                    <ImageButton x:Name="PeopleButton"
+                                 HeightRequest="30"
+                                 WidthRequest="30"
+                                 Padding="0"
+                                 Margin="5,0,0,0"
+                                 BorderColor="White"
+                                 BorderWidth="2"
+                                 CornerRadius="20"
+                                 Clicked="OnPeopleTapped"
+                                 IsVisible="True"
+                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                        <ImageButton.Source>
+                            <FontImageSource Size="18"
+                                             Glyph="&#xE716;"
+                                             FontFamily="SegoeMDL2" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                </HorizontalStackLayout>
             </TitleBar.LeadingContent>
             <TitleBar.Content>
-                <SearchBar Placeholder="Rechercher une ville..."
+                <SearchBar x:Name="TitleSearchBar" Placeholder="Rechercher une ville..."
                            PlaceholderColor="{AppThemeBinding Light=#667eea, Dark=White}"
                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
                            MaximumWidthRequest="300"
@@ -38,15 +59,41 @@
                            VerticalOptions="Center" />
             </TitleBar.Content>
             <TitleBar.TrailingContent>
-                <HorizontalStackLayout Spacing="8" Padding="0,0,12,0">
+                <HorizontalStackLayout Spacing="8"
+                                       Padding="0,0,12,0">
+                    <!-- Bouton Settings -->
+                    <ImageButton x:Name="MessagesButton"
+                                 HeightRequest="36"
+                                 WidthRequest="36"
+                                 BorderWidth="0"
+                                 Clicked="OnMessagesTapped"
+                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                        <ImageButton.Source>
+                            <FontImageSource Size="18"
+                                             Glyph="&#xE8BD;"
+                                             FontFamily="SegoeMDL2" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                    <!-- Bouton Settings -->
+                    <ImageButton x:Name="NotificationsButton"
+                                 HeightRequest="36"
+                                 WidthRequest="36"
+                                 BorderWidth="0"
+                                 Clicked="NotificationsTapped"
+                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                        <ImageButton.Source>
+                            <FontImageSource Size="18"
+                                             Glyph="&#xEDAC;"
+                                             FontFamily="SegoeMDL2" />
+                        </ImageButton.Source>
+                    </ImageButton>
                     <!-- Bouton Settings -->
                     <ImageButton x:Name="SettingsButton"
                                  HeightRequest="36"
                                  WidthRequest="36"
                                  BorderWidth="0"
                                  Clicked="OnSettingsTapped"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}"
-                                >
+                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
                         <ImageButton.Source>
                             <FontImageSource Size="18"
                                              Glyph="&#xE713;"

@@ -138,6 +138,14 @@ namespace mobile
                 UserFullNameLabel.Text = string.Empty;
                 UserEmailLabel.Text = string.Empty;
                 UserInitialsLabel.Text = string.Empty;
+
+#if WINDOWS || MACCATALYST
+                // Masquer le bouton Account et afficher l'icône People dans la titlebar
+                if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                {
+                    mw.ClearAccountButton();
+                }
+#endif
             }
         }
 
