@@ -14,8 +14,8 @@
                 <!-- Bouton Account -->
                 <Button x:Name="AccountButton"
                         Text="HA"
-                        HeightRequest="36"
-                        WidthRequest="36"
+                        HeightRequest="30"
+                        WidthRequest="30"
                         Padding="0"
                         FontFamily="SegoeSemibold"
                         Margin="5,0,0,0"
@@ -45,10 +45,10 @@
                                  WidthRequest="36"
                                  BorderWidth="0"
                                  Clicked="OnSettingsTapped"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}"
+                                >
                         <ImageButton.Source>
                             <FontImageSource Size="18"
-                                             Color="{AppThemeBinding Light=White, Dark=Black}"
                                              Glyph="&#xE713;"
                                              FontFamily="SegoeMDL2" />
                         </ImageButton.Source>
