@@ -17,6 +17,7 @@
                         BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
                         StrokeThickness="0"
                         Padding="12,14"
+                        Margin="10,6"
                         MinimumHeightRequest="50"
                         HorizontalOptions="FillAndExpand"
                         StrokeShape="RoundRectangle 12">
