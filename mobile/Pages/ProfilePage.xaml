@@ -26,13 +26,13 @@
                 <!-- Avatar et info utilisateur -->
                 <VerticalStackLayout Grid.Row="1" 
                                     Spacing="10"
-                                    Margin="0,-75,0,0">
+                                    Margin="0,-95,0,40">
                     <!-- Avatar avec initiales et effet Fluent -->
                     <Border WidthRequest="110"
                             HeightRequest="110"
                             StrokeShape="RoundRectangle 55"
                             Stroke="White"
-                            StrokeThickness="4"
+                            StrokeThickness="2"
                             HorizontalOptions="Center">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">

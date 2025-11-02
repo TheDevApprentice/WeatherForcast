@@ -119,7 +119,7 @@ namespace mobile
                     MainThread.BeginInvokeOnMainThread(async () =>
                     {
                         var authState = await authStateService.GetStateAsync();
-                        
+
                         if (authState.IsAuthenticated)
                         {
                             UserFullNameLabel.Text = authState.GetFullName();
@@ -179,7 +179,7 @@ namespace mobile
 
                     // Supprimer les données locales
                     await secureStorage.ClearAllAsync();
-                    
+
                     // Effacer l'état d'authentification centralisé
                     await authStateService.ClearStateAsync();
 
