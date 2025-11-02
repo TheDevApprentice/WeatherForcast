@@ -12,19 +12,19 @@
     <!-- 🎨 Menu Items - Modern Card Style -->
     <Shell.ItemTemplate>
         <DataTemplate>
-            <Grid Padding="12,4">
+            <Grid>
                 <Border x:Name="ItemCard"
                         BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
                         StrokeThickness="0"
-                        Margin="12,6"
-                        Padding="16,14"
-                        HeightRequest="60"
+                        Padding="12,14"
+                        MinimumHeightRequest="50"
+                        HorizontalOptions="FillAndExpand"
                         StrokeShape="RoundRectangle 12">
                     <Border.Shadow>
                         <Shadow Brush="Black" Opacity="0.08" Radius="12" Offset="0,2" />
                     </Border.Shadow>
                     
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" HorizontalOptions="FillAndExpand">
                         <Border Grid.Column="0"
                                 WidthRequest="40"
                                 HeightRequest="40"
@@ -46,7 +46,8 @@
                                FontSize="16"
                                FontAttributes="None"
                                TextColor="{AppThemeBinding Light=#1C1C1E, Dark=#F5F5F7}"
-                               VerticalOptions="Center"/>
+                               VerticalOptions="Center"
+                               LineBreakMode="TailTruncation"/>
                         
                         <Label Grid.Column="2"
                                x:Name="SelectionChevron"
@@ -186,34 +187,52 @@
                      Opacity="0.6"
                      Margin="0,0,0,8"/>
             
-            <HorizontalStackLayout Grid.Row="1" 
-                                  Spacing="14" 
-                                  HorizontalOptions="Center">
-                <Label FontSize="15"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"
-                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
-                
-                <sf:SfSegmentedControl x:Name="ThemeSegmentedControl" 
-                                      VerticalOptions="Center" 
-                                      SelectionChanged="SfSegmentedControl_SelectionChanged"
-                                      SegmentWidth="44" 
-                                      SegmentHeight="44">
-                    <sf:SfSegmentedControl.ItemsSource>
-                        <x:Array Type="{x:Type sf:SfSegmentItem}">
-                            <sf:SfSegmentItem ImageSource="{StaticResource IconLight}"/>
-                            <sf:SfSegmentItem ImageSource="{StaticResource IconDark}"/>
-                        </x:Array>
-                    </sf:SfSegmentedControl.ItemsSource>
-                </sf:SfSegmentedControl>
-            </HorizontalStackLayout>
-            
+            <!-- Theme toggle row: switch centered across full flyout width, icons on both sides -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,*" ColumnSpacing="14" HorizontalOptions="FillAndExpand" VerticalOptions="Center" HeightRequest="32">
+                <!-- Left icon container ensures equal visual weight -->
+                <Grid Grid.Column="0" HorizontalOptions="FillAndExpand" VerticalOptions="Center">
+                    <Image WidthRequest="22"
+                           HeightRequest="22"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           InputTransparent="True">
+                        <Image.Source>
+                            <FontImageSource FontFamily="SegoeMDL2"
+                                             Glyph="&#xE706;"
+                                             Size="18"
+                                             Color="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                        </Image.Source>
+                    </Image>
+                </Grid>
+
+                <!-- Centered switch -->
+                <Switch Grid.Column="1"
+                        x:Name="ThemeSwitch"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Toggled="ThemeSwitch_Toggled" />
+
+                <!-- Right icon container mirrors the left -->
+                <Grid Grid.Column="2" HorizontalOptions="FillAndExpand" VerticalOptions="Center">
+                    <Image WidthRequest="22"
+                           HeightRequest="22"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center"
+                           InputTransparent="True">
+                        <Image.Source>
+                            <FontImageSource FontFamily="SegoeMDL2"
+                                             Glyph="&#xE708;"
+                                             Size="18"
+                                             Color="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                        </Image.Source>
+                    </Image>
+                </Grid>
+            </Grid>
+
             <Border Grid.Row="2"
                     x:Name="LogoutButton"
                     StrokeShape="RoundRectangle 12"
-                    StrokeThickness="0"
-                    HeightRequest="52"
-                    IsVisible="False">
+                    IsVisible="true">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnLogoutClicked"/>
                 </Border.GestureRecognizers>
@@ -223,13 +242,33 @@
                 <Border.Shadow>
                     <Shadow Brush="#DC362E" Opacity="0.3" Radius="10" Offset="0,3" />
                 </Border.Shadow>
-                
-                <Label Text="Déconnexion" 
-                       FontSize="16"
+                <HorizontalStackLayout Grid.Row="1" 
+                                  Spacing="14" 
+                                   MaximumWidthRequest="150"
+                                   MinimumWidthRequest="100"
+                                  HorizontalOptions="Center"
+                                   VerticalOptions="Center">
+                    <Label Text="Déconnexion" 
+                       FontSize="13"
                        FontAttributes="Bold"
                        TextColor="White"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
+
+                    <!-- Logout glyph (MDL2) -->
+                    <Image WidthRequest="22"
+                            HeightRequest="22"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            InputTransparent="True">
+                        <Image.Source>
+                            <FontImageSource FontFamily="SegoeMDL2"
+                                  Glyph="&#xE726;"
+                                  Size="18"
+                                  Color="{AppThemeBinding Light=Black, Dark=Black}"/>
+                        </Image.Source>
+                    </Image>
+                </HorizontalStackLayout>
             </Border>
         </Grid>
     </Shell.FlyoutFooter>

@@ -10,7 +10,8 @@ namespace mobile
         {
             InitializeComponent();
             var currentTheme = Application.Current!.RequestedTheme;
-            ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
+            // Initialize the new Switch based on current theme
+            ThemeSwitch.IsToggled = currentTheme == AppTheme.Dark;
 
             // Enregistrer les routes pour la navigation
             Routing.RegisterRoute("register", typeof(RegisterPage));
@@ -247,9 +248,9 @@ namespace mobile
             await toast.Show(cts.Token);
         }
 
-        private void SfSegmentedControl_SelectionChanged(object sender, Syncfusion.Maui.Toolkit.SegmentedControl.SelectionChangedEventArgs e)
+        private void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
         {
-            Application.Current!.UserAppTheme = e.NewIndex == 0 ? AppTheme.Light : AppTheme.Dark;
+            Application.Current!.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
         }
     }
 }
