@@ -160,6 +160,14 @@
         ContentTemplate="{DataTemplate pages:ForecastsPage}"
         Route="forecasts" />
 
+    <!-- Page de démarrage (Splash) - jamais visible dans le menu -->
+    <ShellContent
+        x:Name="SplashItem"
+        Title="Chargement"
+        ContentTemplate="{DataTemplate pages:SplashPage}"
+        Route="splash"
+        FlyoutItemIsVisible="False" />
+
     <!-- Page de connexion (jamais visible dans le menu) -->
     <ShellContent
         x:Name="LoginItem"

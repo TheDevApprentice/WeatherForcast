@@ -4,7 +4,8 @@
              x:Class="mobile.Pages.ForecastsPage"
              xmlns:viewmodels="clr-namespace:mobile.PageModels"
              xmlns:models="clr-namespace:mobile.Models"
-             x:DataType="viewmodels:ForecastsPageModel">
+             x:DataType="viewmodels:ForecastsPageModel"
+             Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*">
         <!-- Header -->

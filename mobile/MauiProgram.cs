@@ -53,6 +53,7 @@ namespace mobile
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
             builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
+            builder.Services.AddSingleton<IStartupService, StartupService>();
 
             // Service de notification - Toasts personnalisés:
             builder.Services.AddSingleton<INotificationService, NotificationService>();
@@ -86,6 +87,9 @@ namespace mobile
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+
+            // Page de démarrage (Splash)
+            builder.Services.AddTransient<SplashPage>();
 
             // Pages et ViewModels d'authentification
             builder.Services.AddTransient<LoginPage>();

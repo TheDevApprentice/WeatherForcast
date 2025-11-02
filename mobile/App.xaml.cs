@@ -4,20 +4,14 @@ namespace mobile
 {
     public partial class App : Application
     {
-        private readonly ISecureStorageService _secureStorage;
-        private readonly ISessionValidationService _sessionValidation;
         private readonly GlobalExceptionHandler _exceptionHandler;
         private readonly ILogger<App> _logger;
 
         public App(
-            ISecureStorageService secureStorage,
-            ISessionValidationService sessionValidation,
             GlobalExceptionHandler exceptionHandler,
             ILogger<App> logger)
         {
             InitializeComponent();
-            _secureStorage = secureStorage;
-            _sessionValidation = sessionValidation;
             _exceptionHandler = exceptionHandler;
             _logger = logger;
 
@@ -30,70 +24,18 @@ namespace mobile
         {
             var shell = new AppShell();
 
-            // Vérifier l'authentification au démarrage avec validation de session
+            // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 try
                 {
-                    _logger.LogInformation("Vérification de l'authentification...");
-
-                    // 1. Vérifier si un token existe (rapide, local)
-                    var hasToken = await _secureStorage.IsAuthenticatedAsync();
-
-                    if (!hasToken)
-                    {
-                        _logger.LogInformation("Aucun token, redirection vers login");
-                        shell.UpdateAuthenticationUI(false);
-                        await shell.GoToAsync("///login");
-                        return;
-                    }
-
-                    // 2. Naviguer vers MainPage d'abord (UX fluide)
-                    _logger.LogInformation("Token trouvé, navigation vers MainPage");
-                    shell.UpdateAuthenticationUI(true);
-                    await shell.GoToAsync("///main");
-
-                    // 3. Valider la session en arrière-plan
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await Task.Delay(500); // Laisser la page se charger
-
-                            _logger.LogInformation("🔍 Début de la validation de la session en arrière-plan...");
-                            var isValid = await _sessionValidation.ValidateSessionAsync();
-
-                            _logger.LogInformation("🔍 Résultat de la validation: {IsValid}", isValid);
-
-                            if (!isValid)
-                            {
-                                // Session invalide : nettoyer et rediriger
-                                _logger.LogWarning("❌ Session invalide détectée, déconnexion en cours...");
-                                await _sessionValidation.ClearSessionAsync();
-
-                                _logger.LogInformation("🔄 Redirection vers la page de login...");
-                                await MainThread.InvokeOnMainThreadAsync(async () =>
-                                {
-                                    shell.UpdateAuthenticationUI(false);
-                                    await shell.GoToAsync("///login");
-                                    _logger.LogInformation("✅ Redirection effectuée");
-                                });
-                            }
-                            else
-                            {
-                                _logger.LogInformation("✅ Session valide confirmée !");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "❌ Erreur lors de la validation de session en arrière-plan");
-                        }
-                    });
+                    _logger.LogInformation("🚀 Démarrage de l'application");
+                    await shell.GoToAsync("///splash");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Erreur lors de la vérification de l'authentification");
-                    shell.UpdateAuthenticationUI(false);
+                    _logger.LogError(ex, "Erreur lors de la navigation vers SplashPage");
+                    // En cas d'erreur, rediriger vers login par sécurité
                     await shell.GoToAsync("///login");
                 }
             });
