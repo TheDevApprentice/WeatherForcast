@@ -15,6 +15,9 @@ namespace mobile.PageModels
         [ObservableProperty]
         private string userEmail = "user@example.com";
 
+        [ObservableProperty]
+        private string initials = "U";
+
         public ProfilePageModel(
             IAuthenticationStateService authStateService,
             ILogger<ProfilePageModel> logger)
@@ -34,11 +37,54 @@ namespace mobile.PageModels
                 {
                     UserName = authState.FirstName ?? "Utilisateur";
                     UserEmail = authState.Email ?? "user@example.com";
+                    UpdateInitials();
+                }
+                else
+                {
+                    UpdateInitials();
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du chargement des informations utilisateur");
+            }
+        }
+
+        private void UpdateInitials()
+        {
+            try
+            {
+                string source = !string.IsNullOrWhiteSpace(UserName) ? UserName : UserEmail;
+                if (string.IsNullOrWhiteSpace(source))
+                {
+                    Initials = "U";
+                    return;
+                }
+
+                // Si email, prendre la partie avant @
+                var baseText = source.Contains('@') ? source.Split('@')[0] : source;
+                var parts = baseText
+                    .Replace("_", " ")
+                    .Replace("-", " ")
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 0)
+                {
+                    Initials = char.ToUpper(baseText[0]).ToString();
+                }
+                else if (parts.Length == 1)
+                {
+                    var p = parts[0];
+                    Initials = p.Length >= 2 ? ($"{char.ToUpper(p[0])}{char.ToUpper(p[1])}") : char.ToUpper(p[0]).ToString();
+                }
+                else
+                {
+                    Initials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[^1][0])}";
+                }
+            }
+            catch
+            {
+                Initials = "U";
             }
         }
 

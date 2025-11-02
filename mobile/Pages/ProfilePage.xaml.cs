@@ -10,7 +10,7 @@ namespace mobile.Pages
             BindingContext = viewModel;
 
             // Initialiser le switch selon le thème actuel
-            ThemeSwitch.IsToggled = Application.Current?.RequestedTheme == AppTheme.Dark;
+            ThemeSwitch.IsToggled = Application.Current?.UserAppTheme == AppTheme.Dark;
         }
 
         private void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
