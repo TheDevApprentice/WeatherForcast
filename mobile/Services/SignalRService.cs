@@ -10,7 +10,7 @@ namespace mobile.Services
     /// </summary>
     public class SignalRService : ISignalRService
     {
-        private readonly IConfiguration _configuration;
+        private readonly IApiConfigurationService _apiConfig;
         private readonly ISecureStorageService _secureStorage;
         private readonly ILogger<SignalRService> _logger;
 
@@ -30,11 +30,11 @@ namespace mobile.Services
         public event EventHandler<EmailNotification>? VerificationEmailSent;
 
         public SignalRService(
-            IConfiguration configuration,
+            IApiConfigurationService apiConfig,
             ISecureStorageService secureStorage,
             ILogger<SignalRService> logger)
         {
-            _configuration = configuration;
+            _apiConfig = apiConfig;
             _secureStorage = secureStorage;
             _logger = logger;
         }
@@ -338,26 +338,8 @@ namespace mobile.Services
         /// </summary>
         private string GetHubUrl(string hubPath)
         {
-            var baseUrl = "";
-#if ANDROID
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"]
-                ?? _configuration["ApiSettings:BaseUrlEmulator"];
-#elif IOS
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"] 
-                ?? _configuration["ApiSettings:BaseUrlEmulator"];
-#elif WINDOWS
-            baseUrl = _configuration["ApiSettings:BaseUrlWindows"];
-#endif
-
-            if (string.IsNullOrWhiteSpace(baseUrl))
-            {
-                throw new InvalidOperationException("ApiSettings:BaseUrl* n'est pas configuré.");
-            }
-
-            // Retirer le slash final si présent
-            baseUrl = baseUrl.TrimEnd('/');
-
-            return $"{baseUrl}{hubPath}";
+            // Utiliser le service de configuration centralisé
+            return _apiConfig.GetHubUrl(hubPath);
         }
     }
 }

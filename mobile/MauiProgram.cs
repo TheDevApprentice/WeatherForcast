@@ -50,6 +50,7 @@ namespace mobile
             }
 
             // Services
+            builder.Services.AddSingleton<IApiConfigurationService, ApiConfigurationService>();
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
             builder.Services.AddSingleton<IAuthenticationStateService, AuthenticationStateService>();
             builder.Services.AddSingleton<ISavedProfilesService, SavedProfilesService>();
@@ -66,24 +67,11 @@ namespace mobile
 
             // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
-            builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+            builder.Services.AddHttpClient<IApiService, ApiService>((serviceProvider, client) =>
             {
-                var baseUrl = "";
-#if ANDROID
-                // Utilise BaseUrlDevice pour téléphone réel, BaseUrlEmulator pour émulateur
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"]
-                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
-#elif IOS
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"] 
-                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
-#elif WINDOWS
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlWindows"];
-#endif
-
-                if (string.IsNullOrWhiteSpace(baseUrl))
-                {
-                    throw new InvalidOperationException("ApiSettings:BaseUrl* n'est pas configuré.");
-                }
+                // Utiliser le service de configuration centralisé
+                var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
+                var baseUrl = apiConfig.GetBaseUrl();
 
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);

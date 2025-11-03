@@ -162,6 +162,15 @@
         ContentTemplate="{DataTemplate pages:ForecastsPage}"
         Route="forecasts" />
 
+    <!-- Page de profil (jamais visible dans le menu - accessible via TitleBar) -->
+    <ShellContent
+        x:Name="ProfileItem"
+        Title="Profil"
+        Icon="{StaticResource IconProfile}"
+        ContentTemplate="{DataTemplate pages:ProfilePage}"
+        Route="profile"
+        FlyoutItemIsVisible="False" />
+
     <!-- Page de démarrage (Splash) - jamais visible dans le menu -->
     <ShellContent
         x:Name="SplashItem"
@@ -256,19 +265,7 @@
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
 
-                    <!-- Logout glyph (MDL2) -->
-                    <Image WidthRequest="22"
-                            HeightRequest="22"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            InputTransparent="True">
-                        <Image.Source>
-                            <FontImageSource FontFamily="SegoeMDL2"
-                                  Glyph="&#xE726;"
-                                  Size="18"
-                                  Color="{AppThemeBinding Light=Black, Dark=Black}"/>
-                        </Image.Source>
-                    </Image>
+                 
                 </HorizontalStackLayout>
             </Border>
         </Grid>

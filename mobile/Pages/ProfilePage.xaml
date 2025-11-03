@@ -4,7 +4,8 @@
              x:Class="mobile.Pages.ProfilePage"
              xmlns:viewmodels="clr-namespace:mobile.PageModels"
              x:DataType="viewmodels:ProfilePageModel"
-             BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#000000}">
+             BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#000000}"
+             Shell.NavBarIsVisible="False">
 
     <ScrollView x:Name="RootScroll" Scrolled="OnScrollViewScrolled">
         <VerticalStackLayout x:Name="RootStack" Spacing="0">

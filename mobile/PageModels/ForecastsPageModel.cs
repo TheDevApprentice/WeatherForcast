@@ -39,7 +39,7 @@ namespace mobile.PageModels
             _errorHandler = errorHandler;
 
             // Ne pas s'abonner ici, le faire dans OnAppearing
-            LoadForecasts();
+            _ = InitializeAsync(); // Fire and forget avec intention claire
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace mobile.PageModels
             _signalRService.ForecastDeleted -= OnForecastDeleted;
         }
 
-        private async void LoadForecasts()
+        private async Task InitializeAsync()
         {
             // Démarrer la connexion SignalR au hub des forecasts
             await _signalRService.StartForecastHubAsync();

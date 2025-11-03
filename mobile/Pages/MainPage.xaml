@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="mobile.Pages.MainPage"
              xmlns:viewmodels="clr-namespace:mobile.PageModels"
-             x:DataType="viewmodels:MainPageModel">
+             x:DataType="viewmodels:MainPageModel"
+             Shell.NavBarIsVisible="False">
     
     <!-- TitleView vide pour masquer le titre mais garder le burger menu -->
     <!--<Shell.TitleView>

@@ -6,11 +6,15 @@ namespace mobile.Pages
     public partial class ProfilePage : ContentPage
     {
         private CancellationTokenSource? _animCts;
+        private bool _isPageActive = false;
 
         public ProfilePage(ProfilePageModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;
+            
+            // S'abonner aux événements du cycle de vie de l'application
+            Application.Current!.RequestedThemeChanged += OnAppThemeChanged;
 
             // Initialiser le switch selon le thème actuel
             ThemeSwitch.IsToggled = Application.Current?.UserAppTheme == AppTheme.Dark;
@@ -39,6 +43,7 @@ namespace mobile.Pages
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            _isPageActive = true;
 
             // Animation d'apparition douce
             var tasks = new List<Task>();
@@ -57,10 +62,7 @@ namespace mobile.Pages
             await Task.WhenAll(tasks);
 
             // Lancer animations lentes (ring + header gradient)
-            _animCts?.Cancel();
-            _animCts = new CancellationTokenSource();
-            _ = StartRingRotationAsync(_animCts.Token);
-            _ = StartHeaderGradientAnimationAsync(_animCts.Token);
+            StartAnimations();
         }
 
         private void OnScrollViewScrolled(object sender, ScrolledEventArgs e)
@@ -133,8 +135,48 @@ namespace mobile.Pages
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            try { _animCts?.Cancel(); } catch { }
+            _isPageActive = false;
+            StopAnimations();
+        }
+
+        /// <summary>
+        /// Démarre les animations continues (ring et gradient)
+        /// </summary>
+        private void StartAnimations()
+        {
+            if (!_isPageActive) return;
+
+            _animCts?.Cancel();
+            _animCts = new CancellationTokenSource();
+            _ = StartRingRotationAsync(_animCts.Token);
+            _ = StartHeaderGradientAnimationAsync(_animCts.Token);
+        }
+
+        /// <summary>
+        /// Arrête toutes les animations continues
+        /// </summary>
+        private void StopAnimations()
+        {
+            try 
+            { 
+                _animCts?.Cancel(); 
+            } 
+            catch { /* Ignore cancellation errors */ }
+            
             this.AbortAnimation("HeaderGradientAnim");
+        }
+
+        /// <summary>
+        /// Gère le changement de thème de l'application
+        /// </summary>
+        private void OnAppThemeChanged(object? sender, AppThemeChangedEventArgs e)
+        {
+            // Redémarrer l'animation du gradient avec les nouvelles couleurs
+            if (_isPageActive)
+            {
+                this.AbortAnimation("HeaderGradientAnim");
+                _ = StartHeaderGradientAnimationAsync(_animCts?.Token ?? CancellationToken.None);
+            }
         }
 
         private async Task StartRingRotationAsync(CancellationToken token)

@@ -23,6 +23,20 @@ namespace mobile
             _logger.LogInformation("✅ Application démarrée");
         }
 
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+            _logger.LogInformation("💤 Application en arrière-plan");
+            // Les animations seront automatiquement arrêtées via OnDisappearing des pages
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+            _logger.LogInformation("▶️ Application reprise");
+            // Les animations seront automatiquement redémarrées via OnAppearing des pages
+        }
+
         protected override Window CreateWindow(IActivationState? activationState)
         {
             Shell shell;

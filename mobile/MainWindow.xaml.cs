@@ -314,21 +314,28 @@ namespace mobile
 
         /// <summary>
         /// Appelé quand on clique sur le bouton Account
+        /// Navigue vers la page de profil
         /// </summary>
         private async void OnAccountTapped(object? sender, EventArgs e)
         {
             try
             {
-                _logger?.LogInformation("👤 Bouton Account cliqué");
+                _logger?.LogInformation("👤 Bouton Account cliqué - Navigation vers ProfilePage");
 
-                if (this.Page != null)
+                if (this.Page is Shell shell)
                 {
-                    await this.Page.DisplayAlert("Account", "Page de Account (à implémenter)", "OK");
+                    // Fermer le flyout s'il est ouvert
+                    shell.FlyoutIsPresented = false;
+                    
+                    // Naviguer vers la page de profil
+                    await shell.GoToAsync("///profile");
+                    
+                    _logger?.LogInformation("✅ Navigation vers ProfilePage réussie");
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors du clic sur Account");
+                _logger?.LogError(ex, "❌ Erreur lors de la navigation vers ProfilePage");
             }
         }
     }
