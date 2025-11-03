@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using mobile.Models;
 using mobile.Models.DTOs;
-using mobile.Services;
 using System.Collections.ObjectModel;
 
 namespace mobile.PageModels.Auth
@@ -44,8 +42,8 @@ namespace mobile.PageModels.Auth
         public bool IsNotLoading => !IsLoading;
         public bool ShowClassicLogin => !ShowProfileSelection && SelectedProfile == null;
 
-        public LoginPageModel(
-            IApiService apiService, 
+        public LoginPageModel (
+            IApiService apiService,
             ISecureStorageService secureStorage,
             IAuthenticationStateService authState,
             ISavedProfilesService savedProfilesService)
@@ -57,7 +55,7 @@ namespace mobile.PageModels.Auth
         }
 
         [RelayCommand]
-        private async Task LoginAsync()
+        private async Task LoginAsync ()
         {
             // Réinitialiser l'erreur
             HasError = false;
@@ -96,7 +94,7 @@ namespace mobile.PageModels.Auth
 
                     // Récupérer l'ID utilisateur depuis l'API
                     var currentUser = await _apiService.GetCurrentUserAsync();
-                    
+
                     if (currentUser != null)
                     {
                         // Sauvegarder l'état d'authentification centralisé
@@ -127,13 +125,11 @@ namespace mobile.PageModels.Auth
 
                     // Navigation vers l'application principale
 #if ANDROID || IOS
-                    // Sur mobile : réafficher le TabBar et naviguer vers main
+                    // Sur mobile : réafficher le TabBar
                     Shell.SetTabBarIsVisible(Shell.Current, true);
-                    await Shell.Current.GoToAsync("///main");
-#else
-                    // Sur desktop : navigation globale
-                    await Shell.Current.GoToAsync("///main");
 #endif
+                    // Navigation vers le Tab Dashboard (fonctionne sur toutes les plateformes)
+                    await Shell.Current.GoToAsync("///main");
                 }
                 else
                 {
@@ -151,28 +147,29 @@ namespace mobile.PageModels.Auth
         }
 
         [RelayCommand]
-        private async Task NavigateToRegisterAsync()
+        private async Task NavigateToRegisterAsync ()
         {
-            await Shell.Current.GoToAsync("register");
+            // Navigation relative (fonctionne sur toutes les plateformes)
+            await Shell.Current.GoToAsync("//register");
         }
 
-        private void ShowError(string message)
+        private void ShowError (string message)
         {
             ErrorMessage = message;
             HasError = true;
         }
 
-        partial void OnIsLoadingChanged(bool value)
+        partial void OnIsLoadingChanged (bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
         }
 
-        partial void OnShowProfileSelectionChanged(bool value)
+        partial void OnShowProfileSelectionChanged (bool value)
         {
             OnPropertyChanged(nameof(ShowClassicLogin));
         }
 
-        partial void OnSelectedProfileChanged(SavedUserProfile? value)
+        partial void OnSelectedProfileChanged (SavedUserProfile? value)
         {
             OnPropertyChanged(nameof(ShowClassicLogin));
         }
@@ -180,13 +177,13 @@ namespace mobile.PageModels.Auth
         /// <summary>
         /// Charge les profils sauvegardés au démarrage de la page
         /// </summary>
-        public async Task LoadSavedProfilesAsync()
+        public async Task LoadSavedProfilesAsync ()
         {
             var profiles = await _savedProfiles.GetSavedProfilesAsync();
             SavedProfiles = new ObservableCollection<SavedUserProfile>(profiles);
             HasSavedProfiles = profiles.Count > 0;
             ShowProfileSelection = HasSavedProfiles;
-            
+
             System.Diagnostics.Debug.WriteLine($"🟢 Profils chargés : {profiles.Count}");
             System.Diagnostics.Debug.WriteLine($"🟢 ShowProfileSelection = {ShowProfileSelection}");
             System.Diagnostics.Debug.WriteLine($"🟢 HasSavedProfiles = {HasSavedProfiles}");
@@ -196,7 +193,7 @@ namespace mobile.PageModels.Auth
         /// Sélectionne un profil pour se connecter
         /// </summary>
         [RelayCommand]
-        private void SelectProfile(SavedUserProfile profile)
+        private void SelectProfile (SavedUserProfile profile)
         {
             System.Diagnostics.Debug.WriteLine($"🔵 SelectProfile appelé pour : {profile.Email}");
             SelectedProfile = profile;
@@ -212,7 +209,7 @@ namespace mobile.PageModels.Auth
         /// Retour à la sélection des profils
         /// </summary>
         [RelayCommand]
-        private void BackToProfiles()
+        private void BackToProfiles ()
         {
             SelectedProfile = null;
             Email = string.Empty;
@@ -226,7 +223,7 @@ namespace mobile.PageModels.Auth
         /// Utiliser un autre compte (affiche le formulaire classique)
         /// </summary>
         [RelayCommand]
-        private void UseAnotherAccount()
+        private void UseAnotherAccount ()
         {
             System.Diagnostics.Debug.WriteLine($"🟡 UseAnotherAccount appelé");
             SelectedProfile = null;
@@ -242,13 +239,13 @@ namespace mobile.PageModels.Auth
         /// Supprime un profil sauvegardé
         /// </summary>
         [RelayCommand]
-        private async Task RemoveProfile(SavedUserProfile profile)
+        private async Task RemoveProfile (SavedUserProfile profile)
         {
             System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
             await _savedProfiles.RemoveProfileAsync(profile.Email);
             SavedProfiles.Remove(profile);
             HasSavedProfiles = SavedProfiles.Count > 0;
-            
+
             if (!HasSavedProfiles)
             {
                 ShowProfileSelection = false;

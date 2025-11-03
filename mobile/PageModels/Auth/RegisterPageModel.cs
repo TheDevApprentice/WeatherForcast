@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using mobile.Models.DTOs;
-using mobile.Services;
 using System.Text.RegularExpressions;
 
 namespace mobile.PageModels.Auth
@@ -39,9 +38,9 @@ namespace mobile.PageModels.Auth
 
         public bool IsNotLoading => !IsLoading;
 
-        public RegisterPageModel(
-            IApiService apiService, 
-            ISecureStorageService secureStorage, 
+        public RegisterPageModel (
+            IApiService apiService,
+            ISecureStorageService secureStorage,
             ISignalRService signalRService,
             INotificationService notificationService)
         {
@@ -55,7 +54,7 @@ namespace mobile.PageModels.Auth
         }
 
         [RelayCommand]
-        private async Task RegisterAsync()
+        private async Task RegisterAsync ()
         {
             // Réinitialiser l'erreur
             HasError = false;
@@ -90,15 +89,16 @@ namespace mobile.PageModels.Auth
                     // L'inscription a réussi, mais pas de token retourné
                     // L'utilisateur doit maintenant se connecter
                     ShowError("Compte créé avec succès ! Vérifiez votre email.");
-                    
+
                     // Attendre un peu pour recevoir la notification SignalR
                     await Task.Delay(3000);
-                    
+
                     // Quitter le canal email
                     await _signalRService.LeaveEmailChannelAsync(Email.Trim());
-                    
+
                     // Navigation vers la page de connexion
-                    await Shell.Current.GoToAsync("..");
+                    // Utiliser navigation relative (fonctionne sur toutes les plateformes)
+                    await Shell.Current.GoToAsync("//login");
                 }
                 else
                 {
@@ -116,12 +116,13 @@ namespace mobile.PageModels.Auth
         }
 
         [RelayCommand]
-        private async Task NavigateToLoginAsync()
+        private async Task NavigateToLoginAsync ()
         {
-            await Shell.Current.GoToAsync("..");
+            // Navigation relative (fonctionne sur toutes les plateformes)
+            await Shell.Current.GoToAsync("//login");
         }
 
-        private bool ValidateInputs()
+        private bool ValidateInputs ()
         {
             if (string.IsNullOrWhiteSpace(FirstName))
             {
@@ -170,18 +171,18 @@ namespace mobile.PageModels.Auth
             return true;
         }
 
-        private void ShowError(string message)
+        private void ShowError (string message)
         {
             ErrorMessage = message;
             HasError = true;
         }
 
-        partial void OnIsLoadingChanged(bool value)
+        partial void OnIsLoadingChanged (bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
         }
 
-        private async void OnVerificationEmailSent(object? sender, EmailNotification notification)
+        private async void OnVerificationEmailSent (object? sender, EmailNotification notification)
         {
             // Afficher une notification toast à l'utilisateur
             await _notificationService.ShowSuccessAsync(

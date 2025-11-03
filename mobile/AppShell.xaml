@@ -188,6 +188,15 @@
         Route="login"
         FlyoutItemIsVisible="False" />
 
+    <!-- Page d'inscription (jamais visible dans le menu) -->
+    <ShellContent
+        x:Name="RegisterItem"
+        Title="Inscription"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate auth:RegisterPage}"
+        Route="register"
+        FlyoutItemIsVisible="False" />
+
     <!-- Footer moderne -->
     <Shell.FlyoutFooter>
         <Grid Padding="24,20,24,24" RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
