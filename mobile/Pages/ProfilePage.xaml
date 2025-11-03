@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Pages.ProfilePage"
+             xmlns:viewmodels="clr-namespace:mobile.PageModels"
+             x:DataType="viewmodels:ProfilePageModel"
+             BackgroundColor="{AppThemeBinding Light=#F5F5F5, Dark=#000000}"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView x:Name="RootScroll" Scrolled="OnScrollViewScrolled">
+        <VerticalStackLayout x:Name="RootStack" Spacing="0">
+            
+            <!-- Header avec gradient Fluent -->
+            <Grid x:Name="HeaderGrid" RowDefinitions="180,Auto" Margin="0,0,0,20">
+                <!-- Gradient background -->
+                <Border x:Name="HeaderBackground" Grid.RowSpan="2"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 0,0,32,32">
+                    <Border.Background>
+                        <!-- Animatable gradient (different Light/Dark palettes) -->
+                        <LinearGradientBrush x:Name="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
+                            <!-- Plus violet (moins bleu) -->
+                            <GradientStop x:Name="HeaderGradStop1" Color="{AppThemeBinding Light=#6D28D9, Dark=#7C3AED}" Offset="0.0" />
+                            <GradientStop x:Name="HeaderGradStop2" Color="{AppThemeBinding Light=#C4B5FD, Dark=#5B21B6}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                
+                <!-- Avatar et info utilisateur -->
+                <VerticalStackLayout x:Name="HeaderContent" Grid.Row="1" 
+                                    Spacing="10"
+                                    Margin="0,-95,0,40">
+                    <!-- Avatar avec ring rotatif et initiales -->
+                    <Grid WidthRequest="120" HeightRequest="120" HorizontalOptions="Center" x:Name="AvatarContainer">
+                        <!-- Anneau externe avec gradient qui tourne -->
+                        <Border x:Name="AvatarRing"
+                                WidthRequest="120"
+                                HeightRequest="120"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 60">
+                            <Border.Background>
+                                <LinearGradientBrush x:Name="RingGradient" StartPoint="0,0" EndPoint="1,1">
+                                    <!-- Plus clair / moins saturé -->
+                                    <GradientStop x:Name="RingStop1" Color="{AppThemeBinding Light=#EDE9FE, Dark=#A78BFA}" Offset="0.0" />
+                                    <GradientStop x:Name="RingStop2" Color="{AppThemeBinding Light=#C4B5FD, Dark=#7C3AED}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" Opacity="0.12" Radius="18" Offset="0,6" />
+                            </Border.Shadow>
+                        </Border>
+
+                        <!-- Cercle interne pour créer l'effet d'anneau -->
+                        <Border x:Name="AvatarBorder"
+                                WidthRequest="110"
+                                HeightRequest="110"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 55"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{AppThemeBinding Light=#111827, Dark=#0B0B0D}" Offset="0.0" />
+                                    <GradientStop Color="{AppThemeBinding Light=#374151, Dark=#111827}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.Stroke>
+                                <!-- fin liseré blanc pour accent -->
+                                <SolidColorBrush Color="{AppThemeBinding Light=#FFFFFF, Dark=#2E2E32}" />
+                            </Border.Stroke>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" Opacity="0.2" Radius="24" Offset="0,8" />
+                            </Border.Shadow>
+                            <Label x:Name="InitialsLabel" Text="{Binding Initials}"
+                                   FontSize="38"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Nom utilisateur -->
+                    <Label x:Name="NameLabel" Text="{Binding UserName}"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource White}, Dark=White}"/>
+                    
+                    <!-- Email -->
+                    <Label x:Name="EmailLabel" Text="{Binding UserEmail}"
+                           FontSize="14"
+                           HorizontalOptions="Center"
+                           Opacity="0.7"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray100}, Dark=#8E8E93}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Menu Options -->
+            <VerticalStackLayout x:Name="ContentStack" Spacing="16" Padding="10,0">
+                    
+                <!-- Card Apparence avec Fluent Design -->
+                <Border StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                        StrokeThickness="0"
+                        Padding="0">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
+                    </Border.Shadow>
+
+                    <Grid Padding="10,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                        <!-- Icône -->
+                        <!--<Border Grid.Column="0"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                StrokeShape="RoundRectangle 8"
+                        BackgroundColor="{AppThemeBinding Light=#tranparent, Dark=#tranparent}"
+                                StrokeThickness="0">
+                            <Label Text="🎨"
+                                   FontSize="20"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>-->
+                        
+                        <!-- Texte -->
+                        <VerticalStackLayout Grid.Column="1" 
+                                           Spacing="2"
+                                           VerticalOptions="Center">
+                            <Label Text="Thème sombre"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                            <Label Text="Activer le mode sombre"
+                                   FontSize="13"
+                                   Opacity="0.6"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                        </VerticalStackLayout>
+                        
+                        <!-- Switch -->
+                        <Switch Grid.Column="2"
+                                x:Name="ThemeSwitch"
+                                VerticalOptions="Center"
+                                Toggled="ThemeSwitch_Toggled"/>
+                    </Grid>
+                </Border>
+
+                <!-- Card Paramètres avec Fluent Design -->
+                <Border StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                        StrokeThickness="0"
+                        Padding="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
+                    </Border.Shadow>
+                    
+                    <Grid Padding="10,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                        <!-- Icône --><!--
+                        <Border Grid.Column="0"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                StrokeShape="RoundRectangle 8"
+                                BackgroundColor="{AppThemeBinding Light=#F3F3F3, Dark=#2C2C2E}"
+                                StrokeThickness="0">
+                            <Label Text="⚙️"
+                                   FontSize="20"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>-->
+                        
+                        <!-- Texte -->
+                        <VerticalStackLayout Grid.Column="1" 
+                                           Spacing="2"
+                                           VerticalOptions="Center">
+                            <Label Text="Paramètres"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                            <Label Text="Gérer vos préférences"
+                                   FontSize="13"
+                                   Opacity="0.6"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                        </VerticalStackLayout>
+                        
+                        <!-- Chevron -->
+                        <Label Grid.Column="2"
+                               Text="›"
+                               FontSize="24"
+                               Padding="0,0,10,0"
+                               VerticalOptions="Center"
+                               Opacity="0.3"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Card Déconnexion avec Fluent Design -->
+                <Border StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{AppThemeBinding Light=#E53935, Dark=#tranparent}"
+                        StrokeThickness="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Shadow>
+                        <Shadow Brush="#E53935" Opacity="0.04" Radius="8" Offset="0,2" />
+                    </Border.Shadow>
+                    
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                        <!-- Texte -->
+                        <VerticalStackLayout Grid.Column="1" 
+                                           Spacing="2"
+                                             HorizontalOptions="Center"
+                                           VerticalOptions="Center">
+                            <Label Text="Déconnexion"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#E53935"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

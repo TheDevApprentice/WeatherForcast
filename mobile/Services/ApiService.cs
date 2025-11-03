@@ -89,6 +89,34 @@ namespace mobile.Services
             }
         }
 
+        public async Task<CurrentUserResponse?> GetCurrentUserAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/auth/me");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
+                    _logger.LogInformation("Utilisateur récupéré: {Email}", user?.Email);
+                    return user;
+                }
+
+                _logger.LogWarning("Échec de la récupération de l'utilisateur: {StatusCode}", response.StatusCode);
+                return null;
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogWarning(ex, "Erreur réseau lors de la récupération de l'utilisateur");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la récupération de l'utilisateur");
+                return null;
+            }
+        }
+
         public async Task<bool> LogoutAsync()
         {
             try

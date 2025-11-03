@@ -3,37 +3,259 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="mobile.Pages.Auth.LoginPage"
              xmlns:viewmodels="clr-namespace:mobile.PageModels.Auth"
+             xmlns:models="clr-namespace:mobile.Models"
              x:DataType="viewmodels:LoginPageModel"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource LightBackground}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            
-            <!-- Header avec gradient violet -->
-            <Frame CornerRadius="12" HasShadow="True" Padding="0" Margin="0,20,0,0">
-                <Frame.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
-                        <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Frame.Background>
+            <!-- ========== VUE: SÉLECTION DE PROFIL ========== -->
+            <VerticalStackLayout IsVisible="{Binding ShowProfileSelection}" Spacing="15">
                 
-                <VerticalStackLayout Padding="30" Spacing="10">
-                    <Label Text="☁️" FontSize="48" HorizontalOptions="Center" />
-                    <Label Text="WeatherForecast" 
-                           FontSize="28" 
+                <!-- Liste des profils sauvegardés -->
+                <CollectionView ItemsSource="{Binding SavedProfiles}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:SavedUserProfile">
+                            <Border Padding="0" Margin="0,5" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Border.Shadow>
+                                    <Shadow Brush="Black" Opacity="0.1" Radius="8" Offset="0,2" />
+                                </Border.Shadow>
+                                
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnProfileCardTapped" />
+                                </Border.GestureRecognizers>
+                                
+                                <Grid Padding="15" BackgroundColor="Transparent">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup Name="CommonStates">
+                                            <VisualState Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="White" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState Name="PointerOver">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#F0F4F8" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                    
+                                    <Grid ColumnDefinitions="60,*,Auto" ColumnSpacing="15">
+                                    <!-- Avatar avec initiales -->
+                                    <Border Grid.Column="0" 
+                                            WidthRequest="60" 
+                                            HeightRequest="60"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 30">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="{Binding Email, Converter={StaticResource StringToColorConverter}}" />
+                                        </Border.Background>
+                                        <Label Text="{Binding Initials}" 
+                                               FontSize="24" 
+                                               FontAttributes="Bold"
+                                               FontFamily="SegoeSemibold"
+                                               TextColor="White"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center" />
+                                    </Border>
+                                    
+                                    <!-- Infos utilisateur -->
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                        <Label Text="{Binding FullName}" 
+                                               FontSize="16" 
+                                               FontAttributes="Bold"
+                                               FontFamily="SegoeSemibold"
+                                               TextColor="{StaticResource DarkOnLightBackground}" />
+                                        <Label Text="{Binding Email}" 
+                                               FontSize="13" 
+                                               TextColor="{StaticResource Gray500}"
+                                               FontFamily="SegoeSemibold" />
+                                        <Label Text="{Binding LastLoginDescription}" 
+                                               FontSize="11" 
+                                               TextColor="{StaticResource Gray400}"
+                                               FontFamily="SegoeSemibold" />
+                                    </VerticalStackLayout>
+                                    
+                                    <!-- Bouton supprimer -->
+                                    <ImageButton Grid.Column="2"
+                                                WidthRequest="32"
+                                                HeightRequest="32"
+                                                VerticalOptions="Center"
+                                                Background="Transparent"
+                                                Padding="0"
+                                                CornerRadius="16"
+                                                Clicked="OnDeleteProfileClicked">
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup Name="CommonStates">
+                                                <VisualState Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="#FFEBEE" />
+                                                        <Setter Property="Scale" Value="1.1" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                        <ImageButton.Source>
+                                            <FontImageSource FontFamily="SegoeMDL2" 
+                                                           Glyph="&#xE74D;" 
+                                                           Size="18"
+                                                           Color="{StaticResource Gray500}" />
+                                        </ImageButton.Source>
+                                    </ImageButton>
+                                </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                
+                <!-- Séparateur avec "ou" -->
+                <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="10" Margin="0,10">
+                    <BoxView Grid.Column="0" 
+                             HeightRequest="1" 
+                             Color="{StaticResource Gray300}"
+                             VerticalOptions="Center" />
+                    <Label Grid.Column="1" 
+                           Text="ou" 
+                           TextColor="{StaticResource Gray500}"
+                           FontSize="14"
+                           VerticalOptions="Center" />
+                    <BoxView Grid.Column="2" 
+                             HeightRequest="1" 
+                             Color="{StaticResource Gray300}"
+                             VerticalOptions="Center" />
+                </Grid>
+                
+                <!-- Lien "Se connecter avec un autre compte" -->
+                <Border BackgroundColor="Transparent" 
+                        Padding="10,5"
+                        HorizontalOptions="Center"
+                        Margin="0,5">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup Name="CommonStates">
+                            <VisualState Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="Opacity" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="Opacity" Value="0.7" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UseAnotherAccountCommand}" />
+                    </Border.GestureRecognizers>
+                    
+                    <Label Text="Se connecter avec un autre compte"
+                           TextColor="{StaticResource Primary}"
+                           FontSize="14"
                            FontAttributes="Bold"
-                           TextColor="White"
+                           TextDecorations="Underline"
                            HorizontalOptions="Center" />
-                    <Label Text="Connexion à votre compte" 
-                           FontSize="14" 
-                           TextColor="White"
-                           Opacity="0.9"
-                           HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </Frame>
+                </Border>
+                        
+            </VerticalStackLayout>
 
+            <!-- ========== VUE: PROFIL SÉLECTIONNÉ (Mot de passe) ========== -->
+            <VerticalStackLayout IsVisible="{Binding SelectedProfile, Converter={StaticResource IsNotNullConverter}}" Spacing="15">
+                
+                <!-- Bouton retour -->
+                <Button Text="← Retour aux profils"
+                        Command="{Binding BackToProfilesCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        HorizontalOptions="Start"
+                        Padding="0"
+                        FontSize="14" />
+                
+                <!-- Card du profil sélectionné -->
+                <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="White">
+                    <VerticalStackLayout Spacing="15">
+                        
+                        <!-- Avatar et nom -->
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Border WidthRequest="80" 
+                                    HeightRequest="80"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 40"
+                                    HorizontalOptions="Center">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding SelectedProfile.Email, Converter={StaticResource StringToColorConverter}}" />
+                                </Border.Background>
+                                <Label Text="{Binding SelectedProfile.Initials}" 
+                                       FontSize="32" 
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                            
+                            <Label Text="{Binding SelectedProfile.FullName}" 
+                                   FontSize="18" 
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource DarkOnLightBackground}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding SelectedProfile.Email}" 
+                                   FontSize="14" 
+                                   TextColor="{StaticResource Gray500}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        
+                        <!-- Mot de passe -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Mot de passe" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                            <Entry Text="{Binding Password}"
+                                   Placeholder="••••••••"
+                                   IsPassword="True"
+                                   ReturnType="Done" />
+                        </VerticalStackLayout>
+                        
+                        <!-- Message d'erreur -->
+                        <Label Text="{Binding ErrorMessage}"
+                               TextColor="{StaticResource Danger}"
+                               IsVisible="{Binding HasError}"
+                               FontSize="12" />
+                        
+                        <!-- Bouton de connexion -->
+                        <Button Text="Se connecter"
+                                Command="{Binding LoginCommand}"
+                                IsEnabled="{Binding IsNotLoading}"
+                                HeightRequest="50"
+                                CornerRadius="8"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                Margin="0,10,0,0">
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
+                                    <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        
+                        <!-- Indicateur de chargement -->
+                        <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                         IsVisible="{Binding IsLoading}"
+                                         Color="{StaticResource Primary}"
+                                         HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+                
+            </VerticalStackLayout>
+
+            <!-- ========== VUE: LOGIN CLASSIQUE ========== -->
+            <VerticalStackLayout IsVisible="{Binding ShowClassicLogin}" Spacing="15">
+            
             <!-- Formulaire de connexion -->
             <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="White">
                 <VerticalStackLayout Spacing="15">
@@ -96,6 +318,7 @@
                 </Label>
             </HorizontalStackLayout>
 
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

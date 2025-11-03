@@ -12,6 +12,7 @@ namespace mobile.Services
         Task<AuthResponse?> LoginAsync(LoginRequest request);
         Task<bool> RegisterAsync(RegisterRequest request);
         Task<bool> ValidateTokenAsync();
+        Task<CurrentUserResponse?> GetCurrentUserAsync();
         Task<bool> LogoutAsync();
 
         // WeatherForecast

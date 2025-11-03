@@ -1,9 +1,7 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using mobile.Services.ErrorHandling;
 using mobile.Services.Handlers;
-using mobile.Services.Middleware;
 using Syncfusion.Maui.Toolkit.Hosting;
 using System.Reflection;
 
@@ -52,45 +50,36 @@ namespace mobile
             }
 
             // Services
+            builder.Services.AddSingleton<IApiConfigurationService, ApiConfigurationService>();
             builder.Services.AddSingleton<ISecureStorageService, SecureStorageService>();
+            builder.Services.AddSingleton<IAuthenticationStateService, AuthenticationStateService>();
+            builder.Services.AddSingleton<ISavedProfilesService, SavedProfilesService>();
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
+            builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
+            builder.Services.AddSingleton<IStartupService, StartupService>();
 
             // Service de notification - Toasts personnalisés:
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
-            // Gestion des erreurs - Nouveau système complet
+            // Gestion des erreurs
             builder.Services.AddSingleton<IErrorHandler, ModalErrorHandler>();
-            builder.Services.AddSingleton<IErrorHandlingService, ErrorHandlingService>();
             builder.Services.AddSingleton<GlobalExceptionHandler>();
 
-            // HttpClient avec authentification et gestion d'erreurs
+            // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
-            builder.Services.AddTransient<ErrorHandlingMiddleware>();
-            
-            builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+            builder.Services.AddHttpClient<IApiService, ApiService>((serviceProvider, client) =>
             {
-                var baseUrl = "";
-#if ANDROID
-                // Utilise BaseUrlDevice pour téléphone réel, BaseUrlEmulator pour émulateur
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"]
-                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
-#elif IOS
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlDevice"] 
-                    ?? builder.Configuration["ApiSettings:BaseUrlEmulator"];
-#elif WINDOWS
-                baseUrl = builder.Configuration["ApiSettings:BaseUrlWindows"];
-#endif
-
-                if (string.IsNullOrWhiteSpace(baseUrl))
-                {
-                    throw new InvalidOperationException("ApiSettings:BaseUrl* n'est pas configuré.");
-                }
+                // Utiliser le service de configuration centralisé
+                var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
+                var baseUrl = apiConfig.GetBaseUrl();
 
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
-            .AddHttpMessageHandler<ErrorHandlingMiddleware>()
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+
+            // Page de démarrage (Splash)
+            builder.Services.AddTransient<SplashPage>();
 
             // Pages et ViewModels d'authentification
             builder.Services.AddTransient<LoginPage>();
@@ -105,6 +94,10 @@ namespace mobile
             // Page des prévisions météo
             builder.Services.AddTransient<ForecastsPage>();
             builder.Services.AddTransient<ForecastsPageModel>();
+
+            // Page de profil
+            builder.Services.AddTransient<ProfilePage>();
+            builder.Services.AddTransient<ProfilePageModel>();
 
             return builder.Build();
         }

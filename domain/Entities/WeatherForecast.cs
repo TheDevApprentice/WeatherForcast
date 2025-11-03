@@ -1,4 +1,5 @@
 using domain.ValueObjects;
+using System.Text.Json.Serialization;
 
 namespace domain.Entities
 {
@@ -12,27 +13,32 @@ namespace domain.Entities
         /// <summary>
         /// Identifiant unique
         /// </summary>
+        [JsonInclude]
         public int Id { get; internal set; }
 
         /// <summary>
         /// Date de la prévision
         /// </summary>
+        [JsonInclude]
         public DateTime Date { get; private set; }
 
         /// <summary>
         /// Température (Value Object)
         /// Encapsule la logique métier liée à la température
         /// </summary>
+        [JsonInclude]
         public Temperature Temperature { get; private set; } = null!;
 
         /// <summary>
         /// Résumé de la météo (Sunny, Rainy, etc.)
         /// </summary>
+        [JsonInclude]
         public string? Summary { get; private set; }
 
         /// <summary>
-        /// Constructeur parameterless pour EF Core
+        /// Constructeur parameterless pour EF Core et JSON deserialization
         /// </summary>
+        [JsonConstructor]
         private WeatherForecast()
         {
         }

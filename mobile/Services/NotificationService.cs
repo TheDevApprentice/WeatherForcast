@@ -23,15 +23,21 @@ namespace mobile.Services
         /// </summary>
         private async Task EnsureInitializedAsync()
         {
-            if (_isInitialized && _notificationManager != null)
-                return;
-
+            // ✅ Toujours vérifier si le NotificationManager est encore valide
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
+                // Si le manager existe et est toujours attaché à une page, on garde
+                if (_notificationManager != null && _notificationManager.Parent != null)
+                {
+                    return;
+                }
+
                 var currentPage = GetCurrentPage();
                 if (currentPage == null)
                 {
-                    _logger.LogWarning("Impossible d'initialiser le gestionnaire de notifications: Pas de page active");
+                    _logger.LogWarning("⚠️ Impossible d'initialiser le gestionnaire de notifications: Pas de page active");
+                    _isInitialized = false;
+                    _notificationManager = null;
                     return;
                 }
 
@@ -82,10 +88,7 @@ namespace mobile.Services
                 }
 
                 _isInitialized = true;
-                
-#if DEBUG
-                _logger.LogDebug("✅ Gestionnaire de notifications initialisé");
-#endif
+                _logger.LogInformation("✅ Gestionnaire de notifications initialisé sur la page: {PageType}", currentPage?.GetType().Name);
             });
         }
 
@@ -134,25 +137,35 @@ namespace mobile.Services
         {
             try
             {
+                _logger.LogInformation("🔔 Tentative d'affichage notification: {Title} - {Message}", title, message);
+                
                 await EnsureInitializedAsync();
 
                 if (_notificationManager != null)
                 {
+                    _logger.LogInformation("✅ NotificationManager disponible, affichage en cours...");
                     await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
-                    
-#if DEBUG
-                    _logger.LogDebug("📢 MOBILE - Notification affichée: {Title} - {Message}", title, message);
-#endif
+                    _logger.LogInformation("📢 Notification affichée avec succès: {Title} - {Message}", title, message);
                 }
                 else
                 {
-                    _logger.LogWarning("Gestionnaire de notifications non disponible");
+                    _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null)");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de l'affichage de la notification: {Title} - {Message}", title, message);
+                _logger.LogError(ex, "❌ Erreur lors de l'affichage de la notification: {Title} - {Message}", title, message);
             }
+        }
+
+        /// <summary>
+        /// Réinitialise le gestionnaire de notifications (force la recréation)
+        /// </summary>
+        public void Reset()
+        {
+            _logger.LogInformation("🔄 Réinitialisation du gestionnaire de notifications");
+            _isInitialized = false;
+            _notificationManager = null;
         }
 
         private ContentPage? GetCurrentPage()

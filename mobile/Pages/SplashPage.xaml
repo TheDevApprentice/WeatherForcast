@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Pages.SplashPage"
+             Shell.NavBarIsVisible="False"
+             Shell.FlyoutBehavior="Disabled">
+    
+    <Grid>
+        <!-- Fond avec gradient subtil et moderne -->
+        <BoxView>
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="{AppThemeBinding Light=#FFFFFF, Dark=#000000}" Offset="0.0" />
+                    <GradientStop Color="{AppThemeBinding Light=#F0F4F8, Dark=#0A0A0A}" Offset="1.0" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+
+        <!-- Zone de chargement ultra-centrée et minimaliste -->
+        <VerticalStackLayout VerticalOptions="Center" 
+                            HorizontalOptions="Center" 
+                            Spacing="50">
+            
+            <!-- Loader avec effet de glow -->
+            <Grid WidthRequest="80" HeightRequest="80">
+                <!-- Cercle de fond avec glow -->
+                <Ellipse Fill="{AppThemeBinding Light=#E8F0FE, Dark=#1A2332}"
+                         WidthRequest="80"
+                         HeightRequest="80"
+                         Opacity="0.3"/>
+                
+                <!-- Indicateur de chargement -->
+                <ActivityIndicator x:Name="LoadingIndicator"
+                                 IsRunning="True"
+                                 Color="{DynamicResource Primary}"
+                                 HeightRequest="48"
+                                 WidthRequest="48"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"/>
+            </Grid>
+
+            <!-- Étape en cours - Design épuré -->
+            <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <!-- Icône avec Segoe Fluent Icons -->
+                    <Label x:Name="StatusIcon"
+                           Text=""
+                           FontSize="18"
+                           FontFamily="Segoe Fluent Icons"
+                           TextColor="{DynamicResource Primary}"
+                           VerticalOptions="Center"/>
+                    
+                    <!-- Texte de l'étape -->
+                    <Label x:Name="CurrentStepLabel"
+                           Text="Démarrage..."
+                           FontSize="16"
+                           FontAttributes="None"
+                           TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"
+                           LineBreakMode="WordWrap"
+                           MaxLines="2"
+                           WidthRequest="280"
+                           VerticalOptions="Center"
+                           Opacity="0.9"/>
+                </HorizontalStackLayout>
+                
+                <!-- Points de progression des étapes -->
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Ellipse x:Name="Dot1" 
+                             Fill="{DynamicResource Primary}"
+                             WidthRequest="8" 
+                             HeightRequest="8"
+                             Opacity="0.3"/>
+                    <Ellipse x:Name="Dot2" 
+                             Fill="{DynamicResource Primary}"
+                             WidthRequest="8" 
+                             HeightRequest="8"
+                             Opacity="0.3"/>
+                    <Ellipse x:Name="Dot3" 
+                             Fill="{DynamicResource Primary}"
+                             WidthRequest="8" 
+                             HeightRequest="8"
+                             Opacity="0.3"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- Message d'erreur minimaliste (en bas) -->
+        <VerticalStackLayout x:Name="ErrorContainer"
+                            IsVisible="False"
+                            Spacing="20"
+                            Padding="32"
+                            Margin="40,0,40,60"
+                            VerticalOptions="End"
+                            HorizontalOptions="Center">
+            
+            <!-- Icône d'erreur avec cercle -->
+            <Grid WidthRequest="56" HeightRequest="56" HorizontalOptions="Center">
+                <Ellipse Fill="{AppThemeBinding Light=#FEF2F2, Dark=#3D1F1F}"
+                         WidthRequest="56"
+                         HeightRequest="56"/>
+                <Label Text="\uE783" 
+                       FontFamily="Segoe Fluent Icons"
+                       FontSize="28"
+                       TextColor="{AppThemeBinding Light=#DC2626, Dark=#EF4444}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+            </Grid>
+            
+            <!-- Titre de l'erreur -->
+            <Label Text="Impossible de démarrer" 
+                   FontSize="20" 
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light=#DC2626, Dark=#EF4444}"/>
+            
+            <!-- Message d'erreur -->
+            <Label x:Name="ErrorMessage" 
+                   TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   LineBreakMode="WordWrap"
+                   MaxLines="3"
+                   WidthRequest="320"/>
+            
+            <!-- Bouton réessayer moderne -->
+            <Border BackgroundColor="{DynamicResource Primary}"
+                    StrokeThickness="0"
+                    Padding="24,14"
+                    HorizontalOptions="Center"
+                    Margin="0,8,0,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnRetryClicked"/>
+                </Border.GestureRecognizers>
+                
+                <Label Text="Réessayer"
+                       TextColor="White"
+                       FontSize="15"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+            </Border>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

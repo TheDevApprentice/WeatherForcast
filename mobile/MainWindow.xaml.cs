@@ -86,6 +86,88 @@ namespace mobile
         }
 
         /// <summary>
+        /// Masque tous les éléments de la title bar sauf l'icône account, le titre et le sous-titre
+        /// Utilisé pendant le splash screen
+        /// </summary>
+        public void HideTitleBarElements()
+        {
+            try
+            {
+                // Masquer la SearchBar
+                var search = this.FindByName<SearchBar>("TitleSearchBar");
+                if (search != null)
+                {
+                    search.IsVisible = false;
+                }
+
+                // Masquer les boutons de droite
+                var msg = this.FindByName<ImageButton>("MessagesButton");
+                var noti = this.FindByName<ImageButton>("NotificationsButton");
+                var set = this.FindByName<ImageButton>("SettingsButton");
+
+                if (msg != null) msg.IsVisible = false;
+                if (noti != null) noti.IsVisible = false;
+                if (set != null) set.IsVisible = false;
+
+                // Masquer les boutons Account et People
+                AccountButton.IsVisible = false;
+                if (this.FindByName<ImageButton>("PeopleButton") is ImageButton people)
+                {
+                    people.IsVisible = false;
+                }
+
+                _logger?.LogInformation("🔒 Éléments de la title bar masqués (splash screen)");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "❌ Erreur lors du masquage des éléments de la title bar");
+            }
+        }
+
+        /// <summary>
+        /// Affiche les éléments de la title bar après le splash screen
+        /// </summary>
+        public void ShowTitleBarElements(bool isAuthenticated)
+        {
+            try
+            {
+                // Afficher la SearchBar
+                var search = this.FindByName<SearchBar>("TitleSearchBar");
+                if (search != null)
+                {
+                    search.IsVisible = true;
+                }
+
+                // Afficher les boutons selon l'état d'authentification
+                SetTitleBarAuthState(isAuthenticated);
+
+                // Afficher le bon bouton (Account ou People)
+                if (isAuthenticated)
+                {
+                    AccountButton.IsVisible = true;
+                    if (this.FindByName<ImageButton>("PeopleButton") is ImageButton people)
+                    {
+                        people.IsVisible = false;
+                    }
+                }
+                else
+                {
+                    AccountButton.IsVisible = false;
+                    if (this.FindByName<ImageButton>("PeopleButton") is ImageButton people)
+                    {
+                        people.IsVisible = true;
+                    }
+                }
+
+                _logger?.LogInformation("✅ Éléments de la title bar affichés (auth: {IsAuth})", isAuthenticated);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "❌ Erreur lors de l'affichage des éléments de la title bar");
+            }
+        }
+
+        /// <summary>
         /// Active/désactive et montre/masque les boutons du TitleBar selon l'authentification
         /// </summary>
         private void SetTitleBarAuthState(bool isAuthenticated)
@@ -232,21 +314,28 @@ namespace mobile
 
         /// <summary>
         /// Appelé quand on clique sur le bouton Account
+        /// Navigue vers la page de profil
         /// </summary>
         private async void OnAccountTapped(object? sender, EventArgs e)
         {
             try
             {
-                _logger?.LogInformation("👤 Bouton Account cliqué");
+                _logger?.LogInformation("👤 Bouton Account cliqué - Navigation vers ProfilePage");
 
-                if (this.Page != null)
+                if (this.Page is Shell shell)
                 {
-                    await this.Page.DisplayAlert("Account", "Page de Account (à implémenter)", "OK");
+                    // Fermer le flyout s'il est ouvert
+                    shell.FlyoutIsPresented = false;
+                    
+                    // Naviguer vers la page de profil
+                    await shell.GoToAsync("///profile");
+                    
+                    _logger?.LogInformation("✅ Navigation vers ProfilePage réussie");
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors du clic sur Account");
+                _logger?.LogError(ex, "❌ Erreur lors de la navigation vers ProfilePage");
             }
         }
     }

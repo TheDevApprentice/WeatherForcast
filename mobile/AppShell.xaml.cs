@@ -10,7 +10,8 @@ namespace mobile
         {
             InitializeComponent();
             var currentTheme = Application.Current!.RequestedTheme;
-            ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
+            // Initialize the new Switch based on current theme
+            ThemeSwitch.IsToggled = currentTheme == AppTheme.Dark;
 
             // Enregistrer les routes pour la navigation
             Routing.RegisterRoute("register", typeof(RegisterPage));
@@ -77,7 +78,9 @@ namespace mobile
         /// <summary>
         /// Met à jour la visibilité du menu selon l'état d'authentification
         /// </summary>
-        public void UpdateAuthenticationUI(bool isAuthenticated)
+        /// <param name="isAuthenticated">État d'authentification</param>
+        /// <param name="updateTitleBar">Si false, ne met pas à jour la title bar (utilisé pendant le splash)</param>
+        public void UpdateAuthenticationUI(bool isAuthenticated, bool updateTitleBar = true)
         {
             // Contrôler la visibilité du Flyout
             FlyoutBehavior = isAuthenticated ? FlyoutBehavior.Flyout : FlyoutBehavior.Disabled;
@@ -110,26 +113,27 @@ namespace mobile
             // Mettre à jour les informations utilisateur dans le header
             if (isAuthenticated)
             {
-                var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-                if (secureStorage != null)
+                var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
+                if (authStateService != null)
                 {
                     MainThread.BeginInvokeOnMainThread(async () =>
                     {
-                        var userInfo = await secureStorage.GetUserInfoAsync();
-                        UserFullNameLabel.Text = $"{userInfo.FirstName} {userInfo.LastName}";
-                        UserEmailLabel.Text = userInfo.Email;
+                        var authState = await authStateService.GetStateAsync();
 
-                        // Générer les initiales (première lettre du prénom + première lettre du nom)
-                        var initials = GetInitials(userInfo.FirstName, userInfo.LastName);
-                        UserInitialsLabel.Text = initials;
+                        if (authState.IsAuthenticated)
+                        {
+                            UserFullNameLabel.Text = authState.GetFullName();
+                            UserEmailLabel.Text = authState.Email;
+                            UserInitialsLabel.Text = authState.GetInitials();
 
 #if WINDOWS || MACCATALYST
-                        // Synchroniser avec la titlebar
-                        if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
-                        {
-                            mw.UpdateAccountButton(userInfo.FirstName, userInfo.LastName);
-                        }
+                            // Synchroniser avec la titlebar (sauf si on est dans le splash)
+                            if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                            {
+                                mw.UpdateAccountButton(authState.FirstName, authState.LastName);
+                            }
 #endif
+                        }
                     });
                 }
             }
@@ -140,8 +144,8 @@ namespace mobile
                 UserInitialsLabel.Text = string.Empty;
 
 #if WINDOWS || MACCATALYST
-                // Masquer le bouton Account et afficher l'icône People dans la titlebar
-                if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
+                // Masquer le bouton Account et afficher l'icône People dans la titlebar (sauf si on est dans le splash)
+                if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
                 {
                     mw.ClearAccountButton();
                 }
@@ -165,15 +169,19 @@ namespace mobile
             {
                 // Récupérer les services
                 var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
+                var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
                 var apiService = Handler?.MauiContext?.Services.GetService<IApiService>();
 
-                if (secureStorage != null && apiService != null)
+                if (secureStorage != null && authStateService != null && apiService != null)
                 {
                     // Appeler l'API pour déconnecter
                     await apiService.LogoutAsync();
 
                     // Supprimer les données locales
                     await secureStorage.ClearAllAsync();
+
+                    // Effacer l'état d'authentification centralisé
+                    await authStateService.ClearStateAsync();
 
                     // Mettre à jour l'UI
                     UpdateAuthenticationUI(false);
@@ -194,14 +202,18 @@ namespace mobile
         {
             base.OnNavigated(args);
 
-            // Mettre à jour l'UI à chaque navigation
-            var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-            if (secureStorage != null)
+            // Ne pas mettre à jour la title bar si on est sur le splash
+            bool isOnSplash = args.Current?.Location?.OriginalString?.Contains("splash") ?? false;
+
+            // Mettre à jour l'UI à chaque navigation (utilise l'état centralisé)
+            var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
+            if (authStateService != null)
             {
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    var isAuthenticated = await secureStorage.IsAuthenticatedAsync();
-                    UpdateAuthenticationUI(isAuthenticated);
+                    var isAuthenticated = await authStateService.IsAuthenticatedAsync();
+                    // Ne pas mettre à jour la title bar pendant le splash
+                    UpdateAuthenticationUI(isAuthenticated, updateTitleBar: !isOnSplash);
                 });
             }
         }
@@ -236,9 +248,9 @@ namespace mobile
             await toast.Show(cts.Token);
         }
 
-        private void SfSegmentedControl_SelectionChanged(object sender, Syncfusion.Maui.Toolkit.SegmentedControl.SelectionChangedEventArgs e)
+        private void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
         {
-            Application.Current!.UserAppTheme = e.NewIndex == 0 ? AppTheme.Light : AppTheme.Dark;
+            Application.Current!.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
         }
     }
 }

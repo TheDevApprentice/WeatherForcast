@@ -13,10 +13,10 @@ namespace mobile.PageModels
         public MainPageModel(ISecureStorageService secureStorage)
         {
             _secureStorage = secureStorage;
-            LoadUserInfo();
+            _ = LoadUserInfoAsync(); // Fire and forget avec intention claire
         }
 
-        private async void LoadUserInfo()
+        private async Task LoadUserInfoAsync()
         {
             var userInfo = await _secureStorage.GetUserInfoAsync();
             WelcomeMessage = $"Bienvenue {userInfo.FirstName} {userInfo.LastName} !";

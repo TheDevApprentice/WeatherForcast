@@ -8,6 +8,11 @@
         "DebugTarget": "Container (Dockerfile)"
       },
       {
+        "Path": "application\\application.csproj",
+        "Action": "Start",
+        "DebugTarget": "Container (Dockerfile)"
+      },
+      {
         "Path": "mobile\\mobile.csproj",
         "Action": "Start",
         "DebugTarget": "Windows Machine"
