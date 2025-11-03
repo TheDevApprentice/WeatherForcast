@@ -32,4 +32,28 @@
         </Tab>
     </TabBar>
 
+    <!-- Page de connexion (hors TabBar, accessible via navigation) -->
+    <ShellContent
+        x:Name="LoginItem"
+        Title="Connexion"
+        ContentTemplate="{DataTemplate auth:LoginPage}"
+        Route="login"
+        Shell.TabBarIsVisible="False" />
+
+    <!-- Page d'inscription (hors TabBar, accessible via navigation) -->
+    <ShellContent
+        x:Name="RegisterItem"
+        Title="Inscription"
+        ContentTemplate="{DataTemplate auth:RegisterPage}"
+        Route="register"
+        Shell.TabBarIsVisible="False" />
+
+    <!-- Page de splash (hors TabBar, accessible via navigation) -->
+    <ShellContent
+        x:Name="SplashItem"
+        Title="Chargement"
+        ContentTemplate="{DataTemplate pages:SplashPage}"
+        Route="splash"
+        Shell.TabBarIsVisible="False" />
+
 </Shell>
