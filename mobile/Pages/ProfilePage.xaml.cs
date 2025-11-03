@@ -67,6 +67,37 @@ namespace mobile.Pages
         {
             double y = e.ScrollY;
 
+            // Elastic stretch on pull-to-stretch (overscroll at top)
+            if (y <= 0)
+            {
+                double pull = -y;
+                if (HeaderBackground != null)
+                {
+                    double stretchY = 1 + Math.Min(pull / 600.0, 0.12); // max +12%
+                    HeaderBackground.ScaleY = stretchY;
+                    HeaderBackground.TranslationY = -pull * 0.15; // keep gradient attached to the top
+                }
+                if (AvatarContainer != null)
+                {
+                    AvatarContainer.TranslationY = pull * 0.25;
+                    AvatarContainer.Scale = 1 + Math.Min(pull / 900.0, 0.08); // subtle
+                }
+            }
+            else
+            {
+                // Reset elastic transforms when scrolling down
+                if (HeaderBackground != null)
+                {
+                    HeaderBackground.ScaleY = 1;
+                    HeaderBackground.TranslationY = 0;
+                }
+                if (AvatarContainer != null)
+                {
+                    AvatarContainer.TranslationY = 0;
+                    AvatarContainer.Scale = 1;
+                }
+            }
+
             // Parallax du header
             if (HeaderGrid != null)
             {
@@ -114,7 +145,7 @@ namespace mobile.Pages
                 while (!token.IsCancellationRequested)
                 {
                     // rotation continue très lente
-                    await AvatarRing.RotateTo(360, 16000u, Easing.Linear);
+                    await AvatarRing.RotateTo(360, 12000u, Easing.Linear);
                     AvatarRing.Rotation = 0;
                 }
             }
@@ -156,7 +187,7 @@ namespace mobile.Pages
             void start()
             {
                 this.AbortAnimation("HeaderGradientAnim");
-                animation.Commit(this, "HeaderGradientAnim", rate: 16, length: 20000u, easing: Easing.Linear,
+                animation.Commit(this, "HeaderGradientAnim", rate: 16, length: 14000u, easing: Easing.Linear,
                     finished: (v, c) => { },
                     repeat: () =>
                     {

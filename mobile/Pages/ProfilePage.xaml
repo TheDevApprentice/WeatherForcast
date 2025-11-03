@@ -12,14 +12,15 @@
             <!-- Header avec gradient Fluent -->
             <Grid x:Name="HeaderGrid" RowDefinitions="180,Auto" Margin="0,0,0,20">
                 <!-- Gradient background -->
-                <Border Grid.RowSpan="2"
+                <Border x:Name="HeaderBackground" Grid.RowSpan="2"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 0,0,32,32">
                     <Border.Background>
                         <!-- Animatable gradient (different Light/Dark palettes) -->
                         <LinearGradientBrush x:Name="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop x:Name="HeaderGradStop1" Color="{AppThemeBinding Light=#4F46E5, Dark=#0EA5E9}" Offset="0.0" />
-                            <GradientStop x:Name="HeaderGradStop2" Color="{AppThemeBinding Light=#06B6D4, Dark=#8B5CF6}" Offset="1.0" />
+                            <!-- Plus violet (moins bleu) -->
+                            <GradientStop x:Name="HeaderGradStop1" Color="{AppThemeBinding Light=#6D28D9, Dark=#7C3AED}" Offset="0.0" />
+                            <GradientStop x:Name="HeaderGradStop2" Color="{AppThemeBinding Light=#C4B5FD, Dark=#5B21B6}" Offset="1.0" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
@@ -38,8 +39,9 @@
                                 StrokeShape="RoundRectangle 60">
                             <Border.Background>
                                 <LinearGradientBrush x:Name="RingGradient" StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop x:Name="RingStop1" Color="{AppThemeBinding Light=#FFFFFF, Dark=#94A3B8}" Offset="0.0" />
-                                    <GradientStop x:Name="RingStop2" Color="{AppThemeBinding Light=#93C5FD, Dark=#60A5FA}" Offset="1.0" />
+                                    <!-- Plus clair / moins saturé -->
+                                    <GradientStop x:Name="RingStop1" Color="{AppThemeBinding Light=#EDE9FE, Dark=#A78BFA}" Offset="0.0" />
+                                    <GradientStop x:Name="RingStop2" Color="{AppThemeBinding Light=#C4B5FD, Dark=#7C3AED}" Offset="1.0" />
                                 </LinearGradientBrush>
                             </Border.Background>
                             <Border.Shadow>
