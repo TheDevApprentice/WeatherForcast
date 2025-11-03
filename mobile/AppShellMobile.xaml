@@ -11,21 +11,21 @@
     <!-- TabBar pour iOS et Android avec style moderne -->
     <TabBar>
         <!-- Tab Dashboard -->
-        <Tab Title="Dashboard" Icon="{StaticResource IconDashboard}">
+        <Tab Title="Dashboard" >
             <ShellContent
                 ContentTemplate="{DataTemplate pages:MainPage}"
                 Route="main" />
         </Tab>
 
         <!-- Tab Prévisions -->
-        <Tab Title="Prévisions" Icon="{StaticResource IconForecasts}">
+        <Tab Title="Prévisions" >
             <ShellContent
                 ContentTemplate="{DataTemplate pages:ForecastsPage}"
                 Route="forecasts" />
         </Tab>
 
         <!-- Tab Profil -->
-        <Tab Title="Profil" Icon="{StaticResource IconProfile}">
+        <Tab Title="Profil" >
             <ShellContent
                 ContentTemplate="{DataTemplate pages:ProfilePage}"
                 Route="profile" />
