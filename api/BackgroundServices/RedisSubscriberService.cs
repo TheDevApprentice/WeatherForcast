@@ -114,8 +114,19 @@ namespace api.BackgroundServices
                     return;
                 }
 
+                // Options de désérialisation pour gérer les propriétés privées
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    IncludeFields = true
+                };
+                
+                var forecastJson = root.GetProperty("Forecast").GetRawText();
+                _logger.LogDebug("📋 JSON à désérialiser: {Json}", forecastJson);
+                
                 var forecast = JsonSerializer.Deserialize<WeatherForecast>(
-                    root.GetProperty("Forecast").GetRawText());
+                    forecastJson,
+                    options);
 
                 if (forecast != null)
                 {
@@ -124,6 +135,8 @@ namespace api.BackgroundServices
                         sourceApp,
                         ChannelForecastCreated,
                         forecast.Id);
+                    _logger.LogDebug("✅ Forecast désérialisé: Id={Id}, Date={Date}, Summary={Summary}", 
+                        forecast.Id, forecast.Date, forecast.Summary);
 
                     // Broadcaster via SignalR vers tous les clients connectés à l'API
                     await _hubContext.Clients.All.SendAsync("ForecastCreated", forecast);
@@ -157,8 +170,19 @@ namespace api.BackgroundServices
                     return;
                 }
 
+                // Options de désérialisation pour gérer les propriétés privées
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    IncludeFields = true
+                };
+                
+                var forecastJson = root.GetProperty("Forecast").GetRawText();
+                _logger.LogDebug("📋 JSON à désérialiser: {Json}", forecastJson);
+                
                 var forecast = JsonSerializer.Deserialize<WeatherForecast>(
-                    root.GetProperty("Forecast").GetRawText());
+                    forecastJson,
+                    options);
 
                 if (forecast != null)
                 {
@@ -167,6 +191,8 @@ namespace api.BackgroundServices
                         sourceApp,
                         ChannelForecastUpdated,
                         forecast.Id);
+                    _logger.LogDebug("✅ Forecast désérialisé: Id={Id}, Date={Date}, Summary={Summary}", 
+                        forecast.Id, forecast.Date, forecast.Summary);
 
                     await _hubContext.Clients.All.SendAsync("ForecastUpdated", forecast);
                 }
