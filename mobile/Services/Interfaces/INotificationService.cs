@@ -39,5 +39,10 @@ namespace mobile.Services
         /// Affiche une notification pour un forecast supprimé
         /// </summary>
         Task ShowForecastDeletedAsync(int forecastId);
+
+        /// <summary>
+        /// Réinitialise le gestionnaire de notifications (force la recréation)
+        /// </summary>
+        void Reset();
     }
 }
