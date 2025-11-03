@@ -57,19 +57,19 @@
                            FontSize="24"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
+                           TextColor="{AppThemeBinding Light={StaticResource White}, Dark=White}"/>
                     
                     <!-- Email -->
                     <Label Text="{Binding UserEmail}"
                            FontSize="14"
                            HorizontalOptions="Center"
                            Opacity="0.7"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                           TextColor="{AppThemeBinding Light={StaticResource Gray100}, Dark=#8E8E93}"/>
                 </VerticalStackLayout>
             </Grid>
 
             <!-- Menu Options -->
-            <VerticalStackLayout Spacing="16" Padding="20,0">
+            <VerticalStackLayout Spacing="16" Padding="10,0">
                     
                 <!-- Card Apparence avec Fluent Design -->
                 <Border StrokeShape="RoundRectangle 12"
@@ -79,20 +79,20 @@
                     <Border.Shadow>
                         <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
                     </Border.Shadow>
-                    
-                    <Grid Padding="20,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+
+                    <Grid Padding="10,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
                         <!-- Icône -->
-                        <Border Grid.Column="0"
+                        <!--<Border Grid.Column="0"
                                 WidthRequest="40"
                                 HeightRequest="40"
                                 StrokeShape="RoundRectangle 8"
-                                BackgroundColor="{AppThemeBinding Light=#F3F3F3, Dark=#2C2C2E}"
+                        BackgroundColor="{AppThemeBinding Light=#tranparent, Dark=#tranparent}"
                                 StrokeThickness="0">
                             <Label Text="🎨"
                                    FontSize="20"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                        </Border>
+                        </Border>-->
                         
                         <!-- Texte -->
                         <VerticalStackLayout Grid.Column="1" 
@@ -119,7 +119,8 @@
                 <!-- Card Paramètres avec Fluent Design -->
                 <Border StrokeShape="RoundRectangle 12"
                         BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
-                        StrokeThickness="0">
+                        StrokeThickness="0"
+                        Padding="0">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
                     </Border.GestureRecognizers>
@@ -127,8 +128,8 @@
                         <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
                     </Border.Shadow>
                     
-                    <Grid Padding="20,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <!-- Icône -->
+                    <Grid Padding="10,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                        <!-- Icône --><!--
                         <Border Grid.Column="0"
                                 WidthRequest="40"
                                 HeightRequest="40"
@@ -139,7 +140,7 @@
                                    FontSize="20"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                        </Border>
+                        </Border>-->
                         
                         <!-- Texte -->
                         <VerticalStackLayout Grid.Column="1" 
@@ -167,50 +168,26 @@
                 
                 <!-- Card Déconnexion avec Fluent Design -->
                 <Border StrokeShape="RoundRectangle 12"
-                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+                        BackgroundColor="{AppThemeBinding Light=#E53935, Dark=#tranparent}"
                         StrokeThickness="0">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding LogoutCommand}" />
                     </Border.GestureRecognizers>
                     <Border.Shadow>
-                        <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
+                        <Shadow Brush="#E53935" Opacity="0.04" Radius="8" Offset="0,2" />
                     </Border.Shadow>
                     
-                    <Grid Padding="20,16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <!-- Icône -->
-                        <Border Grid.Column="0"
-                                WidthRequest="40"
-                                HeightRequest="40"
-                                StrokeShape="RoundRectangle 8"
-                                BackgroundColor="#FFEBEE"
-                                StrokeThickness="0">
-                            <Label Text="🚪"
-                                   FontSize="20"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center"/>
-                        </Border>
-                        
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
                         <!-- Texte -->
                         <VerticalStackLayout Grid.Column="1" 
                                            Spacing="2"
+                                             HorizontalOptions="Center"
                                            VerticalOptions="Center">
                             <Label Text="Déconnexion"
                                    FontSize="16"
                                    FontAttributes="Bold"
                                    TextColor="#E53935"/>
-                            <Label Text="Se déconnecter de l'application"
-                                   FontSize="13"
-                                   Opacity="0.6"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
                         </VerticalStackLayout>
-                        
-                        <!-- Chevron -->
-                        <Label Grid.Column="2"
-                               Text="›"
-                               FontSize="24"
-                               VerticalOptions="Center"
-                               Opacity="0.3"
-                               TextColor="#E53935"/>
                     </Grid>
                 </Border>
             </VerticalStackLayout>
