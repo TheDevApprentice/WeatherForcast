@@ -17,6 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shared", "shared\shared.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Éléments de solution", "Éléments de solution", "{9C8CB701-102D-CF49-A3E0-89AC09D42C2C}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.env = .env
 	EndProjectSection
 EndProject
@@ -56,6 +57,7 @@ Global
 		{10556B93-F6E6-48EE-BD52-D479BB5F06FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10556B93-F6E6-48EE-BD52-D479BB5F06FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10556B93-F6E6-48EE-BD52-D479BB5F06FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10556B93-F6E6-48EE-BD52-D479BB5F06FF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
