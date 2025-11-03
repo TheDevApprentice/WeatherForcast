@@ -50,7 +50,7 @@
                                FontAttributes="Bold"
                                HorizontalOptions="Center"
                                TextColor="{StaticResource Gray600}"/>
-                        <Label Text="Ajoutez votre première prévision météo !" 
+                        <Label Text="Les prévisions météo s'afficheront ici en temps réel" 
                                FontSize="14"
                                HorizontalOptions="Center"
                                HorizontalTextAlignment="Center"

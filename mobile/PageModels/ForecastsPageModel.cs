@@ -38,14 +38,13 @@ namespace mobile.PageModels
             _notificationService = notificationService;
             _errorHandler = errorHandler;
 
-            // Ne pas s'abonner ici, le faire dans OnAppearing
-            _ = InitializeAsync(); // Fire and forget avec intention claire
+            // Ne pas initialiser ici, le faire dans OnAppearing
         }
 
         /// <summary>
         /// Appelé quand la page apparaît
         /// </summary>
-        public void OnAppearing()
+        public async void OnAppearing()
         {
             if (_disposed)
             {
@@ -60,6 +59,9 @@ namespace mobile.PageModels
             _signalRService.ForecastCreated += OnForecastCreated; // Puis réabonner
             _signalRService.ForecastUpdated += OnForecastUpdated;
             _signalRService.ForecastDeleted += OnForecastDeleted;
+
+            // Initialiser la connexion SignalR et charger les données
+            await InitializeAsync();
         }
 
         /// <summary>
@@ -75,9 +77,18 @@ namespace mobile.PageModels
 
         private async Task InitializeAsync()
         {
-            // Démarrer la connexion SignalR au hub des forecasts
-            await _signalRService.StartForecastHubAsync();
+            try
+            {
+                // Démarrer la connexion SignalR au hub des forecasts
+                await _signalRService.StartForecastHubAsync();
+            }
+            catch (Exception ex)
+            {
+                // Si SignalR échoue, continuer quand même (on aura juste pas le temps réel)
+                System.Diagnostics.Debug.WriteLine($"⚠️ SignalR connection failed: {ex.Message}");
+            }
             
+            // Charger les prévisions depuis l'API (même si SignalR a échoué)
             await LoadForecastsAsync();
         }
 
@@ -90,13 +101,17 @@ namespace mobile.PageModels
                 // Récupérer les prévisions depuis l'API
                 var forecastsList = await _apiService.GetForecastsAsync();
 
-                Forecasts.Clear();
-                foreach (var forecast in forecastsList)
+                // ✅ Mettre à jour la collection sur le thread UI
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Forecasts.Add(forecast);
-                }
+                    Forecasts.Clear();
+                    foreach (var forecast in forecastsList)
+                    {
+                        Forecasts.Add(forecast);
+                    }
 
-                ForecastsCount = Forecasts.Count;
+                    ForecastsCount = Forecasts.Count;
+                });
             }
             catch (Exception ex)
             {
