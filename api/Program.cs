@@ -334,9 +334,20 @@ curl -H ""Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."" https:
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowWeb",
-                    policy => policy.AllowAnyOrigin()
-                                    .AllowAnyHeader()
-                                    .AllowAnyMethod());
+                    policy => policy
+                        .WithOrigins(
+                            "https://localhost:7252",
+                            "https://localhost:5173",
+                            "http://localhost:5173",
+                            "https://5l8qgk3c-7252.uks1.devtunnels.ms",  // Tunnel de développement
+                            "https://10.0.2.2:7252",  // Émulateur Android
+                            "capacitor://localhost",  // Capacitor (si utilisé)
+                            "ionic://localhost"       // Ionic (si utilisé)
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()  // ✅ CRITIQUE pour SignalR
+                        .SetIsOriginAllowedToAllowWildcardSubdomains());
             });
 
             // 6. Data Protection : Configuration adaptative (Dev vs Prod)
