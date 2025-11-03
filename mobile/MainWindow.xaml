@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
         xmlns:local="clr-namespace:mobile"
         x:Class="mobile.MainWindow">
-    <!-- TitleBar personnalisée (Windows et Mac uniquement) -->
+    <!-- TitleBar .NET 9 personnalisée (Windows et Mac uniquement) -->
     <Window.TitleBar>
         <TitleBar Title="☁️ WeatherForecast"
-                  Subtitle="Test"
+                  Subtitle="Prévisions météo en temps réel"
+                  Icon="appicon.png"
                   BackgroundColor="{AppThemeBinding Light=#667eea, Dark=#1C1C1E}"
                   ForegroundColor="{AppThemeBinding Light=White, Dark=White}"
                   HeightRequest="48">

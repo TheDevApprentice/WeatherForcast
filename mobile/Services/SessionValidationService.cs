@@ -37,7 +37,16 @@ namespace mobile.Services
                     return false;
                 }
 
-                _logger.LogInformation("Token trouvé, validation via API /me...");
+                // Vérifier que le token n'est pas expiré avant d'appeler l'API
+                var isTokenValid = await _secureStorage.IsTokenValidAsync();
+                if (!isTokenValid)
+                {
+                    _logger.LogWarning("❌ Token expiré, nettoyage de la session");
+                    await _secureStorage.ClearAllAsync();
+                    return false;
+                }
+
+                _logger.LogInformation("Token trouvé et valide, validation via API /me...");
 
                 // Résoudre IApiService via le ServiceProvider (évite le lifetime mismatch)
                 using var scope = _serviceProvider.CreateScope();
