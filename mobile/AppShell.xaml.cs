@@ -170,12 +170,12 @@ namespace mobile
                 // Récupérer les services
                 var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
                 var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
-                var apiService = Handler?.MauiContext?.Services.GetService<IApiService>();
+                var apiAuthService = Handler?.MauiContext?.Services.GetService<IApiAuthService>();
 
-                if (secureStorage != null && authStateService != null && apiService != null)
+                if (secureStorage != null && authStateService != null && apiAuthService != null)
                 {
                     // Appeler l'API pour déconnecter
-                    await apiService.LogoutAsync();
+                    await apiAuthService.LogoutAsync();
 
                     // Supprimer les données locales
                     await secureStorage.ClearAllAsync();

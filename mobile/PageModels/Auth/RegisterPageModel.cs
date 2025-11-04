@@ -7,7 +7,7 @@ namespace mobile.PageModels.Auth
 {
     public partial class RegisterPageModel : ObservableObject
     {
-        private readonly IApiService _apiService;
+        private readonly IApiAuthService _apiAuthService;
         private readonly ISecureStorageService _secureStorage;
         private readonly ISignalRService _signalRService;
         private readonly INotificationService _notificationService;
@@ -39,12 +39,12 @@ namespace mobile.PageModels.Auth
         public bool IsNotLoading => !IsLoading;
 
         public RegisterPageModel (
-            IApiService apiService,
+            IApiAuthService apiAuthService,
             ISecureStorageService secureStorage,
             ISignalRService signalRService,
             INotificationService notificationService)
         {
-            _apiService = apiService;
+            _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
             _signalRService = signalRService;
             _notificationService = notificationService;
@@ -82,7 +82,7 @@ namespace mobile.PageModels.Auth
                     Password = Password
                 };
 
-                var success = await _apiService.RegisterAsync(request);
+                var success = await _apiAuthService.RegisterAsync(request);
 
                 if (success)
                 {

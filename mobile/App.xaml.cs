@@ -20,6 +20,22 @@ namespace mobile
 
             // Initialiser le gestionnaire global d'exceptions
             _exceptionHandler.Initialize();
+            
+            // Initialiser le cache SQLite en arrière-plan
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var cacheService = _serviceProvider.GetRequiredService<Services.ICacheService>();
+                    await cacheService.InitializeAsync();
+                    _logger.LogInformation("💾 Cache SQLite initialisé");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ Erreur lors de l'initialisation du cache");
+                }
+            });
+            
             _logger.LogInformation("✅ Application démarrée");
         }
 

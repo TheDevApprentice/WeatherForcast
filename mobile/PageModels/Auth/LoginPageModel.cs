@@ -7,7 +7,7 @@ namespace mobile.PageModels.Auth
 {
     public partial class LoginPageModel : ObservableObject
     {
-        private readonly IApiService _apiService;
+        private readonly IApiAuthService _apiAuthService;
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
         private readonly ISavedProfilesService _savedProfiles;
@@ -43,12 +43,12 @@ namespace mobile.PageModels.Auth
         public bool ShowClassicLogin => !ShowProfileSelection && SelectedProfile == null;
 
         public LoginPageModel (
-            IApiService apiService,
+            IApiAuthService apiAuthService,
             ISecureStorageService secureStorage,
             IAuthenticationStateService authState,
             ISavedProfilesService savedProfilesService)
         {
-            _apiService = apiService;
+            _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
             _authState = authState;
             _savedProfiles = savedProfilesService;
@@ -84,7 +84,7 @@ namespace mobile.PageModels.Auth
                     Password = Password
                 };
 
-                var response = await _apiService.LoginAsync(request);
+                var response = await _apiAuthService.LoginAsync(request);
 
                 if (response != null)
                 {
@@ -93,7 +93,7 @@ namespace mobile.PageModels.Auth
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
 
                     // Récupérer l'ID utilisateur depuis l'API
-                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    var currentUser = await _apiAuthService.GetCurrentUserAsync();
 
                     if (currentUser != null)
                     {

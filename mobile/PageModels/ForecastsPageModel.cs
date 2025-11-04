@@ -8,7 +8,7 @@ namespace mobile.PageModels
 {
     public partial class ForecastsPageModel : ObservableObject, IDisposable
     {
-        private readonly IApiService _apiService;
+        private readonly IApiWeatherForecastService _apiWeatherForecastService;
         private readonly ISignalRService _signalRService;
         private readonly INotificationService _notificationService;
         private readonly IErrorHandler _errorHandler;
@@ -28,12 +28,12 @@ namespace mobile.PageModels
         private int forecastsCount;
 
         public ForecastsPageModel(
-            IApiService apiService, 
+            IApiWeatherForecastService apiWeatherForecastService,
             ISignalRService signalRService,
             INotificationService notificationService,
             IErrorHandler errorHandler)
         {
-            _apiService = apiService;
+            _apiWeatherForecastService = apiWeatherForecastService;
             _signalRService = signalRService;
             _notificationService = notificationService;
             _errorHandler = errorHandler;
@@ -106,7 +106,7 @@ namespace mobile.PageModels
                 IsRefreshing = true;
 
                 // Récupérer les prévisions depuis l'API
-                var forecastsList = await _apiService.GetForecastsAsync();
+                var forecastsList = await _apiWeatherForecastService.GetForecastsAsync();
 
                 // ✅ Mettre à jour la collection sur le thread UI
                 await MainThread.InvokeOnMainThreadAsync(() =>

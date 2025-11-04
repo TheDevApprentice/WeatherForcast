@@ -48,12 +48,12 @@ namespace mobile.Services
 
                 _logger.LogInformation("Token trouvé et valide, validation via API /me...");
 
-                // Résoudre IApiService via le ServiceProvider (évite le lifetime mismatch)
+                // Résoudre IApiAuthService via le ServiceProvider (évite le lifetime mismatch)
                 using var scope = _serviceProvider.CreateScope();
-                var apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+                var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
 
                 // Appeler l'API /me
-                var currentUser = await apiService.GetCurrentUserAsync();
+                var currentUser = await apiAuthService.GetCurrentUserAsync();
 
                 if (currentUser != null)
                 {

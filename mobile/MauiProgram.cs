@@ -9,7 +9,7 @@ namespace mobile
 {
     public static class MauiProgram
     {
-        public static MauiApp CreateMauiApp()
+        public static MauiApp CreateMauiApp ()
         {
             var builder = MauiApp.CreateBuilder();
             builder
@@ -67,7 +67,10 @@ namespace mobile
 
             // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
-            
+
+            // Service de cache local (SQLite)
+            builder.Services.AddSingleton<ICacheService, CacheService>();
+
             // Services API spécialisés (ISP - Interface Segregation Principle)
             builder.Services.AddHttpClient<IApiAuthService, ApiAuthService>((serviceProvider, client) =>
             {
@@ -77,7 +80,8 @@ namespace mobile
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
-            builder.Services.AddHttpClient<IApiWeatherForecastService, ApiWeatherForecastService>((serviceProvider, client) =>
+            // Service API WeatherForecast de base (sans cache)
+            builder.Services.AddHttpClient<ApiWeatherForecastService>((serviceProvider, client) =>
             {
                 var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
                 client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
@@ -85,14 +89,15 @@ namespace mobile
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
-            // Service API combiné (pour compatibilité ascendante - obsolète)
-            builder.Services.AddHttpClient<IApiService, ApiService>((serviceProvider, client) =>
+            // Service API WeatherForecast avec cache (Decorator Pattern)
+            builder.Services.AddSingleton<IApiWeatherForecastService>(sp =>
             {
-                var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
-                client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
-                client.Timeout = TimeSpan.FromSeconds(30);
-            })
-            .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+                var innerService = sp.GetRequiredService<ApiWeatherForecastService>();
+                var cacheService = sp.GetRequiredService<ICacheService>();
+                var logger = sp.GetRequiredService<ILogger<ApiWeatherForecastServiceWithCache>>();
+
+                return new ApiWeatherForecastServiceWithCache(innerService, cacheService, logger);
+            });
 
             // Page de démarrage (Splash)
             builder.Services.AddTransient<SplashPage>();

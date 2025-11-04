@@ -66,13 +66,4 @@ namespace mobile.Services
         /// </summary>
         Task<bool> DeleteForecastAsync(int id);
     }
-
-    /// <summary>
-    /// Interface combinée pour compatibilité ascendante
-    /// À utiliser uniquement pendant la migration
-    /// </summary>
-    [Obsolete("Utilisez IApiAuthService et IApiWeatherForecastService à la place")]
-    public interface IApiService : IApiAuthService, IApiWeatherForecastService
-    {
-    }
 }

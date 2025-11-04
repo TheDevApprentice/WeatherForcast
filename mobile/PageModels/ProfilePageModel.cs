@@ -110,12 +110,12 @@ namespace mobile.PageModels
                 {
                     // Récupérer les services nécessaires
                     var secureStorage = Shell.Current.Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-                    var apiService = Shell.Current.Handler?.MauiContext?.Services.GetService<IApiService>();
+                    var apiAuthService = Shell.Current.Handler?.MauiContext?.Services.GetService<IApiAuthService>();
 
-                    if (secureStorage != null && apiService != null)
+                    if (secureStorage != null && apiAuthService != null)
                     {
                         // Appeler l'API pour déconnecter
-                        await apiService.LogoutAsync();
+                        await apiAuthService.LogoutAsync();
 
                         // Supprimer les données locales
                         await secureStorage.ClearAllAsync();

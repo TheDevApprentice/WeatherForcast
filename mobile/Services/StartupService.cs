@@ -10,7 +10,7 @@ namespace mobile.Services
     public class StartupService : IStartupService
     {
         private readonly ILogger<StartupService> _logger;
-        private readonly IApiService _apiService;
+        private readonly IApiAuthService _apiAuthService;
         private readonly ISessionValidationService _sessionValidation;
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
@@ -30,7 +30,7 @@ namespace mobile.Services
 
             // Résoudre les services via ServiceProvider pour éviter les problèmes de lifetime
             using var scope = serviceProvider.CreateScope();
-            _apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+            _apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
             _sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
 
             // Initialiser la queue de procédures
@@ -166,12 +166,12 @@ namespace mobile.Services
                 {
                     _logger.LogInformation("Tentative {Attempt}/{Max} de connexion à l'API...", attempt, maxRetries);
 
-                    // Utiliser le ServiceProvider pour créer un scope et résoudre IApiService
+                    // Utiliser le ServiceProvider pour créer un scope et résoudre IApiAuthService
                     using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
-                    var apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+                    var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
 
                     // Tenter un appel simple à l'API (par exemple, /me sans authentification)
-                    var user = await apiService.GetCurrentUserAsync();
+                    var user = await apiAuthService.GetCurrentUserAsync();
 
                     // Si on arrive ici sans exception, l'API est joignable
                     _logger.LogInformation("API joignable");
@@ -233,7 +233,7 @@ namespace mobile.Services
                 // Valider la session via l'API
                 using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
                 var sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
-                var apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+                var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
                 
                 var isValid = await sessionValidation.ValidateSessionAsync();
 
@@ -247,7 +247,7 @@ namespace mobile.Services
 
                 // Session valide : récupérer les infos utilisateur et sauvegarder l'état
                 _logger.LogInformation("Session valide, récupération des informations utilisateur...");
-                var currentUser = await apiService.GetCurrentUserAsync();
+                var currentUser = await apiAuthService.GetCurrentUserAsync();
 
                 if (currentUser != null)
                 {
