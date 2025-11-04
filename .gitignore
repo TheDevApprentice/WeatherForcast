@@ -77,3 +77,5 @@ keys/
 # # Thumbprints et secrets
 # thumbprint.txt
 # **/secrets/
+
+*.keystore
