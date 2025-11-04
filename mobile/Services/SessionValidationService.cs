@@ -11,7 +11,7 @@ namespace mobile.Services
         private readonly ISecureStorageService _secureStorage;
         private readonly ILogger<SessionValidationService> _logger;
 
-        public SessionValidationService(
+        public SessionValidationService (
             IServiceProvider serviceProvider,
             ISecureStorageService secureStorage,
             ILogger<SessionValidationService> logger)
@@ -25,7 +25,7 @@ namespace mobile.Services
         /// Valide la session en appelant l'API /me
         /// Retourne true si la session est valide, false sinon
         /// </summary>
-        public async Task<bool> ValidateSessionAsync()
+        public async Task<bool> ValidateSessionAsync ()
         {
             try
             {
@@ -67,7 +67,7 @@ namespace mobile.Services
             catch (HttpRequestException ex)
             {
                 // Erreur réseau : impossible de valider, on déconnecte par sécurité
-                _logger.LogError(ex, "❌ Erreur réseau lors de la validation, déconnexion par sécurité");
+                _logger.LogError(ex, "❌ Erreur réseau lors de la validation");
                 return false;
             }
             catch (Exception ex)
@@ -80,7 +80,7 @@ namespace mobile.Services
         /// <summary>
         /// Nettoie la session (supprime le token)
         /// </summary>
-        public async Task ClearSessionAsync()
+        public async Task ClearSessionAsync ()
         {
             try
             {

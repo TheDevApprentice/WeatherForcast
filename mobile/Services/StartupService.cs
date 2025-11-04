@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using mobile.Models;
+using mobile.Exceptions;
 using System.Net.NetworkInformation;
 
 namespace mobile.Services
@@ -18,7 +18,7 @@ namespace mobile.Services
 
         public IReadOnlyList<StartupProcedure> Procedures => _procedures.AsReadOnly();
 
-        public StartupService(
+        public StartupService (
             ILogger<StartupService> logger,
             IServiceProvider serviceProvider,
             ISecureStorageService secureStorage,
@@ -60,7 +60,7 @@ namespace mobile.Services
         /// <summary>
         /// Exécute toutes les procédures de démarrage dans l'ordre
         /// </summary>
-        public async Task<bool> ExecuteStartupProceduresAsync(IProgress<StartupProcedure> progress)
+        public async Task<bool> ExecuteStartupProceduresAsync (IProgress<StartupProcedure> progress)
         {
             _logger.LogInformation("🚀 Début des procédures de démarrage");
 
@@ -120,7 +120,7 @@ namespace mobile.Services
         /// <summary>
         /// Procédure 1: Vérifier la connectivité réseau
         /// </summary>
-        private async Task<StartupProcedureResult> CheckNetworkConnectivityAsync()
+        private async Task<StartupProcedureResult> CheckNetworkConnectivityAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
             await Task.Delay(2000);
@@ -152,7 +152,7 @@ namespace mobile.Services
         /// <summary>
         /// Procédure 2: Vérifier la disponibilité de l'API (avec retry)
         /// </summary>
-        private async Task<StartupProcedureResult> CheckApiAvailabilityAsync()
+        private async Task<StartupProcedureResult> CheckApiAvailabilityAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
             await Task.Delay(2000);
@@ -166,18 +166,17 @@ namespace mobile.Services
                 {
                     _logger.LogInformation("Tentative {Attempt}/{Max} de connexion à l'API...", attempt, maxRetries);
 
-                    // Utiliser le ServiceProvider pour créer un scope et résoudre IApiAuthService
+                    // Essayer de valider via l'API (mode online)
                     using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
                     var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
 
-                    // Tenter un appel simple à l'API (par exemple, /me sans authentification)
-                    var user = await apiAuthService.GetCurrentUserAsync();
+                    await apiAuthService.CheckApiAvailabilityAsync();
 
                     // Si on arrive ici sans exception, l'API est joignable
                     _logger.LogInformation("API joignable");
                     return StartupProcedureResult.Ok();
                 }
-                catch (HttpRequestException ex)
+                catch (ApiUnavailableException ex)
                 {
                     _logger.LogWarning("Tentative {Attempt}/{Max} échouée: {Message}", attempt, maxRetries, ex.Message);
 
@@ -185,7 +184,7 @@ namespace mobile.Services
                     {
                         return StartupProcedureResult.Fail(
                             "L'API n'est pas joignable. Veuillez vérifier que le serveur est démarré.",
-                            canContinue: false);
+                            canContinue: true);
                     }
 
                     // Attendre avant de réessayer
@@ -212,9 +211,9 @@ namespace mobile.Services
         }
 
         /// <summary>
-        /// Procédure 3: Valider la session utilisateur
+        /// Procédure 3: Valider la session utilisateur (avec support offline)
         /// </summary>
-        private async Task<StartupProcedureResult> ValidateUserSessionAsync()
+        private async Task<StartupProcedureResult> ValidateUserSessionAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
             await Task.Delay(2000);
@@ -230,40 +229,93 @@ namespace mobile.Services
                     return StartupProcedureResult.Ok(); // Pas d'erreur, juste pas de session
                 }
 
-                // Valider la session via l'API
+                // Vérifier d'abord si le token est valide localement (non expiré)
+                var isTokenValid = await _secureStorage.IsTokenValidAsync();
+
+                if (!isTokenValid)
+                {
+                    _logger.LogWarning("❌ Token expiré, nettoyage de la session");
+                    await _secureStorage.ClearAllAsync();
+                    await _authState.ClearStateAsync();
+                    return StartupProcedureResult.Ok(); // Token expiré, redirection vers login
+                }
+
+                _logger.LogInformation("✅ Token valide localement");
+
+                // Essayer de valider via l'API (mode online)
                 using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
                 var sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
                 var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
-                
-                var isValid = await sessionValidation.ValidateSessionAsync();
 
-                if (!isValid)
+                try
                 {
-                    _logger.LogWarning("Session invalide, nettoyage...");
-                    await sessionValidation.ClearSessionAsync();
-                    await _authState.ClearStateAsync();
-                    return StartupProcedureResult.Ok(); // Pas d'erreur, juste session invalide
+                    // Vérifier d'abord si l'API est joignable
+                    await apiAuthService.CheckApiAvailabilityAsync();
+
+                    // API joignable, valider la session
+                    var isValid = await sessionValidation.ValidateSessionAsync();
+
+                    if (!isValid)
+                    {
+                        _logger.LogWarning("❌ Session invalide selon l'API, nettoyage...");
+                        await sessionValidation.ClearSessionAsync();
+                        await _authState.ClearStateAsync();
+                        return StartupProcedureResult.Ok(); // Session invalide, redirection vers login
+                    }
+
+                    // Session valide : récupérer les infos utilisateur depuis l'API
+                    _logger.LogInformation("✅ Session valide (mode online)");
+                    var currentUser = await apiAuthService.GetCurrentUserAsync();
+
+                    if (currentUser != null)
+                    {
+                        // Sauvegarder l'état d'authentification
+                        var authState = AuthenticationState.Authenticated(
+                            currentUser.Id,
+                            currentUser.Email,
+                            currentUser.FirstName,
+                            currentUser.LastName
+                        );
+
+                        await _authState.SetStateAsync(authState);
+                        _logger.LogInformation("État d'authentification sauvegardé pour {Email}", currentUser.Email);
+                    }
+
+                    return StartupProcedureResult.Ok();
                 }
-
-                // Session valide : récupérer les infos utilisateur et sauvegarder l'état
-                _logger.LogInformation("Session valide, récupération des informations utilisateur...");
-                var currentUser = await apiAuthService.GetCurrentUserAsync();
-
-                if (currentUser != null)
+                catch (ApiUnavailableException ex)
                 {
-                    // Sauvegarder l'état d'authentification
-                    var authState = AuthenticationState.Authenticated(
-                        currentUser.Id,
-                        currentUser.Email,
-                        currentUser.FirstName,
-                        currentUser.LastName
-                    );
+                    // API non joignable, mais token valide localement -> Mode offline
+                    _logger.LogWarning(ex, "📡 API non joignable, activation du mode offline");
 
-                    await _authState.SetStateAsync(authState);
-                    _logger.LogInformation("État d'authentification sauvegardé pour {Email}", currentUser.Email);
+                    // Extraire les infos du token JWT pour authentification offline
+                    var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
+
+                    if (userInfo.HasValue)
+                    {
+                        var (userId, email, firstName, lastName) = userInfo.Value;
+
+                        // Sauvegarder l'état d'authentification en mode offline
+                        var authState = AuthenticationState.Authenticated(
+                            userId,
+                            email,
+                            firstName,
+                            lastName
+                        );
+
+                        await _authState.SetStateAsync(authState);
+                        _logger.LogInformation("✅ Authentification offline réussie pour {Email}", email);
+
+                        return StartupProcedureResult.Ok();
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ Impossible d'extraire les infos du token");
+                        await _secureStorage.ClearAllAsync();
+                        await _authState.ClearStateAsync();
+                        return StartupProcedureResult.Ok();
+                    }
                 }
-
-                return StartupProcedureResult.Ok();
             }
             catch (Exception ex)
             {

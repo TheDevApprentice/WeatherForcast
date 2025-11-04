@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using mobile.Exceptions;
 using mobile.Models.DTOs;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -91,7 +92,6 @@ namespace mobile.Services
 #endif
 
             var response = await _httpClient.GetAsync("/api/auth/validate");
-
             if (response.IsSuccessStatusCode)
             {
 #if DEBUG
@@ -119,13 +119,13 @@ namespace mobile.Services
 
             if (response.IsSuccessStatusCode)
             {
-                var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
-                
+            var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
+            
 #if DEBUG
-                _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);
+            _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);
 #endif
-                
-                return user;
+            
+            return user;
             }
 
 #if DEBUG
@@ -157,6 +157,51 @@ namespace mobile.Services
             _logger.LogWarning("❌ Échec déconnexion: {StatusCode}", response.StatusCode);
 #endif
             return false;
+        }
+
+        /// <summary>
+        /// Vérifie si l'API est joignable
+        /// Lève ApiUnavailableException si l'API n'est pas accessible (502, timeout, connexion refusée, etc.)
+        /// Retourne true si l'API est joignable (même si le token est invalide - 401)
+        /// </summary>
+        public async Task<bool> CheckApiAvailabilityAsync()
+        {
+            try
+            {
+#if DEBUG
+                _logger.LogDebug("🔍 Vérification disponibilité API...");
+#endif
+
+                var response = await _httpClient.GetAsync("/api/auth/me");
+
+                // Vérifier les codes d'erreur réseau/serveur
+                if ((int)response.StatusCode >= 500) // 5xx = Erreur serveur
+                {
+                    throw new ApiUnavailableException(
+                        $"API inaccessible - Code {response.StatusCode}");
+                }
+
+                // 401 Unauthorized = API joignable mais token invalide → OK
+                // 2xx Success = API joignable et token valide → OK
+                // 4xx Client Error (sauf 401) = API joignable → OK
+                
+#if DEBUG
+                _logger.LogDebug("✅ API joignable (Status: {StatusCode})", response.StatusCode);
+#endif
+                return true;
+            }
+            catch (HttpRequestException ex)
+            {
+                // Erreur réseau : timeout, connexion refusée, etc.
+                _logger.LogWarning(ex, "📡 API non joignable - Erreur réseau");
+                throw new ApiUnavailableException("API non joignable - Erreur réseau", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                // Timeout
+                _logger.LogWarning(ex, "⏱️ API non joignable - Timeout");
+                throw new ApiUnavailableException("API non joignable - Timeout", ex);
+            }
         }
     }
 }

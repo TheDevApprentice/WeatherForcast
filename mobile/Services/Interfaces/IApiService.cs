@@ -33,6 +33,13 @@ namespace mobile.Services
         /// Déconnecte l'utilisateur
         /// </summary>
         Task<bool> LogoutAsync();
+
+        /// <summary>
+        /// Vérifie si l'API est joignable
+        /// Lève ApiUnavailableException si l'API n'est pas accessible (502, timeout, etc.)
+        /// Retourne true si l'API est joignable (même si le token est invalide)
+        /// </summary>
+        Task<bool> CheckApiAvailabilityAsync();
     }
 
     /// <summary>

@@ -115,6 +115,46 @@ namespace mobile.Services
             return (email, firstName, lastName);
         }
 
+        /// <summary>
+        /// Extrait les informations utilisateur du token JWT (pour authentification offline)
+        /// </summary>
+        public async Task<(string UserId, string Email, string FirstName, string LastName)?> GetUserInfoFromTokenAsync()
+        {
+            try
+            {
+                var token = await GetTokenAsync();
+                
+                if (string.IsNullOrEmpty(token))
+                {
+                    return null;
+                }
+
+                var handler = new JwtSecurityTokenHandler();
+                
+                if (!handler.CanReadToken(token))
+                {
+                    return null;
+                }
+
+                var jwtToken = handler.ReadJwtToken(token);
+                
+                // Extraire les claims
+                var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "nameid")?.Value ?? string.Empty;
+                var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value ?? string.Empty;
+                var firstName = jwtToken.Claims.FirstOrDefault(c => c.Type == "given_name")?.Value ?? string.Empty;
+                var lastName = jwtToken.Claims.FirstOrDefault(c => c.Type == "family_name")?.Value ?? string.Empty;
+                
+                _logger.LogDebug("Extracted user info from token: UserId={UserId}, Email={Email}", userId, email);
+                
+                return (userId, email, firstName, lastName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting user info from JWT token");
+                return null;
+            }
+        }
+
         public async Task ClearAllAsync()
         {
             SecureStorage.Remove(TOKEN_KEY);

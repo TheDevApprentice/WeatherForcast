@@ -15,6 +15,11 @@ namespace mobile.Services
         /// </summary>
         Task<bool> IsTokenValidAsync();
         
+        /// <summary>
+        /// Extrait les informations utilisateur du token JWT (pour authentification offline)
+        /// </summary>
+        Task<(string UserId, string Email, string FirstName, string LastName)?> GetUserInfoFromTokenAsync();
+        
         Task SaveUserInfoAsync(string email, string firstName, string lastName);
         Task<(string Email, string FirstName, string LastName)> GetUserInfoAsync();
         Task ClearAllAsync();
