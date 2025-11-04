@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace mobile.Services
+namespace mobile.Services.Handlers
 {
     /// <summary>
     /// Gestionnaire d'erreurs avec affichage modal
@@ -10,7 +10,7 @@ namespace mobile.Services
         private readonly ILogger<ModalErrorHandler> _logger;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        public ModalErrorHandler(ILogger<ModalErrorHandler> logger)
+        public ModalErrorHandler (ILogger<ModalErrorHandler> logger)
         {
             _logger = logger;
         }
@@ -18,7 +18,7 @@ namespace mobile.Services
         /// <summary>
         /// Gère une erreur et l'affiche à l'utilisateur (synchrone)
         /// </summary>
-        public void HandleError(Exception ex)
+        public void HandleError (Exception ex)
         {
             _logger.LogError(ex, "❌ Erreur capturée: {Message}", ex.Message);
             // Fire and forget - ne pas attendre la tâche
@@ -28,10 +28,10 @@ namespace mobile.Services
         /// <summary>
         /// Gère une erreur de manière asynchrone
         /// </summary>
-        public async Task HandleErrorAsync(Exception ex, string? context = null)
+        public async Task HandleErrorAsync (Exception ex, string? context = null)
         {
             _logger.LogError(ex, "❌ Erreur capturée ({Context}): {Message}", context ?? "Unknown", ex.Message);
-            
+
             var userMessage = GetUserFriendlyMessage(ex);
             await DisplayAlertAsync("Erreur", userMessage);
         }
@@ -39,7 +39,7 @@ namespace mobile.Services
         /// <summary>
         /// Gère une erreur avec un message personnalisé
         /// </summary>
-        public async Task HandleErrorWithMessageAsync(Exception ex, string userMessage)
+        public async Task HandleErrorWithMessageAsync (Exception ex, string userMessage)
         {
             _logger.LogError(ex, "❌ Erreur capturée: {Message}", ex.Message);
             await DisplayAlertAsync("Erreur", userMessage);
@@ -48,7 +48,7 @@ namespace mobile.Services
         /// <summary>
         /// Log une erreur sans afficher de message
         /// </summary>
-        public void LogError(Exception ex, string? context = null)
+        public void LogError (Exception ex, string? context = null)
         {
             _logger.LogError(ex, "❌ Erreur loggée ({Context}): {Message}", context ?? "Unknown", ex.Message);
         }
@@ -56,7 +56,7 @@ namespace mobile.Services
         /// <summary>
         /// Affiche une alerte modale
         /// </summary>
-        private async Task DisplayAlertAsync(string title, string message)
+        private async Task DisplayAlertAsync (string title, string message)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace mobile.Services
         /// <summary>
         /// Convertit une exception en message utilisateur-friendly
         /// </summary>
-        private string GetUserFriendlyMessage(Exception ex)
+        private string GetUserFriendlyMessage (Exception ex)
         {
             return ex switch
             {
