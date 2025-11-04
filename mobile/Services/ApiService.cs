@@ -1,218 +1,59 @@
-using Microsoft.Extensions.Logging;
 using mobile.Models;
 using mobile.Models.DTOs;
-using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace mobile.Services
 {
     /// <summary>
-    /// Service pour les appels API REST
+    /// Service combiné pour compatibilité ascendante
+    /// Délègue aux services spécialisés ApiAuthService et ApiWeatherForecastService
     /// </summary>
+    [Obsolete("Utilisez IApiAuthService et IApiWeatherForecastService à la place")]
     public class ApiService : IApiService
     {
-        private readonly HttpClient _httpClient;
-        private readonly ILogger<ApiService> _logger;
-        private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IApiAuthService _authService;
+        private readonly IApiWeatherForecastService _forecastService;
 
-        public ApiService(HttpClient httpClient, ILogger<ApiService> logger)
+        public ApiService(IApiAuthService authService, IApiWeatherForecastService forecastService)
         {
-            _httpClient = httpClient;
-            _logger = logger;
-
-            _jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
+            _authService = authService;
+            _forecastService = forecastService;
         }
 
-        #region Authentification
+        #region Authentification - Délégation à ApiAuthService
 
-        public async Task<AuthResponse?> LoginAsync(LoginRequest request)
-        {
-#if DEBUG
-            _logger.LogDebug("Tentative de connexion pour {Email}", request.Email);
-#endif
+        public Task<AuthResponse?> LoginAsync(LoginRequest request)
+            => _authService.LoginAsync(request);
 
-            // Le middleware ErrorHandlingMiddleware gère automatiquement les erreurs HTTP
-            // et les transforme en exceptions typées (NetworkException, AuthenticationException, etc.)
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
+        public Task<bool> RegisterAsync(RegisterRequest request)
+            => _authService.RegisterAsync(request);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
-                
-#if DEBUG
-                _logger.LogDebug("Connexion réussie pour {Email}", request.Email);
-#endif
-                
-                return authResponse;
-            }
+        public Task<bool> ValidateTokenAsync()
+            => _authService.ValidateTokenAsync();
 
-            _logger.LogWarning("Échec de la connexion: {StatusCode}", response.StatusCode);
-            return null;
-        }
+        public Task<CurrentUserResponse?> GetCurrentUserAsync()
+            => _authService.GetCurrentUserAsync();
 
-        public async Task<bool> RegisterAsync(RegisterRequest request)
-        {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Inscription réussie pour {Email}", request.Email);
-                    return true;
-                }
-
-                _logger.LogWarning("Échec de l'inscription: {StatusCode}", response.StatusCode);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de l'inscription");
-                throw;
-            }
-        }
-
-        public async Task<bool> ValidateTokenAsync()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync("/api/auth/me");
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la validation du token");
-                return false;
-            }
-        }
-
-        public async Task<CurrentUserResponse?> GetCurrentUserAsync()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync("/api/auth/me");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
-                    _logger.LogInformation("Utilisateur récupéré: {Email}", user?.Email);
-                    return user;
-                }
-
-                _logger.LogWarning("Échec de la récupération de l'utilisateur: {StatusCode}", response.StatusCode);
-                return null;
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogWarning(ex, "Erreur réseau lors de la récupération de l'utilisateur");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la récupération de l'utilisateur");
-                return null;
-            }
-        }
-
-        public async Task<bool> LogoutAsync()
-        {
-            try
-            {
-                var response = await _httpClient.PostAsync("/api/auth/logout", null);
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la déconnexion");
-                return false;
-            }
-        }
+        public Task<bool> LogoutAsync()
+            => _authService.LogoutAsync();
 
         #endregion
 
-        #region WeatherForecast
+        #region WeatherForecast - Délégation à ApiWeatherForecastService
 
-        public async Task<List<WeatherForecast>> GetForecastsAsync()
-        {
-            try
-            {
-                var forecasts = await _httpClient.GetFromJsonAsync<List<WeatherForecast>>(
-                    "/api/weatherforecast", _jsonOptions);
+        public Task<List<WeatherForecast>> GetForecastsAsync()
+            => _forecastService.GetForecastsAsync();
 
-                return forecasts ?? new List<WeatherForecast>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la récupération des prévisions");
-                throw;
-            }
-        }
+        public Task<WeatherForecast?> GetForecastByIdAsync(int id)
+            => _forecastService.GetForecastByIdAsync(id);
 
-        public async Task<WeatherForecast?> GetForecastByIdAsync(int id)
-        {
-            try
-            {
-                return await _httpClient.GetFromJsonAsync<WeatherForecast>(
-                    $"/api/weatherforecast/{id}", _jsonOptions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la récupération de la prévision {Id}", id);
-                throw;
-            }
-        }
+        public Task<WeatherForecast?> CreateForecastAsync(CreateForecastRequest request)
+            => _forecastService.CreateForecastAsync(request);
 
-        public async Task<WeatherForecast?> CreateForecastAsync(CreateForecastRequest request)
-        {
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("/api/weatherforecast", request);
+        public Task<bool> UpdateForecastAsync(int id, UpdateForecastRequest request)
+            => _forecastService.UpdateForecastAsync(id, request);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<WeatherForecast>(_jsonOptions);
-                }
-
-                _logger.LogWarning("Échec de la création de prévision: {StatusCode}", response.StatusCode);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la création de la prévision");
-                throw;
-            }
-        }
-
-        public async Task<bool> UpdateForecastAsync(int id, UpdateForecastRequest request)
-        {
-            try
-            {
-                var response = await _httpClient.PutAsJsonAsync($"/api/weatherforecast/{id}", request);
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la mise à jour de la prévision {Id}", id);
-                throw;
-            }
-        }
-
-        public async Task<bool> DeleteForecastAsync(int id)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"/api/weatherforecast/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erreur lors de la suppression de la prévision {Id}", id);
-                throw;
-            }
-        }
+        public Task<bool> DeleteForecastAsync(int id)
+            => _forecastService.DeleteForecastAsync(id);
 
         #endregion
     }

@@ -67,13 +67,29 @@ namespace mobile
 
             // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
+            
+            // Services API spécialisés (ISP - Interface Segregation Principle)
+            builder.Services.AddHttpClient<IApiAuthService, ApiAuthService>((serviceProvider, client) =>
+            {
+                var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
+                client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+
+            builder.Services.AddHttpClient<IApiWeatherForecastService, ApiWeatherForecastService>((serviceProvider, client) =>
+            {
+                var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
+                client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+
+            // Service API combiné (pour compatibilité ascendante - obsolète)
             builder.Services.AddHttpClient<IApiService, ApiService>((serviceProvider, client) =>
             {
-                // Utiliser le service de configuration centralisé
                 var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
-                var baseUrl = apiConfig.GetBaseUrl();
-
-                client.BaseAddress = new Uri(baseUrl);
+                client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
