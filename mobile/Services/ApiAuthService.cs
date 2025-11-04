@@ -163,45 +163,23 @@ namespace mobile.Services
         /// Vérifie si l'API est joignable
         /// Lève ApiUnavailableException si l'API n'est pas accessible (502, timeout, connexion refusée, etc.)
         /// Retourne true si l'API est joignable (même si le token est invalide - 401)
+        /// Note: AuthenticatedHttpClientHandler gère déjà les retries et lève ApiUnavailableException
         /// </summary>
         public async Task<bool> CheckApiAvailabilityAsync()
         {
-            try
-            {
 #if DEBUG
-                _logger.LogDebug("🔍 Vérification disponibilité API...");
+            _logger.LogDebug("🔍 Vérification disponibilité API...");
 #endif
 
-                var response = await _httpClient.GetAsync("/api/auth/me");
+            // Faire un appel simple - AuthenticatedHttpClientHandler gère les retries
+            // et lève ApiUnavailableException si l'API est inaccessible
+            var response = await _httpClient.GetAsync("/api/auth/me");
 
-                // Vérifier les codes d'erreur réseau/serveur
-                if ((int)response.StatusCode >= 500) // 5xx = Erreur serveur
-                {
-                    throw new ApiUnavailableException(
-                        $"API inaccessible - Code {response.StatusCode}");
-                }
-
-                // 401 Unauthorized = API joignable mais token invalide → OK
-                // 2xx Success = API joignable et token valide → OK
-                // 4xx Client Error (sauf 401) = API joignable → OK
-                
+            // Si on arrive ici, l'API est joignable (même si 401)
 #if DEBUG
-                _logger.LogDebug("✅ API joignable (Status: {StatusCode})", response.StatusCode);
+            _logger.LogDebug("✅ API joignable (Status: {StatusCode})", response.StatusCode);
 #endif
-                return true;
-            }
-            catch (HttpRequestException ex)
-            {
-                // Erreur réseau : timeout, connexion refusée, etc.
-                _logger.LogWarning(ex, "📡 API non joignable - Erreur réseau");
-                throw new ApiUnavailableException("API non joignable - Erreur réseau", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                // Timeout
-                _logger.LogWarning(ex, "⏱️ API non joignable - Timeout");
-                throw new ApiUnavailableException("API non joignable - Timeout", ex);
-            }
+            return true;
         }
     }
 }

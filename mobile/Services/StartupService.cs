@@ -123,7 +123,7 @@ namespace mobile.Services
         private async Task<StartupProcedureResult> CheckNetworkConnectivityAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
-            await Task.Delay(2000);
+            await Task.Delay(500);
 
             try
             {
@@ -155,59 +155,36 @@ namespace mobile.Services
         private async Task<StartupProcedureResult> CheckApiAvailabilityAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
-            await Task.Delay(2000);
+            await Task.Delay(500);
 
             const int maxRetries = 4;
             const int delayMs = 1000;
 
-            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            try
             {
-                try
-                {
-                    _logger.LogInformation("Tentative {Attempt}/{Max} de connexion à l'API...", attempt, maxRetries);
+                // Essayer de valider via l'API (mode online)
 
-                    // Essayer de valider via l'API (mode online)
-                    using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
-                    var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
+                await _apiAuthService.CheckApiAvailabilityAsync();
 
-                    await apiAuthService.CheckApiAvailabilityAsync();
-
-                    // Si on arrive ici sans exception, l'API est joignable
-                    _logger.LogInformation("API joignable");
-                    return StartupProcedureResult.Ok();
-                }
-                catch (ApiUnavailableException ex)
-                {
-                    _logger.LogWarning("Tentative {Attempt}/{Max} échouée: {Message}", attempt, maxRetries, ex.Message);
-
-                    if (attempt == maxRetries)
-                    {
-                        return StartupProcedureResult.Fail(
-                            "L'API n'est pas joignable. Veuillez vérifier que le serveur est démarré.",
-                            canContinue: true);
-                    }
-
-                    // Attendre avant de réessayer
-                    await Task.Delay(delayMs * attempt);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Erreur inattendue lors de la vérification de l'API");
-
-                    if (attempt == maxRetries)
-                    {
-                        return StartupProcedureResult.Fail(
-                            $"Erreur lors de la connexion à l'API: {ex.Message}",
-                            canContinue: false);
-                    }
-
-                    await Task.Delay(delayMs * attempt);
-                }
+                // Si on arrive ici sans exception, l'API est joignable
+                _logger.LogInformation("API joignable");
+                return StartupProcedureResult.Ok();
             }
+            catch (ApiUnavailableException ex)
+            {
+                return StartupProcedureResult.Fail(
+                        "L'API n'est pas joignable. Veuillez vérifier que le serveur est démarré.",
+                        canContinue: true);
 
-            return StartupProcedureResult.Fail(
-                "Impossible de se connecter à l'API après plusieurs tentatives.",
-                canContinue: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur inattendue lors de la vérification de l'API");
+
+                return StartupProcedureResult.Fail(
+                    $"Erreur lors de la connexion à l'API: {ex.Message}",
+                    canContinue: false);
+            }
         }
 
         /// <summary>
@@ -216,22 +193,18 @@ namespace mobile.Services
         private async Task<StartupProcedureResult> ValidateUserSessionAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
-            await Task.Delay(2000);
+            await Task.Delay(500);
 
             try
             {
-                // Vérifier si un token existe
-                var hasToken = await _secureStorage.IsAuthenticatedAsync();
-
+                var hasToken = await VerifyHasToken();
                 if (!hasToken)
                 {
                     _logger.LogInformation("Aucun token, pas de session à valider");
                     return StartupProcedureResult.Ok(); // Pas d'erreur, juste pas de session
                 }
 
-                // Vérifier d'abord si le token est valide localement (non expiré)
                 var isTokenValid = await _secureStorage.IsTokenValidAsync();
-
                 if (!isTokenValid)
                 {
                     _logger.LogWarning("❌ Token expiré, nettoyage de la session");
@@ -242,30 +215,27 @@ namespace mobile.Services
 
                 _logger.LogInformation("✅ Token valide localement");
 
-                // Essayer de valider via l'API (mode online)
-                using var scope = ((IServiceProvider)Application.Current!.Handler!.MauiContext!.Services).CreateScope();
-                var sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
-                var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
+                //// Essayer de valider via l'API (mode online)
 
                 try
                 {
                     // Vérifier d'abord si l'API est joignable
-                    await apiAuthService.CheckApiAvailabilityAsync();
+                    await _apiAuthService.CheckApiAvailabilityAsync();
 
                     // API joignable, valider la session
-                    var isValid = await sessionValidation.ValidateSessionAsync();
+                    var isValid = await _sessionValidation.ValidateSessionAsync();
 
                     if (!isValid)
                     {
                         _logger.LogWarning("❌ Session invalide selon l'API, nettoyage...");
-                        await sessionValidation.ClearSessionAsync();
+                        await _sessionValidation.ClearSessionAsync();
                         await _authState.ClearStateAsync();
                         return StartupProcedureResult.Ok(); // Session invalide, redirection vers login
                     }
 
                     // Session valide : récupérer les infos utilisateur depuis l'API
                     _logger.LogInformation("✅ Session valide (mode online)");
-                    var currentUser = await apiAuthService.GetCurrentUserAsync();
+                    var currentUser = await _apiAuthService.GetCurrentUserAsync();
 
                     if (currentUser != null)
                     {
@@ -313,7 +283,7 @@ namespace mobile.Services
                         _logger.LogWarning("❌ Impossible d'extraire les infos du token");
                         await _secureStorage.ClearAllAsync();
                         await _authState.ClearStateAsync();
-                        return StartupProcedureResult.Ok();
+                        return StartupProcedureResult.Fail("Impossible d'extraire les infos du token", canContinue: true);
                     }
                 }
             }
@@ -321,10 +291,25 @@ namespace mobile.Services
             {
                 _logger.LogError(ex, "Erreur lors de la validation de session");
                 // On continue même si la validation échoue
-                return StartupProcedureResult.Ok();
+                return StartupProcedureResult.Fail("Erreur lors de la validation de session", canContinue: false);
             }
         }
 
         #endregion
+
+        private async Task<bool> VerifyHasToken ()
+        {
+            // Vérifier si un token existe
+            var hasToken = await _secureStorage.IsAuthenticatedAsync();
+
+            if (!hasToken)
+            {
+                _logger.LogInformation("Aucun token, pas de session à valider");
+                return !hasToken; // Pas d'erreur, juste pas de session
+            }
+
+            return hasToken;
+        }
     }
+
 }

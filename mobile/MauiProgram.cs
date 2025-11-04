@@ -78,24 +78,14 @@ namespace mobile
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
-            // Service API WeatherForecast de base (sans cache)
-            builder.Services.AddHttpClient<ApiWeatherForecastService>((serviceProvider, client) =>
+            // Service API WeatherForecast avec cache
+            builder.Services.AddHttpClient<IApiWeatherForecastService, ApiWeatherForecastServiceWithCache>((serviceProvider, client) =>
             {
                 var apiConfig = serviceProvider.GetRequiredService<IApiConfigurationService>();
                 client.BaseAddress = new Uri(apiConfig.GetBaseUrl());
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
-
-            // Service API WeatherForecast avec cache (Decorator Pattern)
-            builder.Services.AddSingleton<IApiWeatherForecastService>(sp =>
-            {
-                var innerService = sp.GetRequiredService<ApiWeatherForecastService>();
-                var cacheService = sp.GetRequiredService<ICacheService>();
-                var logger = sp.GetRequiredService<ILogger<ApiWeatherForecastServiceWithCache>>();
-
-                return new ApiWeatherForecastServiceWithCache(innerService, cacheService, logger);
-            });
 
             // Page de démarrage (Splash)
             builder.Services.AddTransient<SplashPage>();
