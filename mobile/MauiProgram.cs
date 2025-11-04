@@ -2,7 +2,6 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using mobile.Services.Handlers;
-using Syncfusion.Maui.Toolkit.Hosting;
 using System.Reflection;
 
 namespace mobile
@@ -15,7 +14,6 @@ namespace mobile
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
-                .ConfigureSyncfusionToolkit()
                 .ConfigureMauiHandlers(handlers =>
                 {
 #if IOS || MACCATALYST
