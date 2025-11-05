@@ -58,6 +58,11 @@ namespace mobile.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de la récupération de l'état d'authentification");
+                // Alerte active même en Release pour debug publish
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur GetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                });
                 _cachedState = AuthenticationState.Unauthenticated();
                 return _cachedState;
             }
@@ -82,6 +87,11 @@ namespace mobile.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de la sauvegarde de l'état d'authentification");
+                // Alerte active même en Release pour debug publish
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur SetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                });
             }
         }
 
@@ -101,6 +111,11 @@ namespace mobile.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors de l'effacement de l'état d'authentification");
+                // Alerte active même en Release pour debug publish
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur ClearStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                });
             }
         }
 

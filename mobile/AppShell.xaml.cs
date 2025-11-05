@@ -6,7 +6,7 @@ namespace mobile
 {
     public partial class AppShell : Shell
     {
-        public AppShell()
+        public AppShell ()
         {
             InitializeComponent();
             var currentTheme = Application.Current!.RequestedTheme;
@@ -23,7 +23,7 @@ namespace mobile
         /// <summary>
         /// Détecte quand le flyout s'ouvre pour déclencher les animations
         /// </summary>
-        private void OnShellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void OnShellPropertyChanged (object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FlyoutIsPresented) && FlyoutIsPresented)
             {
@@ -35,7 +35,7 @@ namespace mobile
         /// <summary>
         /// Anime l'apparition des éléments du flyout
         /// </summary>
-        private async Task AnimateFlyoutOpen()
+        private async Task AnimateFlyoutOpen ()
         {
             try
             {
@@ -80,7 +80,7 @@ namespace mobile
         /// </summary>
         /// <param name="isAuthenticated">État d'authentification</param>
         /// <param name="updateTitleBar">Si false, ne met pas à jour la title bar (utilisé pendant le splash)</param>
-        public void UpdateAuthenticationUI(bool isAuthenticated, bool updateTitleBar = true)
+        public void UpdateAuthenticationUI (bool isAuthenticated, bool updateTitleBar = true)
         {
             // Contrôler la visibilité du Flyout
             FlyoutBehavior = isAuthenticated ? FlyoutBehavior.Flyout : FlyoutBehavior.Disabled;
@@ -153,17 +153,7 @@ namespace mobile
             }
         }
 
-        /// <summary>
-        /// Génère les initiales à partir du prénom et du nom
-        /// </summary>
-        private string GetInitials(string firstName, string lastName)
-        {
-            var firstInitial = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
-            var lastInitial = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
-            return $"{firstInitial}{lastInitial}";
-        }
-
-        private async void OnLogoutClicked(object sender, EventArgs e)
+        private async void OnLogoutClicked (object sender, EventArgs e)
         {
             try
             {
@@ -189,7 +179,7 @@ namespace mobile
                     // Rediriger vers la page de connexion
                     await Shell.Current.GoToAsync("///login");
 
-                    await DisplayToastAsync("Déconnexion réussie");
+                    //await DisplayToastAsync("Déconnexion réussie");
                 }
             }
             catch (Exception ex)
@@ -198,7 +188,7 @@ namespace mobile
             }
         }
 
-        protected override void OnNavigated(ShellNavigatedEventArgs args)
+        protected override void OnNavigated (ShellNavigatedEventArgs args)
         {
             base.OnNavigated(args);
 
@@ -217,7 +207,7 @@ namespace mobile
                 });
             }
         }
-        public static async Task DisplaySnackbarAsync(string message)
+        public static async Task DisplaySnackbarAsync (string message)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
@@ -236,7 +226,7 @@ namespace mobile
             await snackbar.Show(cancellationTokenSource.Token);
         }
 
-        public static async Task DisplayToastAsync(string message)
+        public static async Task DisplayToastAsync (string message)
         {
             // Toast is currently not working in MCT on Windows
             if (OperatingSystem.IsWindows())
@@ -248,7 +238,7 @@ namespace mobile
             await toast.Show(cts.Token);
         }
 
-        private void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
+        private void ThemeSwitch_Toggled (object sender, ToggledEventArgs e)
         {
             Application.Current!.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
         }

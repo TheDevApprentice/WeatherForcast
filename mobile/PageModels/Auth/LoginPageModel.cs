@@ -107,14 +107,25 @@ namespace mobile.PageModels.Auth
                         await _authState.SetStateAsync(authState);
 
                         // Sauvegarder le profil pour la reconnexion rapide
-                        var profile = new SavedUserProfile
+                        try
                         {
-                            Email = currentUser.Email,
-                            FirstName = currentUser.FirstName,
-                            LastName = currentUser.LastName,
-                            LastLoginDate = DateTime.Now
-                        };
-                        await _savedProfiles.SaveProfileAsync(profile);
+                            var profile = new SavedUserProfile
+                            {
+                                Email = currentUser.Email,
+                                FirstName = currentUser.FirstName,
+                                LastName = currentUser.LastName,
+                                LastLoginDate = DateTime.Now
+                            };
+                            await _savedProfiles.SaveProfileAsync(profile);
+                        }
+                        catch (Exception profileEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"⚠️ Erreur sauvegarde profil: {profileEx.Message}");
+#if DEBUG
+                            await Shell.Current.DisplayAlert("Debug", $"Erreur sauvegarde profil login: {profileEx.Message}", "OK");
+#endif
+                            // Ne pas bloquer le login si la sauvegarde du profil échoue
+                        }
                     }
 
                     // Mettre à jour l'UI du Shell
@@ -138,6 +149,9 @@ namespace mobile.PageModels.Auth
             }
             catch (Exception ex)
             {
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug", $"Erreur login: {ex.Message}\n{ex.StackTrace}", "OK");
+#endif
                 ShowError($"Erreur de connexion : {ex.Message}");
             }
             finally
@@ -179,14 +193,26 @@ namespace mobile.PageModels.Auth
         /// </summary>
         public async Task LoadSavedProfilesAsync ()
         {
-            var profiles = await _savedProfiles.GetSavedProfilesAsync();
-            SavedProfiles = new ObservableCollection<SavedUserProfile>(profiles);
-            HasSavedProfiles = profiles.Count > 0;
-            ShowProfileSelection = HasSavedProfiles;
+            try
+            {
+                var profiles = await _savedProfiles.GetSavedProfilesAsync();
+                SavedProfiles = new ObservableCollection<SavedUserProfile>(profiles);
+                HasSavedProfiles = profiles.Count > 0;
+                ShowProfileSelection = HasSavedProfiles;
 
-            System.Diagnostics.Debug.WriteLine($"🟢 Profils chargés : {profiles.Count}");
-            System.Diagnostics.Debug.WriteLine($"🟢 ShowProfileSelection = {ShowProfileSelection}");
-            System.Diagnostics.Debug.WriteLine($"🟢 HasSavedProfiles = {HasSavedProfiles}");
+                System.Diagnostics.Debug.WriteLine($"🟢 Profils chargés : {profiles.Count}");
+                System.Diagnostics.Debug.WriteLine($"🟢 ShowProfileSelection = {ShowProfileSelection}");
+                System.Diagnostics.Debug.WriteLine($"🟢 HasSavedProfiles = {HasSavedProfiles}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Erreur chargement profils: {ex.Message}");
+                // Alerte active même en Release pour debug publish
+                await Shell.Current.DisplayAlert("Debug Login", $"Erreur chargement profils: {ex.Message}\n{ex.GetType().Name}", "OK");
+                SavedProfiles = new ObservableCollection<SavedUserProfile>();
+                HasSavedProfiles = false;
+                ShowProfileSelection = false;
+            }
         }
 
         /// <summary>
@@ -241,16 +267,26 @@ namespace mobile.PageModels.Auth
         [RelayCommand]
         private async Task RemoveProfile (SavedUserProfile profile)
         {
-            System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
-            await _savedProfiles.RemoveProfileAsync(profile.Email);
-            SavedProfiles.Remove(profile);
-            HasSavedProfiles = SavedProfiles.Count > 0;
-
-            if (!HasSavedProfiles)
+            try
             {
-                ShowProfileSelection = false;
+                System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
+                await _savedProfiles.RemoveProfileAsync(profile.Email);
+                SavedProfiles.Remove(profile);
+                HasSavedProfiles = SavedProfiles.Count > 0;
+
+                if (!HasSavedProfiles)
+                {
+                    ShowProfileSelection = false;
+                }
+                System.Diagnostics.Debug.WriteLine($"🔴 Profil supprimé. Reste : {SavedProfiles.Count}");
             }
-            System.Diagnostics.Debug.WriteLine($"🔴 Profil supprimé. Reste : {SavedProfiles.Count}");
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Erreur suppression profil: {ex.Message}");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug", $"Erreur suppression profil: {ex.Message}", "OK");
+#endif
+            }
         }
     }
 }

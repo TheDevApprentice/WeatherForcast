@@ -32,28 +32,36 @@ namespace mobile.Services
         /// </summary>
         public async Task<AuthResponse?> LoginAsync(LoginRequest request)
         {
-#if DEBUG
-            _logger.LogDebug("🔐 Tentative de connexion pour {Email}", request.Email);
-#endif
-
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
-                
 #if DEBUG
-                _logger.LogDebug("✅ Connexion réussie pour {Email}", request.Email);
+                _logger.LogDebug("🔐 Tentative de connexion pour {Email}", request.Email);
 #endif
-                
-                return authResponse;
-            }
+
+                var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
+                    
+#if DEBUG
+                    _logger.LogDebug("✅ Connexion réussie pour {Email}", request.Email);
+#endif
+                    
+                    return authResponse;
+                }
 
 #if DEBUG
-            _logger.LogWarning("❌ Échec de connexion pour {Email}: {StatusCode}", 
-                request.Email, response.StatusCode);
+                _logger.LogWarning("❌ Échec de connexion pour {Email}: {StatusCode}", 
+                    request.Email, response.StatusCode);
 #endif
-            return null;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la connexion pour {Email}", request.Email);
+                throw;
+            }
         }
 
         /// <summary>
@@ -61,25 +69,33 @@ namespace mobile.Services
         /// </summary>
         public async Task<bool> RegisterAsync(RegisterRequest request)
         {
-#if DEBUG
-            _logger.LogDebug("📝 Tentative d'inscription pour {Email}", request.Email);
-#endif
-
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
 #if DEBUG
-                _logger.LogDebug("✅ Inscription réussie pour {Email}", request.Email);
+                _logger.LogDebug("📝 Tentative d'inscription pour {Email}", request.Email);
 #endif
-                return true;
-            }
+
+                var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
+
+                if (response.IsSuccessStatusCode)
+                {
+#if DEBUG
+                    _logger.LogDebug("✅ Inscription réussie pour {Email}", request.Email);
+#endif
+                    return true;
+                }
 
 #if DEBUG
-            _logger.LogWarning("❌ Échec d'inscription pour {Email}: {StatusCode}", 
-                request.Email, response.StatusCode);
+                _logger.LogWarning("❌ Échec d'inscription pour {Email}: {StatusCode}", 
+                    request.Email, response.StatusCode);
 #endif
-            return false;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de l'inscription pour {Email}", request.Email);
+                return false;
+            }
         }
 
         /// <summary>
@@ -87,23 +103,31 @@ namespace mobile.Services
         /// </summary>
         public async Task<bool> ValidateTokenAsync()
         {
-#if DEBUG
-            _logger.LogDebug("🔍 Validation du token JWT");
-#endif
-
-            var response = await _httpClient.GetAsync("/api/auth/validate");
-            if (response.IsSuccessStatusCode)
+            try
             {
 #if DEBUG
-                _logger.LogDebug("✅ Token valide");
+                _logger.LogDebug("🔍 Validation du token JWT");
 #endif
-                return true;
-            }
+
+                var response = await _httpClient.GetAsync("/api/auth/validate");
+                if (response.IsSuccessStatusCode)
+                {
+#if DEBUG
+                    _logger.LogDebug("✅ Token valide");
+#endif
+                    return true;
+                }
 
 #if DEBUG
-            _logger.LogWarning("❌ Token invalide: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("❌ Token invalide: {StatusCode}", response.StatusCode);
 #endif
-            return false;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la validation du token");
+                return false;
+            }
         }
 
         /// <summary>
@@ -111,27 +135,35 @@ namespace mobile.Services
         /// </summary>
         public async Task<CurrentUserResponse?> GetCurrentUserAsync()
         {
-#if DEBUG
-            _logger.LogDebug("👤 Récupération des informations utilisateur");
-#endif
-
-            var response = await _httpClient.GetAsync("/api/auth/me");
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-            var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
-            
 #if DEBUG
-            _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);
+                _logger.LogDebug("👤 Récupération des informations utilisateur");
 #endif
-            
-            return user;
-            }
+
+                var response = await _httpClient.GetAsync("/api/auth/me");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
+                    
+#if DEBUG
+                    _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);
+#endif
+                    
+                    return user;
+                }
 
 #if DEBUG
-            _logger.LogWarning("❌ Échec récupération utilisateur: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("❌ Échec récupération utilisateur: {StatusCode}", response.StatusCode);
 #endif
-            return null;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la récupération de l'utilisateur");
+                throw;
+            }
         }
 
         /// <summary>
@@ -139,24 +171,32 @@ namespace mobile.Services
         /// </summary>
         public async Task<bool> LogoutAsync()
         {
-#if DEBUG
-            _logger.LogDebug("🚪 Déconnexion utilisateur");
-#endif
-
-            var response = await _httpClient.PostAsync("/api/auth/logout", null);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
 #if DEBUG
-                _logger.LogDebug("✅ Déconnexion réussie");
+                _logger.LogDebug("🚺 Déconnexion utilisateur");
 #endif
-                return true;
-            }
+
+                var response = await _httpClient.PostAsync("/api/auth/logout", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+#if DEBUG
+                    _logger.LogDebug("✅ Déconnexion réussie");
+#endif
+                    return true;
+                }
 
 #if DEBUG
-            _logger.LogWarning("❌ Échec déconnexion: {StatusCode}", response.StatusCode);
+                _logger.LogWarning("❌ Échec déconnexion: {StatusCode}", response.StatusCode);
 #endif
-            return false;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la déconnexion");
+                return false;
+            }
         }
 
         /// <summary>

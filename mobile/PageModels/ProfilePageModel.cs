@@ -18,7 +18,7 @@ namespace mobile.PageModels
         [ObservableProperty]
         private string initials = "U";
 
-        public ProfilePageModel(
+        public ProfilePageModel (
             IAuthenticationStateService authStateService,
             ILogger<ProfilePageModel> logger)
         {
@@ -28,7 +28,7 @@ namespace mobile.PageModels
             LoadUserInfo();
         }
 
-        private async void LoadUserInfo()
+        private async void LoadUserInfo ()
         {
             try
             {
@@ -50,7 +50,7 @@ namespace mobile.PageModels
             }
         }
 
-        private void UpdateInitials()
+        private void UpdateInitials ()
         {
             try
             {
@@ -89,14 +89,14 @@ namespace mobile.PageModels
         }
 
         [RelayCommand]
-        private async Task OpenSettings()
+        private async Task OpenSettings ()
         {
             // TODO: Implémenter la page de paramètres
             await Shell.Current.DisplayAlert("Paramètres", "Page de paramètres à venir", "OK");
         }
 
         [RelayCommand]
-        private async Task Logout()
+        private async Task Logout ()
         {
             try
             {
@@ -108,11 +108,12 @@ namespace mobile.PageModels
 
                 if (confirm)
                 {
-                    // Récupérer les services nécessaires
+                    // Récupérer les services
                     var secureStorage = Shell.Current.Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
+                    var authStateService = Shell.Current.Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
                     var apiAuthService = Shell.Current.Handler?.MauiContext?.Services.GetService<IApiAuthService>();
 
-                    if (secureStorage != null && apiAuthService != null)
+                    if (secureStorage != null && authStateService != null && apiAuthService != null)
                     {
                         // Appeler l'API pour déconnecter
                         await apiAuthService.LogoutAsync();
@@ -121,34 +122,20 @@ namespace mobile.PageModels
                         await secureStorage.ClearAllAsync();
 
                         // Effacer l'état d'authentification centralisé
-                        await _authStateService.ClearStateAsync();
+                        await authStateService.ClearStateAsync();
 
-#if ANDROID || IOS
-                        // Sur mobile : masquer le TabBar et afficher le login en modal
-                        Shell.SetTabBarIsVisible(Shell.Current, false);
-                        var loginPage = Shell.Current.Handler?.MauiContext?.Services.GetService<Pages.Auth.LoginPage>();
-                        if (loginPage != null)
-                        {
-                            await Shell.Current.Navigation.PushModalAsync(loginPage, true);
-                        }
-#else
-                        // Sur desktop : mettre à jour l'UI et naviguer vers login
-                        if (Shell.Current is AppShell appShell)
-                        {
-                            appShell.UpdateAuthenticationUI(false);
-                        }
+                        // Rediriger vers la page de connexion
                         await Shell.Current.GoToAsync("///login");
-#endif
 
-                        _logger.LogInformation("✅ Déconnexion réussie");
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception profileEx)
             {
-                _logger.LogError(ex, "Erreur lors de la déconnexion");
-                await Shell.Current.DisplayAlert("Erreur", "Une erreur est survenue lors de la déconnexion", "OK");
+                _logger.LogWarning(profileEx, "⚠️ Erreur lors de la sauvegarde du profil avant logout");
             }
+
+            _logger.LogInformation("✅ Déconnexion réussie");
         }
     }
 }

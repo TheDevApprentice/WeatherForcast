@@ -27,21 +27,6 @@
                                 </Border.GestureRecognizers>
                                 
                                 <Grid Padding="15" BackgroundColor="Transparent">
-                                    <VisualStateManager.VisualStateGroups>
-                                        <VisualStateGroup Name="CommonStates">
-                                            <VisualState Name="Normal">
-                                                <VisualState.Setters>
-                                                    <Setter Property="BackgroundColor" Value="White" />
-                                                </VisualState.Setters>
-                                            </VisualState>
-                                            <VisualState Name="PointerOver">
-                                                <VisualState.Setters>
-                                                    <Setter Property="BackgroundColor" Value="#F0F4F8" />
-                                                </VisualState.Setters>
-                                            </VisualState>
-                                        </VisualStateGroup>
-                                    </VisualStateManager.VisualStateGroups>
-                                    
                                     <Grid ColumnDefinitions="60,*,Auto" ColumnSpacing="15">
                                     <!-- Avatar avec initiales -->
                                     <Border Grid.Column="0" 
@@ -87,21 +72,6 @@
                                                 Padding="0"
                                                 CornerRadius="16"
                                                 Clicked="OnDeleteProfileClicked">
-                                        <VisualStateManager.VisualStateGroups>
-                                            <VisualStateGroup Name="CommonStates">
-                                                <VisualState Name="Normal">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="Transparent" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                                <VisualState Name="PointerOver">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="#FFEBEE" />
-                                                        <Setter Property="Scale" Value="1.1" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                            </VisualStateGroup>
-                                        </VisualStateManager.VisualStateGroups>
                                         <ImageButton.Source>
                                             <FontImageSource FontFamily="SegoeMDL2" 
                                                            Glyph="&#xE74D;" 
@@ -138,20 +108,6 @@
                         Padding="10,5"
                         HorizontalOptions="Center"
                         Margin="0,5">
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroup Name="CommonStates">
-                            <VisualState Name="Normal">
-                                <VisualState.Setters>
-                                    <Setter Property="Opacity" Value="1" />
-                                </VisualState.Setters>
-                            </VisualState>
-                            <VisualState Name="PointerOver">
-                                <VisualState.Setters>
-                                    <Setter Property="Opacity" Value="0.7" />
-                                </VisualState.Setters>
-                            </VisualState>
-                        </VisualStateGroup>
-                    </VisualStateManager.VisualStateGroups>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding UseAnotherAccountCommand}" />
                     </Border.GestureRecognizers>

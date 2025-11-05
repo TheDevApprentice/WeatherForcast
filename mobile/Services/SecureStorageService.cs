@@ -23,31 +23,66 @@ namespace mobile.Services
 
         public async Task SaveTokenAsync(string token)
         {
-            await SecureStorage.SetAsync(TOKEN_KEY, token);
+            try
+            {
+                await SecureStorage.SetAsync(TOKEN_KEY, token);
 #if DEBUG
-            _logger.LogDebug("Token saved successfully");
+                _logger.LogDebug("Token saved successfully");
 #endif
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving token to SecureStorage");
+                // Alerte active même en Release pour debug publish
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                throw;
+            }
         }
 
         public async Task<string?> GetTokenAsync()
         {
-            var token = await SecureStorage.GetAsync(TOKEN_KEY);
+            try
+            {
+                var token = await SecureStorage.GetAsync(TOKEN_KEY);
 #if DEBUG
-            _logger.LogDebug("Token retrieved: {Status}", string.IsNullOrEmpty(token) ? "NULL/EMPTY" : "OK");
+                _logger.LogDebug("Token retrieved: {Status}", string.IsNullOrEmpty(token) ? "NULL/EMPTY" : "OK");
 #endif
-            return token;
+                return token;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving token from SecureStorage");
+                // Alerte active même en Release pour debug publish
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                return null;
+            }
         }
 
         public async Task RemoveTokenAsync()
         {
-            SecureStorage.Remove(TOKEN_KEY);
-            await Task.CompletedTask;
+            try
+            {
+                SecureStorage.Remove(TOKEN_KEY);
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing token from SecureStorage");
+            }
         }
 
         public async Task<bool> IsAuthenticatedAsync()
         {
-            var token = await GetTokenAsync();
-            return !string.IsNullOrEmpty(token);
+            try
+            {
+                var token = await GetTokenAsync();
+                return !string.IsNullOrEmpty(token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking authentication status");
+                return false;
+            }
         }
 
         /// <summary>
@@ -99,20 +134,38 @@ namespace mobile.Services
 
         public async Task SaveUserInfoAsync(string email, string firstName, string lastName)
         {
-            Preferences.Set(EMAIL_KEY, email);
-            Preferences.Set(FIRSTNAME_KEY, firstName);
-            Preferences.Set(LASTNAME_KEY, lastName);
-            await Task.CompletedTask;
+            try
+            {
+                Preferences.Set(EMAIL_KEY, email);
+                Preferences.Set(FIRSTNAME_KEY, firstName);
+                Preferences.Set(LASTNAME_KEY, lastName);
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving user info to Preferences");
+                // Alerte active même en Release pour debug publish
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveUserInfoAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+                throw;
+            }
         }
 
         public async Task<(string Email, string FirstName, string LastName)> GetUserInfoAsync()
         {
-            var email = Preferences.Get(EMAIL_KEY, string.Empty);
-            var firstName = Preferences.Get(FIRSTNAME_KEY, string.Empty);
-            var lastName = Preferences.Get(LASTNAME_KEY, string.Empty);
-            
-            await Task.CompletedTask;
-            return (email, firstName, lastName);
+            try
+            {
+                var email = Preferences.Get(EMAIL_KEY, string.Empty);
+                var firstName = Preferences.Get(FIRSTNAME_KEY, string.Empty);
+                var lastName = Preferences.Get(LASTNAME_KEY, string.Empty);
+                
+                await Task.CompletedTask;
+                return (email, firstName, lastName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user info from Preferences");
+                return (string.Empty, string.Empty, string.Empty);
+            }
         }
 
         /// <summary>
@@ -157,11 +210,31 @@ namespace mobile.Services
 
         public async Task ClearAllAsync()
         {
-            SecureStorage.Remove(TOKEN_KEY);
-            Preferences.Remove(EMAIL_KEY);
-            Preferences.Remove(FIRSTNAME_KEY);
-            Preferences.Remove(LASTNAME_KEY);
-            await Task.CompletedTask;
+            try
+            {
+                _logger.LogDebug("🧹 Début nettoyage SecureStorage...");
+                
+                try { SecureStorage.Remove(TOKEN_KEY); } 
+                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression TOKEN_KEY"); }
+                
+                try { Preferences.Remove(EMAIL_KEY); } 
+                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression EMAIL_KEY"); }
+                
+                try { Preferences.Remove(FIRSTNAME_KEY); } 
+                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression FIRSTNAME_KEY"); }
+                
+                try { Preferences.Remove(LASTNAME_KEY); } 
+                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression LASTNAME_KEY"); }
+                
+                await Task.CompletedTask;
+                _logger.LogDebug("✅ SecureStorage et Preferences nettoyés");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing all secure storage and preferences");
+                // Alerte active même en Release pour debug publish
+                await Shell.Current.DisplayAlert("Debug ClearAll", $"Erreur: {ex.Message}\n{ex.GetType().Name}", "OK");
+            }
         }
     }
 }
