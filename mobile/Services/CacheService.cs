@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using mobile.Models;
 using mobile.Models.Cache;
 using SQLite;
 
@@ -19,7 +18,7 @@ namespace mobile.Services
         // Durée de validité par défaut du cache (1 heure)
         private static readonly TimeSpan DefaultCacheValidity = TimeSpan.FromHours(1);
 
-        public CacheService(ILogger<CacheService> logger)
+        public CacheService (ILogger<CacheService> logger)
         {
             _logger = logger;
         }
@@ -29,7 +28,7 @@ namespace mobile.Services
         /// <summary>
         /// Initialise la base de données SQLite
         /// </summary>
-        public async Task InitializeAsync()
+        public async Task InitializeAsync ()
         {
             if (_isInitialized)
                 return;
@@ -40,8 +39,8 @@ namespace mobile.Services
                 if (_isInitialized)
                     return;
 
-                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "weatherforecast_cache.db3");
-                
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "weatherforecast_cache.db");
+
 #if DEBUG
                 _logger.LogDebug("💾 Initialisation du cache SQLite: {Path}", dbPath);
 #endif
@@ -50,7 +49,7 @@ namespace mobile.Services
 
                 // Créer les tables
                 await _database.CreateTableAsync<CachedForecast>();
-                
+
 #if DEBUG
                 _logger.LogDebug("✅ Cache SQLite initialisé");
 #endif
@@ -68,7 +67,7 @@ namespace mobile.Services
             }
         }
 
-        private async Task EnsureInitializedAsync()
+        private async Task EnsureInitializedAsync ()
         {
             if (!_isInitialized)
             {
@@ -83,7 +82,7 @@ namespace mobile.Services
         /// <summary>
         /// Sauvegarde une liste de prévisions dans le cache
         /// </summary>
-        public async Task SaveForecastsAsync(IEnumerable<WeatherForecast> forecasts)
+        public async Task SaveForecastsAsync (IEnumerable<WeatherForecast> forecasts)
         {
             await EnsureInitializedAsync();
 
@@ -112,7 +111,7 @@ namespace mobile.Services
         /// <summary>
         /// Récupère toutes les prévisions du cache
         /// </summary>
-        public async Task<List<WeatherForecast>> GetCachedForecastsAsync()
+        public async Task<List<WeatherForecast>> GetCachedForecastsAsync ()
         {
             await EnsureInitializedAsync();
 
@@ -142,7 +141,7 @@ namespace mobile.Services
         /// <summary>
         /// Récupère une prévision du cache par son ID
         /// </summary>
-        public async Task<WeatherForecast?> GetCachedForecastByIdAsync(int id)
+        public async Task<WeatherForecast?> GetCachedForecastByIdAsync (int id)
         {
             await EnsureInitializedAsync();
 
@@ -172,7 +171,7 @@ namespace mobile.Services
         /// <summary>
         /// Supprime une prévision du cache
         /// </summary>
-        public async Task DeleteCachedForecastAsync(int id)
+        public async Task DeleteCachedForecastAsync (int id)
         {
             await EnsureInitializedAsync();
 
@@ -194,7 +193,7 @@ namespace mobile.Services
         /// <summary>
         /// Vide tout le cache des prévisions
         /// </summary>
-        public async Task ClearForecastsCacheAsync()
+        public async Task ClearForecastsCacheAsync ()
         {
             await EnsureInitializedAsync();
 
@@ -215,7 +214,7 @@ namespace mobile.Services
         /// <summary>
         /// Vérifie si le cache des prévisions est valide (pas trop ancien)
         /// </summary>
-        public async Task<bool> IsForecastsCacheValidAsync(TimeSpan maxAge)
+        public async Task<bool> IsForecastsCacheValidAsync (TimeSpan maxAge)
         {
             await EnsureInitializedAsync();
 
@@ -238,8 +237,8 @@ namespace mobile.Services
                 var isValid = cachedForecast.CachedAt >= oldestAllowed;
 
 #if DEBUG
-                _logger.LogDebug(isValid 
-                    ? "✅ Cache valide (mis en cache il y a {Age})" 
+                _logger.LogDebug(isValid
+                    ? "✅ Cache valide (mis en cache il y a {Age})"
                     : "⚠️ Cache expiré (mis en cache il y a {Age})",
                     DateTime.UtcNow - cachedForecast.CachedAt);
 #endif
@@ -262,7 +261,7 @@ namespace mobile.Services
         /// Note: Les profils sont gérés par SavedProfilesService via SecureStorage
         /// Cette méthode est un placeholder pour compatibilité future
         /// </summary>
-        public Task SaveProfileAsync(string email, string firstName, string lastName)
+        public Task SaveProfileAsync (string email, string firstName, string lastName)
         {
             // Les profils sont actuellement gérés par SavedProfilesService
             // Cette méthode pourrait être implémentée plus tard si on veut migrer vers SQLite
@@ -274,7 +273,7 @@ namespace mobile.Services
         /// Récupère tous les profils du cache
         /// Note: Les profils sont gérés par SavedProfilesService via SecureStorage
         /// </summary>
-        public Task<List<SavedUserProfile>> GetCachedProfilesAsync()
+        public Task<List<SavedUserProfile>> GetCachedProfilesAsync ()
         {
             // Les profils sont actuellement gérés par SavedProfilesService
             _logger.LogWarning("⚠️ GetCachedProfilesAsync n'est pas encore implémenté - utilisez SavedProfilesService");
@@ -284,7 +283,7 @@ namespace mobile.Services
         /// <summary>
         /// Supprime un profil du cache
         /// </summary>
-        public Task DeleteCachedProfileAsync(string email)
+        public Task DeleteCachedProfileAsync (string email)
         {
             // Les profils sont actuellement gérés par SavedProfilesService
             _logger.LogWarning("⚠️ DeleteCachedProfileAsync n'est pas encore implémenté - utilisez SavedProfilesService");
@@ -294,7 +293,7 @@ namespace mobile.Services
         /// <summary>
         /// Vide tout le cache des profils
         /// </summary>
-        public Task ClearProfilesCacheAsync()
+        public Task ClearProfilesCacheAsync ()
         {
             // Les profils sont actuellement gérés par SavedProfilesService
             _logger.LogWarning("⚠️ ClearProfilesCacheAsync n'est pas encore implémenté - utilisez SavedProfilesService");
@@ -308,7 +307,7 @@ namespace mobile.Services
         /// <summary>
         /// Vide tout le cache (forecasts + profiles)
         /// </summary>
-        public async Task ClearAllCacheAsync()
+        public async Task ClearAllCacheAsync ()
         {
             await EnsureInitializedAsync();
 
@@ -330,21 +329,21 @@ namespace mobile.Services
         /// <summary>
         /// Récupère la taille totale du cache en octets
         /// </summary>
-        public async Task<long> GetCacheSizeAsync()
+        public async Task<long> GetCacheSizeAsync ()
         {
             await EnsureInitializedAsync();
 
             try
             {
-                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "weatherforecast_cache.db3");
-                
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "weatherforecast_cache.db");
+
                 if (File.Exists(dbPath))
                 {
                     var fileInfo = new FileInfo(dbPath);
                     var sizeInBytes = fileInfo.Length;
 
 #if DEBUG
-                    _logger.LogDebug("📊 Taille du cache: {Size} octets ({SizeKB} KB)", 
+                    _logger.LogDebug("📊 Taille du cache: {Size} octets ({SizeKB} KB)",
                         sizeInBytes, sizeInBytes / 1024);
 #endif
 

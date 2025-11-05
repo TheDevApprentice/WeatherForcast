@@ -11,7 +11,7 @@ namespace mobile.Services
         private readonly IConfiguration _configuration;
         private readonly string _baseUrl;
 
-        public ApiConfigurationService(IConfiguration configuration)
+        public ApiConfigurationService (IConfiguration configuration)
         {
             _configuration = configuration;
             _baseUrl = ResolveBaseUrl();
@@ -20,12 +20,12 @@ namespace mobile.Services
         /// <summary>
         /// Obtient l'URL de base de l'API
         /// </summary>
-        public string GetBaseUrl() => _baseUrl;
+        public string GetBaseUrl () => _baseUrl;
 
         /// <summary>
         /// Construit l'URL complète d'un hub SignalR
         /// </summary>
-        public string GetHubUrl(string hubPath)
+        public string GetHubUrl (string hubPath)
         {
             if (string.IsNullOrWhiteSpace(hubPath))
             {
@@ -47,34 +47,14 @@ namespace mobile.Services
         /// <summary>
         /// Résout l'URL de base selon la plateforme et la configuration
         /// </summary>
-        private string ResolveBaseUrl()
+        private string ResolveBaseUrl ()
         {
-            var baseUrl = "";
-
-#if ANDROID
-            // Android: Utilise BaseUrlDevice pour téléphone réel, BaseUrlEmulator pour émulateur
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"]
-                ?? _configuration["ApiSettings:BaseUrlEmulator"];
-#elif IOS
-            // iOS: Utilise BaseUrlDevice pour iPhone réel, BaseUrlEmulator pour simulateur
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"] 
-                ?? _configuration["ApiSettings:BaseUrlEmulator"];
-#elif MACCATALYST
-            // MacCatalyst: Utilise BaseUrlDevice
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"];
-#elif WINDOWS
-            // Windows: Utilise BaseUrlWindows
-            baseUrl = _configuration["ApiSettings:BaseUrlWindows"];
-#else
-            // Fallback pour autres plateformes
-            baseUrl = _configuration["ApiSettings:BaseUrlDevice"];
-#endif
+            var baseUrl = _configuration["ApiSettings:BaseUrl"];
 
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
                 throw new InvalidOperationException(
-                    "ApiSettings:BaseUrl* n'est pas configuré dans appsettings.json. " +
-                    "Veuillez configurer BaseUrlDevice, BaseUrlEmulator ou BaseUrlWindows selon votre plateforme.");
+                    "ApiSettings:BaseUrl* n'est pas configuré dans appsettings.json. ");
             }
 
             return baseUrl;

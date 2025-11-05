@@ -8,7 +8,7 @@ namespace mobile
         private readonly ILogger<App> _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public App(
+        public App (
             GlobalExceptionHandler exceptionHandler,
             ILogger<App> logger,
             IServiceProvider serviceProvider)
@@ -20,13 +20,13 @@ namespace mobile
 
             // Initialiser le gestionnaire global d'exceptions
             _exceptionHandler.Initialize();
-            
+
             // Initialiser le cache SQLite en arrière-plan
             Task.Run(async () =>
             {
                 try
                 {
-                    var cacheService = _serviceProvider.GetRequiredService<Services.ICacheService>();
+                    var cacheService = _serviceProvider.GetRequiredService<ICacheService>();
                     await cacheService.InitializeAsync();
                     _logger.LogInformation("💾 Cache SQLite initialisé");
                 }
@@ -35,25 +35,25 @@ namespace mobile
                     _logger.LogError(ex, "❌ Erreur lors de l'initialisation du cache");
                 }
             });
-            
+
             _logger.LogInformation("✅ Application démarrée");
         }
 
-        protected override void OnSleep()
+        protected override void OnSleep ()
         {
             base.OnSleep();
             _logger.LogInformation("💤 Application en arrière-plan");
             // Les animations seront automatiquement arrêtées via OnDisappearing des pages
         }
 
-        protected override void OnResume()
+        protected override void OnResume ()
         {
             base.OnResume();
             _logger.LogInformation("▶️ Application reprise");
             // Les animations seront automatiquement redémarrées via OnAppearing des pages
         }
 
-        protected override Window CreateWindow(IActivationState? activationState)
+        protected override Window CreateWindow (IActivationState? activationState)
         {
             Shell shell;
 
@@ -94,11 +94,11 @@ namespace mobile
                 try
                 {
                     _logger.LogInformation("🚀 Démarrage de l'application");
-                    
+
 #if ANDROID || IOS
                     // Sur mobile avec TabBar : masquer le TabBar et afficher Splash en modal
                     Shell.SetTabBarIsVisible(shell, false);
-                    var splashPage = _serviceProvider.GetRequiredService<Pages.SplashPage>();
+                    var splashPage = _serviceProvider.GetRequiredService<SplashPage>();
                     await shell.Navigation.PushModalAsync(splashPage, false);
 #else
                     // Sur desktop avec Flyout : navigation globale vers splash
@@ -110,7 +110,7 @@ namespace mobile
                     _logger.LogError(ex, "Erreur lors de la navigation vers SplashPage");
                     // En cas d'erreur, rediriger vers login par sécurité
 #if ANDROID || IOS
-                    var loginPage = _serviceProvider.GetRequiredService<Pages.Auth.LoginPage>();
+                    var loginPage = _serviceProvider.GetRequiredService<LoginPage>();
                     await shell.Navigation.PushModalAsync(loginPage, false);
 #else
                     await shell.GoToAsync("///login");
