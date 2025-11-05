@@ -18,6 +18,13 @@ namespace mobile
             _logger = logger;
             _serviceProvider = serviceProvider;
 
+            // Démarrer la surveillance du réseau
+            var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
+            networkMonitor.StartMonitoring();
+#if DEBUG
+            _logger.LogInformation("📡 NetworkMonitor démarré");
+#endif
+
             // Initialiser le gestionnaire global d'exceptions
             _exceptionHandler.Initialize();
 
@@ -28,7 +35,9 @@ namespace mobile
                 {
                     var cacheService = _serviceProvider.GetRequiredService<ICacheService>();
                     await cacheService.InitializeAsync();
+#if DEBUG
                     _logger.LogInformation("💾 Cache SQLite initialisé");
+#endif
                 }
                 catch (Exception ex)
                 {
@@ -36,7 +45,9 @@ namespace mobile
                 }
             });
 
+#if DEBUG
             _logger.LogInformation("✅ Application démarrée");
+#endif
         }
 
         protected override void OnSleep ()
@@ -56,14 +67,20 @@ namespace mobile
         protected override Window CreateWindow (IActivationState? activationState)
         {
             Shell shell;
+            var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
 
 #if ANDROID || IOS
             // Sur mobile : utiliser AppShellMobile avec TabBar
-            shell = new AppShellMobile();
+            var mobileShell = new AppShellMobile();
+            shell = mobileShell;
             _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
+            
+            // Initialiser le NetworkMonitor sur le Shell
+            mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else
             // Sur desktop : utiliser AppShell avec Flyout
-            shell = new AppShell();
+            var desktopShell = new AppShell();
+            shell = desktopShell;
             
             // Désactiver le flyout pendant le splash
             shell.FlyoutBehavior = FlyoutBehavior.Disabled;
@@ -71,6 +88,9 @@ namespace mobile
             shell.FlyoutIsPresented = false;
             
             _logger.LogInformation("🖥️ AppShell chargé (Flyout pour desktop)");
+            
+            // Initialiser le NetworkMonitor sur le Shell
+            desktopShell.InitializeNetworkMonitor(networkMonitor);
 #endif
 
 #if WINDOWS || MACCATALYST

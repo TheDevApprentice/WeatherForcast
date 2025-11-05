@@ -12,6 +12,7 @@ namespace mobile.Services.Handlers
     public class AuthenticatedHttpClientHandler : DelegatingHandler
     {
         private readonly ISecureStorageService _secureStorage;
+        private readonly INetworkMonitorService _networkMonitor;
         private readonly ILogger<AuthenticatedHttpClientHandler> _logger;
         private const int MaxRetries = 3;
         private const int BaseDelayMilliseconds = 1000;
@@ -19,9 +20,11 @@ namespace mobile.Services.Handlers
 
         public AuthenticatedHttpClientHandler(
             ISecureStorageService secureStorage,
+            INetworkMonitorService networkMonitor,
             ILogger<AuthenticatedHttpClientHandler> logger)
         {
             _secureStorage = secureStorage;
+            _networkMonitor = networkMonitor;
             _logger = logger;
         }
 
@@ -29,13 +32,28 @@ namespace mobile.Services.Handlers
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            // ✅ VÉRIFIER LE RÉSEAU AVANT TOUT APPEL HTTP
+            if (!_networkMonitor.IsNetworkAvailable)
+            {
+#if DEBUG
+                _logger.LogWarning("📡 Pas de réseau disponible - Annulation de la requête {Method} {Url}", 
+                    request.Method, request.RequestUri);
+#endif
+                throw new NetworkUnavailableExecption(
+                    "Vous êtes hors ligne. Veuillez vérifier votre connexion.",
+                    "Network is not available"
+                );
+            }
+
             // Récupérer le token JWT
             var token = await _secureStorage.GetTokenAsync();
 
+#if DEBUG
             _logger.LogInformation("Token récupéré: {Status} - Request: {Method} {Url}",
                 string.IsNullOrEmpty(token) ? "VIDE" : "OK",
                 request.Method,
                 request.RequestUri);
+#endif
 
             // Ajouter le header Authorization si le token existe
             if (!string.IsNullOrEmpty(token))

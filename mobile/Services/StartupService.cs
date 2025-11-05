@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
-using mobile.Services.Exceptions;
 
 namespace mobile.Services
 {
@@ -15,6 +14,7 @@ namespace mobile.Services
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
         private readonly List<StartupProcedure> _procedures;
+        private readonly INetworkMonitorService _networkMonitor;
 
         public IReadOnlyList<StartupProcedure> Procedures => _procedures.AsReadOnly();
 
@@ -22,7 +22,8 @@ namespace mobile.Services
             ILogger<StartupService> logger,
             IServiceProvider serviceProvider,
             ISecureStorageService secureStorage,
-            IAuthenticationStateService authState)
+            IAuthenticationStateService authState,
+            INetworkMonitorService networkMonitor)
         {
             _logger = logger;
             _secureStorage = secureStorage;
@@ -55,6 +56,7 @@ namespace mobile.Services
                     ExecuteAsync = ValidateUserSessionAsync
                 }
             };
+            _networkMonitor = networkMonitor;
         }
 
         /// <summary>
@@ -141,9 +143,7 @@ namespace mobile.Services
             try
             {
                 // Vérifier si le réseau est accessible
-                bool isInternetAvailable = Connectivity.NetworkAccess == NetworkAccess.Internet;
-
-                if (!isInternetAvailable)
+                if (!_networkMonitor.IsNetworkAvailable)
                 {
 #if DEBUG
                     _logger.LogInformation("Réseau indisponible");
@@ -161,7 +161,6 @@ namespace mobile.Services
                 return StartupProcedureResult.Fail(
                         ex.UserMessage,
                         canContinue: true);
-
             }
             catch (Exception ex)
             {
@@ -338,6 +337,13 @@ namespace mobile.Services
                         return StartupProcedureResult.Fail("Impossible d'extraire les infos du token", canContinue: true);
                     }
                 }
+            }
+            catch (NetworkUnavailableExecption ex)
+            {
+                return StartupProcedureResult.Fail(
+                        ex.UserMessage,
+                        canContinue: true);
+
             }
             catch (Exception ex)
             {
