@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
-using System.Net.NetworkInformation;
+using mobile.Services.Exceptions;
 
 namespace mobile.Services
 {
@@ -62,7 +62,9 @@ namespace mobile.Services
         /// </summary>
         public async Task<bool> ExecuteStartupProceduresAsync (IProgress<StartupProcedure> progress)
         {
+#if DEBUG
             _logger.LogInformation("🚀 Début des procédures de démarrage");
+#endif
 
             foreach (var procedure in _procedures)
             {
@@ -72,7 +74,9 @@ namespace mobile.Services
                     procedure.Status = StartupProcedureStatus.Running;
                     progress?.Report(procedure);
 
+#if DEBUG
                     _logger.LogInformation("▶️ Exécution: {Name}", procedure.Name);
+#endif
 
                     // Exécuter la procédure
                     var result = await procedure.ExecuteAsync();
@@ -80,20 +84,26 @@ namespace mobile.Services
                     if (result.Success)
                     {
                         procedure.Status = StartupProcedureStatus.Success;
+#if DEBUG
                         _logger.LogInformation("✅ {Name} - Succès", procedure.Name);
+#endif
                     }
                     else
                     {
                         procedure.Status = StartupProcedureStatus.Failed;
                         procedure.ErrorMessage = result.ErrorMessage;
+#if DEBUG
                         _logger.LogWarning("❌ {Name} - Échec: {Error}", procedure.Name, result.ErrorMessage);
+#endif
 
                         progress?.Report(procedure);
 
                         // Si on ne peut pas continuer, arrêter la queue
                         if (!result.CanContinue)
                         {
+#if DEBUG
                             _logger.LogError("🛑 Arrêt des procédures de démarrage");
+#endif
                             return false;
                         }
                     }
@@ -104,7 +114,10 @@ namespace mobile.Services
                 {
                     procedure.Status = StartupProcedureStatus.Failed;
                     procedure.ErrorMessage = $"Erreur inattendue: {ex.Message}";
+
+#if DEBUG
                     _logger.LogError(ex, "❌ Erreur lors de l'exécution de {Name}", procedure.Name);
+#endif
 
                     progress?.Report(procedure);
                     return false;
@@ -128,23 +141,35 @@ namespace mobile.Services
             try
             {
                 // Vérifier si le réseau est accessible
-                var isNetworkAvailable = NetworkInterface.GetIsNetworkAvailable();
+                bool isInternetAvailable = Connectivity.NetworkAccess == NetworkAccess.Internet;
 
-                if (!isNetworkAvailable)
+                if (!isInternetAvailable)
                 {
-                    return StartupProcedureResult.Fail(
-                        "Aucune connexion réseau détectée. Veuillez vérifier votre connexion.",
-                        canContinue: false);
+#if DEBUG
+                    _logger.LogInformation("Réseau indisponible");
+#endif
+                    throw new NetworkUnavailableExecption();
                 }
 
+#if DEBUG
                 _logger.LogInformation("Réseau disponible");
+#endif
                 return StartupProcedureResult.Ok();
+            }
+            catch (NetworkUnavailableExecption ex)
+            {
+                return StartupProcedureResult.Fail(
+                        ex.UserMessage,
+                        canContinue: true);
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la vérification du réseau");
+#if DEBUG
+                _logger.LogError(ex, "Erreur lors de la vérification du réseau. Erreur grave");
+#endif
                 return StartupProcedureResult.Fail(
-                    "Impossible de vérifier la connectivité réseau.",
+                    "Impossible de vérifier la connectivité réseau. Veuillez réessayer ultérieurement",
                     canContinue: false);
             }
         }
@@ -155,20 +180,27 @@ namespace mobile.Services
         private async Task<StartupProcedureResult> CheckApiAvailabilityAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
+#if DEBUG
             await Task.Delay(500);
-
-            const int maxRetries = 4;
-            const int delayMs = 1000;
+#endif
 
             try
             {
                 // Essayer de valider via l'API (mode online)
-
                 await _apiAuthService.CheckApiAvailabilityAsync();
 
                 // Si on arrive ici sans exception, l'API est joignable
+#if DEBUG
                 _logger.LogInformation("API joignable");
+#endif
                 return StartupProcedureResult.Ok();
+            }
+            catch (NetworkUnavailableExecption ex)
+            {
+                return StartupProcedureResult.Fail(
+                        ex.UserMessage,
+                        canContinue: true);
+
             }
             catch (ApiUnavailableException ex)
             {
@@ -179,8 +211,9 @@ namespace mobile.Services
             }
             catch (Exception ex)
             {
+#if DEBUG
                 _logger.LogError(ex, "Erreur inattendue lors de la vérification de l'API");
-
+#endif
                 return StartupProcedureResult.Fail(
                     $"Erreur lors de la connexion à l'API: {ex.Message}",
                     canContinue: false);
@@ -193,27 +226,35 @@ namespace mobile.Services
         private async Task<StartupProcedureResult> ValidateUserSessionAsync ()
         {
             // Simulation de temps de chargement pour voir l'étape
+#if DEBUG
             await Task.Delay(500);
+#endif
 
             try
             {
                 var hasToken = await VerifyHasToken();
                 if (!hasToken)
                 {
+#if DEBUG
                     _logger.LogInformation("Aucun token, pas de session à valider");
+#endif
                     return StartupProcedureResult.Ok(); // Pas d'erreur, juste pas de session
                 }
 
                 var isTokenValid = await _secureStorage.IsTokenValidAsync();
                 if (!isTokenValid)
                 {
+#if DEBUG
                     _logger.LogWarning("❌ Token expiré, nettoyage de la session");
+#endif
                     await _secureStorage.ClearAllAsync();
                     await _authState.ClearStateAsync();
                     return StartupProcedureResult.Ok(); // Token expiré, redirection vers login
                 }
 
+#if DEBUG
                 _logger.LogInformation("✅ Token valide localement");
+#endif
 
                 //// Essayer de valider via l'API (mode online)
 
@@ -227,14 +268,18 @@ namespace mobile.Services
 
                     if (!isValid)
                     {
+#if DEBUG
                         _logger.LogWarning("❌ Session invalide selon l'API, nettoyage...");
+#endif
                         await _sessionValidation.ClearSessionAsync();
                         await _authState.ClearStateAsync();
                         return StartupProcedureResult.Ok(); // Session invalide, redirection vers login
                     }
 
                     // Session valide : récupérer les infos utilisateur depuis l'API
+#if DEBUG
                     _logger.LogInformation("✅ Session valide (mode online)");
+#endif
                     var currentUser = await _apiAuthService.GetCurrentUserAsync();
 
                     if (currentUser != null)
@@ -248,15 +293,19 @@ namespace mobile.Services
                         );
 
                         await _authState.SetStateAsync(authState);
+#if DEBUG
                         _logger.LogInformation("État d'authentification sauvegardé pour {Email}", currentUser.Email);
+#endif
                     }
 
                     return StartupProcedureResult.Ok();
                 }
                 catch (ApiUnavailableException ex)
                 {
-                    // API non joignable, mais token valide localement -> Mode offline
+#if DEBUG
                     _logger.LogWarning(ex, "📡 API non joignable, activation du mode offline");
+#endif
+                    // API non joignable, mais token valide localement -> Mode offline
 
                     // Extraire les infos du token JWT pour authentification offline
                     var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
@@ -274,13 +323,16 @@ namespace mobile.Services
                         );
 
                         await _authState.SetStateAsync(authState);
+#if DEBUG
                         _logger.LogInformation("✅ Authentification offline réussie pour {Email}", email);
-
+#endif
                         return StartupProcedureResult.Ok();
                     }
                     else
                     {
+#if DEBUG
                         _logger.LogWarning("❌ Impossible d'extraire les infos du token");
+#endif
                         await _secureStorage.ClearAllAsync();
                         await _authState.ClearStateAsync();
                         return StartupProcedureResult.Fail("Impossible d'extraire les infos du token", canContinue: true);
@@ -289,7 +341,9 @@ namespace mobile.Services
             }
             catch (Exception ex)
             {
+#if DEBUG
                 _logger.LogError(ex, "Erreur lors de la validation de session");
+#endif
                 // On continue même si la validation échoue
                 return StartupProcedureResult.Fail("Erreur lors de la validation de session", canContinue: false);
             }
@@ -304,10 +358,15 @@ namespace mobile.Services
 
             if (!hasToken)
             {
+#if DEBUG
                 _logger.LogInformation("Aucun token, pas de session à valider");
+#endif
                 return !hasToken; // Pas d'erreur, juste pas de session
             }
 
+#if DEBUG
+            _logger.LogInformation("✅ Token valide localement");
+#endif
             return hasToken;
         }
     }
