@@ -89,7 +89,7 @@ Write-Host "--- Step 2: Building Release ---" -ForegroundColor Green
 Push-Location $MobileFolder
 
 Write-Host "Building Release version..." -ForegroundColor Cyan
-dotnet build -c Release -v minimal
+dotnet build -c Release -v normal
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Release build failed" -ForegroundColor Red
