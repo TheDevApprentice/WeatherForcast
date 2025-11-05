@@ -1,4 +1,4 @@
-namespace mobile.Services.Exceptions
+namespace mobile.Exceptions
 {
     /// <summary>
     /// Exception de base pour toutes les exceptions métier de l'application
