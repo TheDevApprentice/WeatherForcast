@@ -80,7 +80,8 @@
                     <!-- Bouton d'inscription -->
                     <Button Text="Créer mon compte"
                             Command="{Binding RegisterCommand}"
-                            IsEnabled="{Binding IsNotLoading}"
+                            IsEnabled="{Binding CanRegister}"
+                            Opacity="{Binding CanRegister, Converter={StaticResource BoolToOpacityConverter}}"
                             HeightRequest="50"
                             CornerRadius="8"
                             FontAttributes="Bold"
@@ -105,14 +106,17 @@
 
             <!-- Lien vers connexion -->
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
-                <Label Text="Déjà un compte ?" TextColor="{StaticResource Gray500}" />
-                <Label Text="Se connecter" 
-                       TextColor="{StaticResource Primary}"
-                       FontAttributes="Bold">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding NavigateToLoginCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
+                <Label Text="Déjà un compte ?" 
+                       TextColor="{StaticResource Gray500}"
+                       VerticalOptions="Center" />
+                <Button Text="Se connecter" 
+                        Command="{Binding NavigateToLoginCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        FontAttributes="Bold"
+                        BorderWidth="0"
+                        Padding="0"
+                        VerticalOptions="Center" />
             </HorizontalStackLayout>
 
         </VerticalStackLayout>

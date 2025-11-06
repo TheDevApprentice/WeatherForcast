@@ -11,6 +11,7 @@ namespace mobile.PageModels.Auth
         private readonly ISecureStorageService _secureStorage;
         private readonly ISignalRService _signalRService;
         private readonly INotificationService _notificationService;
+        private readonly INetworkMonitorService _networkMonitor;
 
         [ObservableProperty]
         private string firstName = string.Empty;
@@ -36,21 +37,41 @@ namespace mobile.PageModels.Auth
         [ObservableProperty]
         private bool hasError;
 
+        [ObservableProperty]
+        private bool isNetworkAvailable = true;
+
         public bool IsNotLoading => !IsLoading;
+        public bool CanRegister => IsNetworkAvailable && !IsLoading;
 
         public RegisterPageModel (
             IApiAuthService apiAuthService,
             ISecureStorageService secureStorage,
             ISignalRService signalRService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            INetworkMonitorService networkMonitor)
         {
             _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
             _signalRService = signalRService;
             _notificationService = notificationService;
+            _networkMonitor = networkMonitor;
 
             // S'abonner aux événements SignalR
             _signalRService.VerificationEmailSent += OnVerificationEmailSent;
+
+            // S'abonner aux changements de connectivité
+            _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
+            
+            // Initialiser l'état réseau
+            IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
+        }
+
+        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                IsNetworkAvailable = access == NetworkAccess.Internet;
+            });
         }
 
         [RelayCommand]
@@ -180,6 +201,12 @@ namespace mobile.PageModels.Auth
         partial void OnIsLoadingChanged (bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
+            OnPropertyChanged(nameof(CanRegister));
+        }
+
+        partial void OnIsNetworkAvailableChanged(bool value)
+        {
+            OnPropertyChanged(nameof(CanRegister));
         }
 
         private async void OnVerificationEmailSent (object? sender, EmailNotification notification)

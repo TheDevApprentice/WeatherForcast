@@ -7,6 +7,7 @@ namespace mobile
     public partial class AppShell : Shell
     {
         private readonly IOfflineBannerManager _bannerManager;
+        private INetworkMonitorService? _networkMonitor;
 
         public AppShell (IOfflineBannerManager bannerManager)
         {
@@ -32,8 +33,32 @@ namespace mobile
         /// </summary>
         public void InitializeNetworkMonitor (INetworkMonitorService networkMonitor)
         {
+            _networkMonitor = networkMonitor;
+            _networkMonitor.ConnectivityChanged += OnNetworkConnectivityChanged;
+            
             _bannerManager.Initialize(networkMonitor);
             _bannerManager.ApplyToCurrentPage();
+            
+            // Initialiser l'état du bouton de déconnexion
+            UpdateLogoutButtonState();
+        }
+
+        private void OnNetworkConnectivityChanged(object? sender, NetworkAccess access)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                UpdateLogoutButtonState();
+            });
+        }
+
+        private void UpdateLogoutButtonState()
+        {
+            if (_networkMonitor != null && LogoutButton != null)
+            {
+                bool isOnline = _networkMonitor.IsNetworkAvailable;
+                LogoutButton.IsEnabled = isOnline;
+                LogoutButton.Opacity = isOnline ? 1.0 : 0.5;
+            }
         }
 
         /// <summary>
@@ -173,6 +198,23 @@ namespace mobile
         {
             try
             {
+                // Vérifier la connexion réseau
+                if (_networkMonitor != null && !_networkMonitor.IsNetworkAvailable)
+                {
+                    await DisplayAlert("Hors ligne", "Vous devez être connecté à Internet pour vous déconnecter.", "OK");
+                    return;
+                }
+
+                // Afficher une confirmation
+                bool confirm = await DisplayAlert(
+                    "Déconnexion",
+                    "Êtes-vous sûr de vouloir vous déconnecter ?",
+                    "Oui",
+                    "Non");
+
+                if (!confirm)
+                    return;
+
                 // Récupérer les services
                 var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
                 var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();

@@ -63,6 +63,7 @@ namespace mobile
                 HeightRequest = 44,
                 Padding = new Thickness(12, 0),
                 HorizontalOptions = LayoutOptions.Fill,
+                InputTransparent = true, // Permet aux clics de passer à travers
                 Content = new HorizontalStackLayout
                 {
                     Spacing = 10,

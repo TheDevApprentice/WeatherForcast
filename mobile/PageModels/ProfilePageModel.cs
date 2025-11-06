@@ -8,6 +8,7 @@ namespace mobile.PageModels
     {
         private readonly IAuthenticationStateService _authStateService;
         private readonly ILogger<ProfilePageModel> _logger;
+        private readonly INetworkMonitorService _networkMonitor;
 
         [ObservableProperty]
         private string userName = "Utilisateur";
@@ -18,14 +19,53 @@ namespace mobile.PageModels
         [ObservableProperty]
         private string initials = "U";
 
+        [ObservableProperty]
+        private bool isNetworkAvailable = true;
+
+        public bool CanLogout => IsNetworkAvailable;
+
+        // Sur desktop, le bouton de déconnexion est dans le Flyout
+        public bool ShowLogoutButton
+        {
+            get
+            {
+#if ANDROID || IOS
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         public ProfilePageModel (
             IAuthenticationStateService authStateService,
-            ILogger<ProfilePageModel> logger)
+            ILogger<ProfilePageModel> logger,
+            INetworkMonitorService networkMonitor)
         {
             _authStateService = authStateService;
             _logger = logger;
+            _networkMonitor = networkMonitor;
+
+            // S'abonner aux changements de connectivité
+            _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
+            
+            // Initialiser l'état réseau
+            IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
 
             LoadUserInfo();
+        }
+
+        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                IsNetworkAvailable = access == NetworkAccess.Internet;
+            });
+        }
+
+        partial void OnIsNetworkAvailableChanged(bool value)
+        {
+            OnPropertyChanged(nameof(CanLogout));
         }
 
         private async void LoadUserInfo ()

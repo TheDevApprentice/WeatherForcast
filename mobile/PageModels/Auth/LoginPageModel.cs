@@ -11,6 +11,7 @@ namespace mobile.PageModels.Auth
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
         private readonly ISavedProfilesService _savedProfiles;
+        private readonly INetworkMonitorService _networkMonitor;
 
         [ObservableProperty]
         private string email = string.Empty;
@@ -39,19 +40,39 @@ namespace mobile.PageModels.Auth
         [ObservableProperty]
         private bool showProfileSelection = true;
 
+        [ObservableProperty]
+        private bool isNetworkAvailable = true;
+
         public bool IsNotLoading => !IsLoading;
         public bool ShowClassicLogin => !ShowProfileSelection && SelectedProfile == null;
+        public bool CanLogin => IsNetworkAvailable && !IsLoading;
 
         public LoginPageModel (
             IApiAuthService apiAuthService,
             ISecureStorageService secureStorage,
             IAuthenticationStateService authState,
-            ISavedProfilesService savedProfilesService)
+            ISavedProfilesService savedProfilesService,
+            INetworkMonitorService networkMonitor)
         {
             _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
             _authState = authState;
             _savedProfiles = savedProfilesService;
+            _networkMonitor = networkMonitor;
+
+            // S'abonner aux changements de connectivité
+            _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
+            
+            // Initialiser l'état réseau
+            IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
+        }
+
+        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                IsNetworkAvailable = access == NetworkAccess.Internet;
+            });
         }
 
         [RelayCommand]
@@ -176,6 +197,12 @@ namespace mobile.PageModels.Auth
         partial void OnIsLoadingChanged (bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
+            OnPropertyChanged(nameof(CanLogin));
+        }
+
+        partial void OnIsNetworkAvailableChanged(bool value)
+        {
+            OnPropertyChanged(nameof(CanLogin));
         }
 
         partial void OnShowProfileSelectionChanged (bool value)

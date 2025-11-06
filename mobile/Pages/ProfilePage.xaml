@@ -194,10 +194,13 @@
                     </Grid>
                 </Border>
                 
-                <!-- Card Déconnexion avec Fluent Design -->
+                <!-- Card Déconnexion avec Fluent Design (visible uniquement sur mobile) -->
                 <Border StrokeShape="RoundRectangle 12"
                         BackgroundColor="{AppThemeBinding Light=#E53935, Dark=#tranparent}"
-                        StrokeThickness="0">
+                        StrokeThickness="0"
+                        IsVisible="{Binding ShowLogoutButton}"
+                        IsEnabled="{Binding CanLogout}"
+                        Opacity="{Binding CanLogout, Converter={StaticResource BoolToOpacityConverter}}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding LogoutCommand}" />
                     </Border.GestureRecognizers>

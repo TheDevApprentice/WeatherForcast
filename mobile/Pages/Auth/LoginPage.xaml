@@ -104,21 +104,16 @@
                 </Grid>
                 
                 <!-- Lien "Se connecter avec un autre compte" -->
-                <Border BackgroundColor="Transparent" 
+                <Button Text="Se connecter avec un autre compte"
+                        Command="{Binding UseAnotherAccountCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        BorderWidth="0"
                         Padding="10,5"
                         HorizontalOptions="Center"
-                        Margin="0,5">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding UseAnotherAccountCommand}" />
-                    </Border.GestureRecognizers>
-                    
-                    <Label Text="Se connecter avec un autre compte"
-                           TextColor="{StaticResource Primary}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           TextDecorations="Underline"
-                           HorizontalOptions="Center" />
-                </Border>
+                        Margin="0,5" />
                         
             </VerticalStackLayout>
 
@@ -185,7 +180,8 @@
                         <!-- Bouton de connexion -->
                         <Button Text="Se connecter"
                                 Command="{Binding LoginCommand}"
-                                IsEnabled="{Binding IsNotLoading}"
+                                IsEnabled="{Binding CanLogin}"
+                                Opacity="{Binding CanLogin, Converter={StaticResource BoolToOpacityConverter}}"
                                 HeightRequest="50"
                                 CornerRadius="8"
                                 FontAttributes="Bold"
@@ -239,7 +235,8 @@
                     <!-- Bouton de connexion -->
                     <Button Text="Se connecter"
                             Command="{Binding LoginCommand}"
-                            IsEnabled="{Binding IsNotLoading}"
+                            IsEnabled="{Binding CanLogin}"
+                            Opacity="{Binding CanLogin, Converter={StaticResource BoolToOpacityConverter}}"
                             HeightRequest="50"
                             CornerRadius="8"
                             FontAttributes="Bold"
@@ -264,14 +261,17 @@
 
             <!-- Lien vers inscription -->
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
-                <Label Text="Pas encore de compte ?" TextColor="{StaticResource Gray500}" />
-                <Label Text="Créer un compte" 
-                       TextColor="{StaticResource Primary}"
-                       FontAttributes="Bold">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding NavigateToRegisterCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
+                <Label Text="Pas encore de compte ?" 
+                       TextColor="{StaticResource Gray500}"
+                       VerticalOptions="Center" />
+                <Button Text="Créer un compte" 
+                        Command="{Binding NavigateToRegisterCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}"
+                        FontAttributes="Bold"
+                        BorderWidth="0"
+                        Padding="0"
+                        VerticalOptions="Center" />
             </HorizontalStackLayout>
 
             </VerticalStackLayout>

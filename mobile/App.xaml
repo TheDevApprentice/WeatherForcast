@@ -15,6 +15,7 @@
             <!-- Converters -->
             <converters:StringToColorConverter x:Key="StringToColorConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
