@@ -14,14 +14,20 @@ namespace mobile.Pages.Auth
         bool _isPasswordHidden = true;
         bool _isConfirmPasswordHidden = true;
 
+        RegisterPageModel _viewModel;
+
         public RegisterPage (RegisterPageModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;
+            _viewModel = viewModel;
+            
+            // S'abonner aux changements d'erreur
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
 
             SizeChanged += OnPageSizeChanged;
 
-            // Récupère les références XAML (évite problèmes d'intellisense/lints)
+            // Récupère les références XAML
             _firstNameGroup = this.FindByName<VerticalStackLayout>("FirstNameGroup");
             _lastNameGroup = this.FindByName<VerticalStackLayout>("LastNameGroup");
             _passwordGroup = this.FindByName<VerticalStackLayout>("PasswordGroup");
@@ -107,6 +113,83 @@ namespace mobile.Pages.Auth
         {
             // Retour haptique pour le lien de navigation
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+        }
+
+        // Animations de pressed/released pour les boutons
+        async void OnButtonPressed (object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.ScaleTo(0.95, 100, Easing.CubicOut);
+            }
+        }
+
+        async void OnButtonReleased (object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
+        }
+
+        // Animations pour les liens
+        async void OnLinkPressed (object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.FadeTo(0.6, 100);
+            }
+        }
+
+        async void OnLinkReleased (object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.FadeTo(1.0, 100);
+            }
+        }
+
+        // Navigation clavier entre les champs
+        void OnFirstNameCompleted (object sender, EventArgs e)
+        {
+            LastNameEntry?.Focus();
+        }
+
+        void OnLastNameCompleted (object sender, EventArgs e)
+        {
+            EmailEntryRegister?.Focus();
+        }
+
+        void OnEmailCompleted (object sender, EventArgs e)
+        {
+            PasswordEntry?.Focus();
+        }
+
+        void OnPasswordCompleted (object sender, EventArgs e)
+        {
+            ConfirmPasswordEntry?.Focus();
+        }
+
+        void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_viewModel.HasError) && _viewModel.HasError)
+            {
+                MainThread.BeginInvokeOnMainThread(async () => await ShakeForm());
+            }
+        }
+
+        async Task ShakeForm()
+        {            
+            var form = this.FindByName<Frame>("RegisterForm");
+            if (form != null)
+            {
+                await form.TranslateTo(-15, 0, 50);
+                await form.TranslateTo(15, 0, 50);
+                await form.TranslateTo(-10, 0, 50);
+                await form.TranslateTo(10, 0, 50);
+                await form.TranslateTo(-5, 0, 50);
+                await form.TranslateTo(0, 0, 50);
+            }
         }
     }
 }

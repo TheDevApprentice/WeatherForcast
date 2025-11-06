@@ -11,7 +11,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="1">
             <!-- ========== VUE: SÉLECTION DE PROFIL ========== -->
-            <VerticalStackLayout IsVisible="{Binding ShowProfileSelection}" Spacing="15">
+            <VerticalStackLayout x:Name="ProfileSelectionView" IsVisible="{Binding ShowProfileSelection}" Spacing="15">
                 
                 <!-- Liste des profils sauvegardés -->
                 <CollectionView ItemsSource="{Binding SavedProfiles}" SelectionMode="None" Margin="0">
@@ -105,6 +105,8 @@
                 <Button Text="Se connecter avec un autre compte"
                         Command="{Binding UseAnotherAccountCommand}"
                         Clicked="OnUseAnotherAccountClicked"
+                        Pressed="OnLinkPressed"
+                        Released="OnLinkReleased"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontSize="14"
@@ -117,12 +119,14 @@
             </VerticalStackLayout>
 
             <!-- ========== VUE: PROFIL SÉLECTIONNÉ (Mot de passe) ========== -->
-            <VerticalStackLayout IsVisible="{Binding SelectedProfile, Converter={StaticResource IsNotNullConverter}}" Spacing="15">
+            <VerticalStackLayout x:Name="SelectedProfileView" IsVisible="{Binding SelectedProfile, Converter={StaticResource IsNotNullConverter}}" Spacing="15">
                 
                 <!-- Bouton retour -->
                 <Button Text="← Retour aux profils"
                         Command="{Binding BackToProfilesCommand}"
                         Clicked="OnBackToProfilesClicked"
+                        Pressed="OnLinkPressed"
+                        Released="OnLinkReleased"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         HorizontalOptions="Start"
@@ -182,6 +186,8 @@
                                 Command="{Binding LoginCommand}"
                                 IsEnabled="{Binding CanLogin}"
                                 Opacity="{Binding CanLogin, Converter={StaticResource BoolToOpacityConverter}}"
+                                Pressed="OnButtonPressed"
+                                Released="OnButtonReleased"
                                 HeightRequest="50"
                                 CornerRadius="8"
                                 FontAttributes="Bold"
@@ -206,7 +212,7 @@
             </VerticalStackLayout>
 
             <!-- ========== VUE: LOGIN CLASSIQUE ========== -->
-            <VerticalStackLayout IsVisible="{Binding ShowClassicLogin}" Spacing="15">
+            <VerticalStackLayout x:Name="ClassicLoginView" IsVisible="{Binding ShowClassicLogin}" Spacing="15">
             
             <!-- Formulaire de connexion -->
             <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="White">
@@ -214,17 +220,21 @@
                     
                     <!-- Email -->
                     <Label Text="Email" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
-                    <Entry Text="{Binding Email}"
+                    <Entry x:Name="EmailEntry"
+                           Text="{Binding Email}"
                            Placeholder="votre@email.com"
                            Keyboard="Email"
-                           ReturnType="Next" />
+                           ReturnType="Next"
+                           Completed="OnEmailCompleted" />
 
                     <!-- Password -->
                     <Label Text="Mot de passe" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
-                    <Entry Text="{Binding Password}"
+                    <Entry x:Name="PasswordEntryClassic"
+                           Text="{Binding Password}"
                            Placeholder="••••••••"
                            IsPassword="True"
-                           ReturnType="Done" />
+                           ReturnType="Done"
+                           ReturnCommand="{Binding LoginCommand}" />
 
                     <!-- Message d'erreur -->
                     <Label Text="{Binding ErrorMessage}"
@@ -237,6 +247,8 @@
                             Command="{Binding LoginCommand}"
                             IsEnabled="{Binding CanLogin}"
                             Opacity="{Binding CanLogin, Converter={StaticResource BoolToOpacityConverter}}"
+                            Pressed="OnButtonPressed"
+                            Released="OnButtonReleased"
                             HeightRequest="50"
                             CornerRadius="8"
                             FontAttributes="Bold"
@@ -268,6 +280,8 @@
                 <Button Text="Créer un compte" 
                         Command="{Binding NavigateToRegisterCommand}"
                         Clicked="OnNavigateToRegisterClicked"
+                        Pressed="OnLinkPressed"
+                        Released="OnLinkReleased"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontAttributes="Bold"

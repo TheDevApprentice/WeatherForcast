@@ -41,26 +41,32 @@
                     <!-- Prénom -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
                         <Label Text="Prénom" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
-                        <Entry Text="{Binding FirstName}"
+                        <Entry x:Name="FirstNameEntry"
+                               Text="{Binding FirstName}"
                                Placeholder="Jean"
-                               ReturnType="Next" />
+                               ReturnType="Next"
+                               Completed="OnFirstNameCompleted" />
                     </VerticalStackLayout>
 
                     <!-- Nom -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
                         <Label Text="Nom" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
-                        <Entry Text="{Binding LastName}"
+                        <Entry x:Name="LastNameEntry"
+                               Text="{Binding LastName}"
                                Placeholder="Dupont"
-                               ReturnType="Next" />
+                               ReturnType="Next"
+                               Completed="OnLastNameCompleted" />
                     </VerticalStackLayout>
 
                     <!-- Email -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="100%" Margin="0,0,0,10">
                         <Label Text="Email" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
-                        <Entry Text="{Binding Email}"
+                        <Entry x:Name="EmailEntryRegister"
+                               Text="{Binding Email}"
                                Placeholder="votre@email.com"
                                Keyboard="Email"
-                               ReturnType="Next" />
+                               ReturnType="Next"
+                               Completed="OnEmailCompleted" />
                     </VerticalStackLayout>
 
                     <!-- Password -->
@@ -72,7 +78,8 @@
                                    Text="{Binding Password}"
                                    Placeholder="••••••••"
                                    IsPassword="True"
-                                   ReturnType="Next" />
+                                   ReturnType="Next"
+                                   Completed="OnPasswordCompleted" />
                             <ImageButton x:Name="TogglePasswordButton"
                                          Grid.Column="1"
                                          BackgroundColor="Transparent"
@@ -94,7 +101,8 @@
                                    Text="{Binding ConfirmPassword}"
                                    Placeholder="••••••••"
                                    IsPassword="True"
-                                   ReturnType="Done" />
+                                   ReturnType="Done"
+                                   ReturnCommand="{Binding RegisterCommand}" />
                             <ImageButton x:Name="ToggleConfirmPasswordButton"
                                          Grid.Column="1"
                                          BackgroundColor="Transparent"
@@ -117,14 +125,17 @@
 
                     <!-- Bouton d'inscription -->
                     <Grid FlexLayout.Basis="100%" Margin="0,10,0,0">
-                        <Button Text="Créer mon compte"
+                        <Button x:Name="RegisterButton"
+                                Text="Créer mon compte"
                                 Command="{Binding RegisterCommand}"
                                 IsEnabled="{Binding CanRegister}"
                                 Opacity="{Binding CanRegister, Converter={StaticResource BoolToOpacityConverter}}"
                                 HeightRequest="50"
                                 CornerRadius="8"
                                 FontAttributes="Bold"
-                                TextColor="White">
+                                TextColor="White"
+                                Pressed="OnButtonPressed"
+                                Released="OnButtonReleased">
                             <Button.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
@@ -154,6 +165,8 @@
                 <Button Text="Se connecter" 
                         Command="{Binding NavigateToLoginCommand}"
                         Clicked="OnNavigateToLoginClicked"
+                        Pressed="OnLinkPressed"
+                        Released="OnLinkReleased"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontAttributes="Bold"
