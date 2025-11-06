@@ -194,33 +194,22 @@
                     </Grid>
                 </Border>
                 
-                <!-- Card Déconnexion avec Fluent Design (visible uniquement sur mobile) -->
-                <Border StrokeShape="RoundRectangle 12"
-                        BackgroundColor="{AppThemeBinding Light=#E53935, Dark=#tranparent}"
-                        StrokeThickness="0"
+                <!-- Bouton Déconnexion (visible uniquement sur mobile) -->
+                <Button Text="Déconnexion"
+                        Command="{Binding LogoutCommand}"
+                        BackgroundColor="{AppThemeBinding Light=#E53935, Dark=Transparent}"
+                        TextColor="{AppThemeBinding Light=White, Dark=#E53935}"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        CornerRadius="12"
+                        HeightRequest="56"
                         IsVisible="{Binding ShowLogoutButton}"
                         IsEnabled="{Binding CanLogout}"
                         Opacity="{Binding CanLogout, Converter={StaticResource BoolToOpacityConverter}}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                    </Border.GestureRecognizers>
-                    <Border.Shadow>
+                    <Button.Shadow>
                         <Shadow Brush="#E53935" Opacity="0.04" Radius="8" Offset="0,2" />
-                    </Border.Shadow>
-                    
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <!-- Texte -->
-                        <VerticalStackLayout Grid.Column="1" 
-                                           Spacing="2"
-                                             HorizontalOptions="Center"
-                                           VerticalOptions="Center">
-                            <Label Text="Déconnexion"
-                                   FontSize="16"
-                                   FontAttributes="Bold"
-                                   TextColor="#E53935"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
+                    </Button.Shadow>
+                </Button>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>

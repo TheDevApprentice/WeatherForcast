@@ -66,6 +66,9 @@ namespace mobile.PageModels
         partial void OnIsNetworkAvailableChanged(bool value)
         {
             OnPropertyChanged(nameof(CanLogout));
+            
+            // Notifier la commande pour qu'elle se réévalue
+            LogoutCommand.NotifyCanExecuteChanged();
         }
 
         private async void LoadUserInfo ()
@@ -135,7 +138,7 @@ namespace mobile.PageModels
             await Shell.Current.DisplayAlert("Paramètres", "Page de paramètres à venir", "OK");
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanLogout))]
         private async Task Logout ()
         {
             try
