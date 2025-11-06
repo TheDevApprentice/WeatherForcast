@@ -4,13 +4,18 @@
     "Projects": [
       {
         "Path": "api\\api.csproj",
-        "Action": "StartWithoutDebugging",
+        "Action": "Start",
         "DebugTarget": "Container (Dockerfile)"
       },
       {
         "Path": "application\\application.csproj",
-        "Action": "StartWithoutDebugging",
+        "Action": "Start",
         "DebugTarget": "Container (Dockerfile)"
+      },
+      {
+        "Path": "mobile\\mobile.csproj",
+        "Action": "Start",
+        "DebugTarget": "Windows Machine"
       }
     ]
   }
