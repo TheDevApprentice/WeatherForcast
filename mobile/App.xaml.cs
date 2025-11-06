@@ -68,10 +68,11 @@ namespace mobile
         {
             Shell shell;
             var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
+            var bannerManager = _serviceProvider.GetRequiredService<IOfflineBannerManager>();
 
 #if ANDROID || IOS
             // Sur mobile : utiliser AppShellMobile avec TabBar
-            var mobileShell = new AppShellMobile();
+            var mobileShell = new AppShellMobile(bannerManager);
             shell = mobileShell;
             _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
             
@@ -79,7 +80,7 @@ namespace mobile
             mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else
             // Sur desktop : utiliser AppShell avec Flyout
-            var desktopShell = new AppShell();
+            var desktopShell = new AppShell(bannerManager);
             shell = desktopShell;
             
             // Désactiver le flyout pendant le splash

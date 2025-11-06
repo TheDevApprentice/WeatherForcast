@@ -53,6 +53,7 @@ namespace mobile
             builder.Services.AddSingleton<IAuthenticationStateService, AuthenticationStateService>();
             builder.Services.AddSingleton<ISavedProfilesService, SavedProfilesService>();
             builder.Services.AddSingleton<INetworkMonitorService, NetworkMonitorService>();
+            builder.Services.AddSingleton<IOfflineBannerManager, OfflineBannerManager>();
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
             builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
             builder.Services.AddSingleton<IStartupService, StartupService>();
