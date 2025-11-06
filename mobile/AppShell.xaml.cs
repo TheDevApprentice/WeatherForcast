@@ -349,7 +349,7 @@ namespace mobile
                     }
 
                     // Ajouter le bandeau à la ligne 0
-                    Grid.SetRow(_offlineBannerView, 0);
+                    grid.SetRow(_offlineBannerView, 0);
                     grid.Children.Insert(0, _offlineBannerView);
                 }
                 else if (!shouldShowBanner && existingBanner != null)
@@ -380,12 +380,12 @@ namespace mobile
                     }
                 };
 
-                Grid.SetRow(_offlineBannerView, 0);
+                wrapperGrid.SetRow(_offlineBannerView, 0);
                 wrapperGrid.Children.Add(_offlineBannerView);
 
                 if (originalContent != null)
                 {
-                    Grid.SetRow(originalContent, 1);
+                    wrapperGrid.SetRow(originalContent, 1);
                     wrapperGrid.Children.Add(originalContent);
                 }
 
