@@ -9,7 +9,7 @@
              BackgroundColor="{StaticResource LightBackground}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+        <VerticalStackLayout Padding="20" Spacing="30">
             <!-- ========== VUE: SÉLECTION DE PROFIL ========== -->
             <VerticalStackLayout IsVisible="{Binding ShowProfileSelection}" Spacing="15">
                 
@@ -17,7 +17,7 @@
                 <CollectionView ItemsSource="{Binding SavedProfiles}" SelectionMode="None">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:SavedUserProfile">
-                            <Border Padding="0" Margin="0,5" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                            <Border HeightRequest="95" Padding="0" Margin="0,0,0,20" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12">
                                 <Border.Shadow>
                                     <Shadow Brush="Black" Opacity="0.1" Radius="8" Offset="0,2" />
                                 </Border.Shadow>
@@ -25,13 +25,14 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnProfileCardTapped" />
                                 </Border.GestureRecognizers>
-                                
-                                <Grid Padding="15" BackgroundColor="Transparent">
-                                    <Grid ColumnDefinitions="60,*,Auto" ColumnSpacing="15">
+
+                                <Grid Padding="15" Margin="0,0,0,0" BackgroundColor="Transparent">
+                                    <Grid ColumnDefinitions="70,*,Auto" Margin="0,0,0,0" Padding="0,0,0,0" ColumnSpacing="15">
                                     <!-- Avatar avec initiales -->
                                     <Border Grid.Column="0" 
                                             WidthRequest="60" 
                                             HeightRequest="60"
+                                            Margin="0,0,0,0"
                                             StrokeThickness="0"
                                             StrokeShape="RoundRectangle 30">
                                         <Border.Background>

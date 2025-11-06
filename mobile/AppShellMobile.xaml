@@ -11,21 +11,30 @@
     <!-- TabBar pour iOS et Android avec style moderne -->
     <TabBar>
         <!-- Tab Dashboard -->
-        <Tab Title="Dashboard" >
+        <Tab Title="Dashboard">
+            <Tab.Icon>
+                <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE80F;" />
+            </Tab.Icon>
             <ShellContent
                 ContentTemplate="{DataTemplate pages:MainPage}"
                 Route="main" />
         </Tab>
 
         <!-- Tab Prévisions -->
-        <Tab Title="Prévisions" >
+        <Tab Title="Prévisions">
+            <Tab.Icon>
+                <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE706;" />
+            </Tab.Icon>
             <ShellContent
                 ContentTemplate="{DataTemplate pages:ForecastsPage}"
                 Route="forecasts" />
         </Tab>
 
         <!-- Tab Profil -->
-        <Tab Title="Profil" >
+        <Tab Title="Profil">
+            <Tab.Icon>
+                <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE716;" />
+            </Tab.Icon>
             <ShellContent
                 ContentTemplate="{DataTemplate pages:ProfilePage}"
                 Route="profile" />

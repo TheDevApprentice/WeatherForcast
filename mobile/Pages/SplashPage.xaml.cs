@@ -65,9 +65,9 @@ namespace mobile.Pages
                 // Mettre à jour l'icône avec des glyphes Segoe Fluent Icons
                 StatusIcon.Text = procedure.Status switch
                 {
-                    StartupProcedureStatus.Running => "\uE895", // Sync icon
-                    StartupProcedureStatus.Success => "\uE73E", // CheckMark icon
-                    StartupProcedureStatus.Failed => "\uE711",  // Error icon
+                    StartupProcedureStatus.Running => "\uF16A", // Sync icon
+                    StartupProcedureStatus.Success => "\uE930", // CheckMark icon
+                    StartupProcedureStatus.Failed => "\uEB90",  // Error icon
                     _ => ""
                 };
 

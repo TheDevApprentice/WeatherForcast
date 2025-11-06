@@ -25,7 +25,7 @@ namespace mobile
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("SegoeUI-Semibold.ttf", "SegoeSemibold");
-                    fonts.AddFont("FluentSystemIcons-Filled.ttf", "FluentIcons");
+                    fonts.AddFont("FluentSystemIcons-Regular.ttf", "FluentIcons");
                     fonts.AddFont("SegMDL2.ttf", "SegoeMDL2");
                 });
 

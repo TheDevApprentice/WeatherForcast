@@ -42,11 +42,11 @@
             <!-- Étape en cours - Design épuré -->
             <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <!-- Icône avec Segoe Fluent Icons -->
+                    <!-- Icône avec Fluent Icons (cross-platform) -->
                     <Label x:Name="StatusIcon"
                            Text=""
                            FontSize="18"
-                           FontFamily="Segoe Fluent Icons"
+                           FontFamily="SegoeMDL2"
                            TextColor="{DynamicResource Primary}"
                            VerticalOptions="Center"/>
                     
@@ -98,8 +98,8 @@
                 <Ellipse Fill="{AppThemeBinding Light=#FEF2F2, Dark=#3D1F1F}"
                          WidthRequest="56"
                          HeightRequest="56"/>
-                <Label Text="\uE783" 
-                       FontFamily="Segoe Fluent Icons"
+                <Label Text="\uEB90" 
+                       FontFamily="SegoeMDL2"
                        FontSize="28"
                        TextColor="{AppThemeBinding Light=#DC2626, Dark=#EF4444}"
                        HorizontalOptions="Center"
