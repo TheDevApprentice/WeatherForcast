@@ -1,3 +1,5 @@
+using mobile.Views;
+
 namespace mobile
 {
     /// <summary>
@@ -6,7 +8,7 @@ namespace mobile
     public class OfflineBannerManager : IOfflineBannerManager
     {
         private INetworkMonitorService? _networkMonitor;
-        private readonly Dictionary<ContentPage, Border> _pageBanners = new();
+        private readonly Dictionary<ContentPage, OfflineBanner> _pageBanners = new();
 
         /// <summary>
         /// Initialise le gestionnaire avec le service de monitoring réseau
@@ -55,45 +57,15 @@ namespace mobile
         /// <summary>
         /// Crée une nouvelle vue du bandeau hors ligne
         /// </summary>
-        private Border CreateOfflineBannerView()
+        private OfflineBanner CreateOfflineBannerView()
         {
-            return new Border
-            {
-                BackgroundColor = Color.FromArgb("#FF9800"), // Orange
-                HeightRequest = 44,
-                Padding = new Thickness(12, 0),
-                HorizontalOptions = LayoutOptions.Fill,
-                InputTransparent = true, // Permet aux clics de passer à travers
-                Content = new HorizontalStackLayout
-                {
-                    Spacing = 10,
-                    HorizontalOptions = LayoutOptions.Center,
-                    VerticalOptions = LayoutOptions.Center,
-                    Children =
-                    {
-                        new Label
-                        {
-                            Text = "⚠️",
-                            FontSize = 20,
-                            VerticalOptions = LayoutOptions.Center
-                        },
-                        new Label
-                        {
-                            Text = "Vous êtes hors ligne",
-                            FontSize = 14,
-                            FontAttributes = FontAttributes.Bold,
-                            TextColor = Colors.White,
-                            VerticalOptions = LayoutOptions.Center
-                        }
-                    }
-                }
-            };
+            return new OfflineBanner();
         }
 
         /// <summary>
         /// Applique ou retire le bandeau d'un Grid existant
         /// </summary>
-        private void ApplyToGrid(Grid grid, Border banner, bool shouldShowBanner)
+        private void ApplyToGrid(Grid grid, OfflineBanner banner, bool shouldShowBanner)
         {
             // Chercher si le bandeau existe déjà
             var existingBanner = grid.Children.FirstOrDefault(c => c == banner);
@@ -158,7 +130,7 @@ namespace mobile
         /// <summary>
         /// Wrappe le contenu de la page avec un Grid contenant le bandeau
         /// </summary>
-        private void WrapContentWithBanner(ContentPage page, Border banner)
+        private void WrapContentWithBanner(ContentPage page, OfflineBanner banner)
         {
             if (page.Content == null)
                 return;
