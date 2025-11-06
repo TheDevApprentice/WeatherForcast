@@ -5,6 +5,7 @@ using domain.Events.Admin;
 using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace domain.Services
@@ -19,7 +20,7 @@ namespace domain.Services
         private readonly IPublisher _publisher;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RoleManagementService(
+        public RoleManagementService (
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IPublisher publisher,
@@ -31,7 +32,7 @@ namespace domain.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<bool> AssignRoleAsync(string userId, string roleName)
+        public async Task<bool> AssignRoleAsync (string userId, string roleName)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -57,7 +58,7 @@ namespace domain.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> RemoveRoleAsync(string userId, string roleName)
+        public async Task<bool> RemoveRoleAsync (string userId, string roleName)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -80,7 +81,7 @@ namespace domain.Services
             return result.Succeeded;
         }
 
-        public async Task<IList<string>> GetUserRolesAsync(string userId)
+        public async Task<IList<string>> GetUserRolesAsync (string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return new List<string>();
@@ -88,7 +89,7 @@ namespace domain.Services
             return await _userManager.GetRolesAsync(user);
         }
 
-        public async Task<bool> IsInRoleAsync(string userId, string roleName)
+        public async Task<bool> IsInRoleAsync (string userId, string roleName)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -96,7 +97,7 @@ namespace domain.Services
             return await _userManager.IsInRoleAsync(user, roleName);
         }
 
-        public async Task<bool> AddClaimAsync(string userId, string claimType, string claimValue)
+        public async Task<bool> AddClaimAsync (string userId, string claimType, string claimValue)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -121,7 +122,7 @@ namespace domain.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> RemoveClaimAsync(string userId, string claimType, string claimValue)
+        public async Task<bool> RemoveClaimAsync (string userId, string claimType, string claimValue)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -146,7 +147,7 @@ namespace domain.Services
             return result.Succeeded;
         }
 
-        public async Task<IList<Claim>> GetUserClaimsAsync(string userId)
+        public async Task<IList<Claim>> GetUserClaimsAsync (string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return new List<Claim>();
@@ -154,7 +155,7 @@ namespace domain.Services
             return await _userManager.GetClaimsAsync(user);
         }
 
-        public async Task<bool> HasPermissionAsync(string userId, string permission)
+        public async Task<bool> HasPermissionAsync (string userId, string permission)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
@@ -180,9 +181,9 @@ namespace domain.Services
             return false;
         }
 
-        public async Task<IList<string>> GetAllRolesAsync()
+        public async Task<IList<string>> GetAllRolesAsync ()
         {
-            return _roleManager.Roles.Select(r => r.Name!).ToList();
+            return await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
         }
     }
 }

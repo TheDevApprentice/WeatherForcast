@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using mobile.Services.Exceptions;
+using mobile.Exceptions;
 
 namespace mobile.Services.ErrorHandling
 {
@@ -9,9 +9,9 @@ namespace mobile.Services.ErrorHandling
     /// </summary>
     public interface IErrorHandlingService
     {
-        Task HandleErrorAsync(Exception exception, string? context = null);
-        Task<T?> ExecuteSafelyAsync<T>(Func<Task<T>> action, string? context = null, T? defaultValue = default);
-        Task ExecuteSafelyAsync(Func<Task> action, string? context = null);
+        Task HandleErrorAsync (Exception exception, string? context = null);
+        Task<T?> ExecuteSafelyAsync<T> (Func<Task<T>> action, string? context = null, T? defaultValue = default);
+        Task ExecuteSafelyAsync (Func<Task> action, string? context = null);
     }
 
     public class ErrorHandlingService : IErrorHandlingService
@@ -20,7 +20,7 @@ namespace mobile.Services.ErrorHandling
         private readonly INotificationService _notificationService;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        public ErrorHandlingService(
+        public ErrorHandlingService (
             ILogger<ErrorHandlingService> logger,
             INotificationService notificationService)
         {
@@ -31,7 +31,7 @@ namespace mobile.Services.ErrorHandling
         /// <summary>
         /// Gère une erreur de manière centralisée
         /// </summary>
-        public async Task HandleErrorAsync(Exception exception, string? context = null)
+        public async Task HandleErrorAsync (Exception exception, string? context = null)
         {
             await _semaphore.WaitAsync();
 
@@ -62,7 +62,7 @@ namespace mobile.Services.ErrorHandling
                     else if (exception is AuthenticationException)
                     {
                         await _notificationService.ShowWarningAsync(message, title);
-                        
+
                         // Rediriger vers la page de connexion
                         await Shell.Current.GoToAsync("///login");
                     }
@@ -81,7 +81,7 @@ namespace mobile.Services.ErrorHandling
         /// <summary>
         /// Exécute une action de manière sécurisée avec gestion d'erreurs automatique
         /// </summary>
-        public async Task<T?> ExecuteSafelyAsync<T>(
+        public async Task<T?> ExecuteSafelyAsync<T> (
             Func<Task<T>> action,
             string? context = null,
             T? defaultValue = default)
@@ -100,7 +100,7 @@ namespace mobile.Services.ErrorHandling
         /// <summary>
         /// Exécute une action de manière sécurisée avec gestion d'erreurs automatique
         /// </summary>
-        public async Task ExecuteSafelyAsync(Func<Task> action, string? context = null)
+        public async Task ExecuteSafelyAsync (Func<Task> action, string? context = null)
         {
             try
             {
@@ -115,42 +115,42 @@ namespace mobile.Services.ErrorHandling
         /// <summary>
         /// Convertit une exception en message utilisateur-friendly
         /// </summary>
-        private (string Title, string Message) GetUserFriendlyMessage(Exception exception)
+        private (string Title, string Message) GetUserFriendlyMessage (Exception exception)
         {
             return exception switch
             {
                 AppException appEx => (GetTitleForErrorCode(appEx.ErrorCode), appEx.UserMessage),
-                
+
                 HttpRequestException => (
                     "Erreur de connexion",
                     "Impossible de se connecter au serveur. Vérifiez votre connexion Internet."
                 ),
-                
+
                 TaskCanceledException => (
                     "Timeout",
                     "L'opération a pris trop de temps et a été annulée. Veuillez réessayer."
                 ),
-                
+
                 UnauthorizedAccessException => (
                     "Accès refusé",
                     "Vous n'avez pas les permissions nécessaires pour cette action."
                 ),
-                
+
                 ArgumentNullException => (
                     "Données manquantes",
                     "Une donnée requise est manquante. Veuillez vérifier votre saisie."
                 ),
-                
+
                 InvalidOperationException => (
                     "Opération invalide",
                     "Cette opération n'est pas possible dans l'état actuel."
                 ),
-                
+
                 NotSupportedException => (
                     "Non supporté",
                     "Cette fonctionnalité n'est pas supportée sur votre appareil."
                 ),
-                
+
                 _ => (
                     "Erreur inattendue",
                     $"Une erreur inattendue s'est produite: {exception.Message}"
@@ -161,7 +161,7 @@ namespace mobile.Services.ErrorHandling
         /// <summary>
         /// Obtient un titre approprié selon le code d'erreur
         /// </summary>
-        private string GetTitleForErrorCode(string? errorCode)
+        private string GetTitleForErrorCode (string? errorCode)
         {
             return errorCode switch
             {

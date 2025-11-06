@@ -18,7 +18,7 @@ namespace mobile.Services.Handlers
         private const int BaseDelayMilliseconds = 1000;
         private static readonly Random _random = new();
 
-        public AuthenticatedHttpClientHandler(
+        public AuthenticatedHttpClientHandler (
             ISecureStorageService secureStorage,
             INetworkMonitorService networkMonitor,
             ILogger<AuthenticatedHttpClientHandler> logger)
@@ -28,7 +28,7 @@ namespace mobile.Services.Handlers
             _logger = logger;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync (
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
@@ -36,7 +36,7 @@ namespace mobile.Services.Handlers
             if (!_networkMonitor.IsNetworkAvailable)
             {
 #if DEBUG
-                _logger.LogWarning("📡 Pas de réseau disponible - Annulation de la requête {Method} {Url}", 
+                _logger.LogWarning("📡 Pas de réseau disponible - Annulation de la requête {Method} {Url}",
                     request.Method, request.RequestUri);
 #endif
                 throw new NetworkUnavailableExecption(
@@ -75,14 +75,14 @@ namespace mobile.Services.Handlers
                     }
 
                     // Gérer les erreurs réseau qui nécessitent un retry
-                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable || 
+                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
                         response.StatusCode == HttpStatusCode.BadGateway ||
                         response.StatusCode == HttpStatusCode.GatewayTimeout)
                     {
                         // Si c'est la dernière tentative, lever ApiUnavailableException
                         if (attempt == MaxRetries)
                         {
-                            _logger.LogWarning("API indisponible après {Attempts} tentatives - Code: {StatusCode}", 
+                            _logger.LogWarning("API indisponible après {Attempts} tentatives - Code: {StatusCode}",
                                 MaxRetries, response.StatusCode);
                             throw new ApiUnavailableException(
                                 $"API inaccessible après {MaxRetries} tentatives - Code {response.StatusCode}");
@@ -92,14 +92,14 @@ namespace mobile.Services.Handlers
                         var delay = CalculateBackoffDelay(attempt);
                         _logger.LogWarning("API indisponible (tentative {Attempt}/{Max}), nouvelle tentative dans {Delay}ms...",
                             attempt, MaxRetries, delay);
-                        
+
                         await Task.Delay(delay, cancellationToken);
                         continue; // Réessayer
                     }
 
                     // Pour les autres erreurs (4xx, 5xx non-réseau), gérer via HandleErrorResponseAsync
                     await HandleErrorResponseAsync(response, request);
-                    
+
                     // Si HandleErrorResponseAsync ne lève pas d'exception, retourner la réponse
                     return response;
                 }
@@ -143,24 +143,24 @@ namespace mobile.Services.Handlers
         /// </summary>
         /// <param name="attempt">Numéro de la tentative (1-based)</param>
         /// <returns>Délai en millisecondes</returns>
-        private static int CalculateBackoffDelay(int attempt)
+        private static int CalculateBackoffDelay (int attempt)
         {
             // Backoff exponentiel: 1s, 2s, 4s, 8s, etc.
             var exponentialDelay = BaseDelayMilliseconds * Math.Pow(2, attempt - 1);
-            
+
             // Ajouter un jitter aléatoire de 0-100ms pour éviter le thundering herd
             var jitter = _random.Next(0, 100);
-            
+
             // Limiter à un maximum de 10 secondes
             var totalDelay = Math.Min(exponentialDelay + jitter, 10000);
-            
+
             return (int)totalDelay;
         }
-    
-       /// <summary>
+
+        /// <summary>
         /// Transforme une réponse HTTP en erreur en exception typée
         /// </summary>
-        private async Task HandleErrorResponseAsync(HttpResponseMessage response, HttpRequestMessage request)
+        private async Task HandleErrorResponseAsync (HttpResponseMessage response, HttpRequestMessage request)
         {
             var statusCode = (int)response.StatusCode;
             var content = await response.Content.ReadAsStringAsync();
@@ -204,13 +204,13 @@ namespace mobile.Services.Handlers
 
                 case (HttpStatusCode)429: // Too Many Requests
                     _logger.LogWarning("Limite de taux atteinte: {Url}", request.RequestUri);
-                    
+
                     TimeSpan? retryAfter = null;
                     if (response.Headers.RetryAfter?.Delta != null)
                     {
                         retryAfter = response.Headers.RetryAfter.Delta;
                     }
-                    
+
                     throw new InvalidOperationException(
                         $"Limite de taux atteinte. Réessayez dans {retryAfter?.TotalSeconds ?? 60} secondes.");
 
