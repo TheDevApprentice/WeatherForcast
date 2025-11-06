@@ -25,7 +25,7 @@ namespace mobile
         /// <summary>
         /// Applique le bandeau sur la page courante
         /// </summary>
-        public void ApplyToCurrentPage()
+        public async void ApplyToCurrentPage()
         {
             if (_networkMonitor == null)
                 return;
@@ -34,7 +34,8 @@ namespace mobile
             if (currentPage == null)
                 return;
 
-            bool shouldShowBanner = !_networkMonitor.IsNetworkAvailable;
+            bool isOnline = _networkMonitor.IsNetworkAvailable;
+            bool shouldShowBanner = !isOnline;
 
             // Obtenir ou créer le bandeau pour cette page
             if (!_pageBanners.TryGetValue(currentPage, out var banner))
@@ -46,7 +47,15 @@ namespace mobile
             // Vérifier si la page a déjà un Grid comme contenu
             if (currentPage.Content is Grid grid)
             {
-                ApplyToGrid(grid, banner, shouldShowBanner);
+                // Si on vient de se reconnecter, afficher brièvement la bannière "connecté"
+                if (isOnline && grid.Children.Contains(banner))
+                {
+                    await ShowOnlineBannerThenHide(grid, banner);
+                }
+                else
+                {
+                    ApplyToGrid(grid, banner, shouldShowBanner);
+                }
             }
             else if (shouldShowBanner && currentPage.Content != null)
             {
@@ -63,9 +72,49 @@ namespace mobile
         }
 
         /// <summary>
+        /// Affiche brièvement la bannière "connecté" puis la cache
+        /// </summary>
+        private async Task ShowOnlineBannerThenHide(Grid grid, OfflineBanner banner)
+        {
+            // Changer l'état en "connecté"
+            banner.IsOnline = true;
+
+            // Attendre 2 secondes
+            await Task.Delay(2000);
+
+            // Animation de disparition (slide up + fade out)
+            await Task.WhenAll(
+                banner.TranslateTo(0, -44, 300, Easing.CubicIn),
+                banner.FadeTo(0, 300)
+            );
+
+            // Retirer le bandeau
+            grid.Children.Remove(banner);
+
+            // Vérifier s'il y a plus d'une RowDefinition avant de supprimer
+            if (grid.RowDefinitions.Count > 0)
+            {
+                grid.RowDefinitions.RemoveAt(0);
+
+                // Redécaler tous les enfants
+                foreach (var child in grid.Children)
+                {
+                    var currentRow = grid.GetRow(child);
+                    if (currentRow > 0)
+                        grid.SetRow(child, currentRow - 1);
+                }
+            }
+
+            // Réinitialiser l'état pour la prochaine fois
+            banner.IsOnline = false;
+            banner.TranslationY = 0;
+            banner.Opacity = 1;
+        }
+
+        /// <summary>
         /// Applique ou retire le bandeau d'un Grid existant
         /// </summary>
-        private void ApplyToGrid(Grid grid, OfflineBanner banner, bool shouldShowBanner)
+        private async void ApplyToGrid(Grid grid, OfflineBanner banner, bool shouldShowBanner)
         {
             // Chercher si le bandeau existe déjà
             var existingBanner = grid.Children.FirstOrDefault(c => c == banner);
@@ -102,12 +151,28 @@ namespace mobile
                     }
                 }
 
+                // Positionner le bandeau hors écran (en haut)
+                banner.TranslationY = -44;
+                banner.Opacity = 0;
+
                 // Ajouter le bandeau à la ligne 0
                 grid.SetRow(banner, 0);
                 grid.Children.Insert(0, banner);
+
+                // Animation d'apparition (slide down + fade in)
+                await Task.WhenAll(
+                    banner.TranslateTo(0, 0, 300, Easing.CubicOut),
+                    banner.FadeTo(1, 300)
+                );
             }
             else if (!shouldShowBanner && existingBanner != null)
             {
+                // Animation de disparition (slide up + fade out)
+                await Task.WhenAll(
+                    banner.TranslateTo(0, -44, 300, Easing.CubicIn),
+                    banner.FadeTo(0, 300)
+                );
+
                 // Retirer le bandeau
                 grid.Children.Remove(banner);
 
@@ -130,7 +195,7 @@ namespace mobile
         /// <summary>
         /// Wrappe le contenu de la page avec un Grid contenant le bandeau
         /// </summary>
-        private void WrapContentWithBanner(ContentPage page, OfflineBanner banner)
+        private async void WrapContentWithBanner(ContentPage page, OfflineBanner banner)
         {
             if (page.Content == null)
                 return;
@@ -145,6 +210,10 @@ namespace mobile
                 }
             };
 
+            // Positionner le bandeau hors écran (en haut)
+            banner.TranslationY = -44;
+            banner.Opacity = 0;
+
             wrapperGrid.SetRow(banner, 0);
             wrapperGrid.Children.Add(banner);
 
@@ -152,6 +221,12 @@ namespace mobile
             wrapperGrid.Children.Add(originalContent);
 
             page.Content = wrapperGrid;
+
+            // Animation d'apparition (slide down + fade in)
+            await Task.WhenAll(
+                banner.TranslateTo(0, 0, 300, Easing.CubicOut),
+                banner.FadeTo(1, 300)
+            );
         }
 
         /// <summary>
