@@ -104,6 +104,7 @@
                 <!-- Lien "Se connecter avec un autre compte" -->
                 <Button Text="Se connecter avec un autre compte"
                         Command="{Binding UseAnotherAccountCommand}"
+                        Clicked="OnUseAnotherAccountClicked"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontSize="14"
@@ -121,6 +122,7 @@
                 <!-- Bouton retour -->
                 <Button Text="← Retour aux profils"
                         Command="{Binding BackToProfilesCommand}"
+                        Clicked="OnBackToProfilesClicked"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         HorizontalOptions="Start"
@@ -265,6 +267,7 @@
                        VerticalOptions="Center" />
                 <Button Text="Créer un compte" 
                         Command="{Binding NavigateToRegisterCommand}"
+                        Clicked="OnNavigateToRegisterClicked"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontAttributes="Bold"

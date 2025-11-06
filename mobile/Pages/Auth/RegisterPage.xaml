@@ -153,6 +153,7 @@
                        VerticalOptions="Center" />
                 <Button Text="Se connecter" 
                         Command="{Binding NavigateToLoginCommand}"
+                        Clicked="OnNavigateToLoginClicked"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontAttributes="Bold"

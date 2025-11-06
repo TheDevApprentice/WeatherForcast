@@ -58,12 +58,18 @@ namespace mobile.Pages.Auth
 
         void OnTogglePasswordClicked (object sender, EventArgs e)
         {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
             _isPasswordHidden = !_isPasswordHidden;
             SetPasswordVisibility(_isPasswordHidden, isConfirm: false);
         }
 
         void OnToggleConfirmPasswordClicked (object sender, EventArgs e)
         {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
             _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
             SetPasswordVisibility(_isConfirmPasswordHidden, isConfirm: true);
         }
@@ -95,6 +101,12 @@ namespace mobile.Pages.Auth
                 Size = 18,
                 Color = iconColor
             };
+        }
+
+        void OnNavigateToLoginClicked (object sender, EventArgs e)
+        {
+            // Retour haptique pour le lien de navigation
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
         }
     }
 }
