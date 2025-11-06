@@ -9,15 +9,18 @@
              BackgroundColor="{StaticResource LightBackground}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="30">
+        <VerticalStackLayout Padding="30" Spacing="1">
             <!-- ========== VUE: SÉLECTION DE PROFIL ========== -->
             <VerticalStackLayout IsVisible="{Binding ShowProfileSelection}" Spacing="15">
                 
                 <!-- Liste des profils sauvegardés -->
-                <CollectionView ItemsSource="{Binding SavedProfiles}" SelectionMode="None">
+                <CollectionView ItemsSource="{Binding SavedProfiles}" SelectionMode="None" Margin="0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="7" />
+                    </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:SavedUserProfile">
-                            <Border HeightRequest="95" Padding="0" Margin="0,0,0,20" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                            <Border Padding="0"  BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12">
                                 <Border.Shadow>
                                     <Shadow Brush="Black" Opacity="0.1" Radius="8" Offset="0,2" />
                                 </Border.Shadow>
@@ -26,13 +29,10 @@
                                     <TapGestureRecognizer Tapped="OnProfileCardTapped" />
                                 </Border.GestureRecognizers>
 
-                                <Grid Padding="15" Margin="0,0,0,0" BackgroundColor="Transparent">
-                                    <Grid ColumnDefinitions="70,*,Auto" Margin="0,0,0,0" Padding="0,0,0,0" ColumnSpacing="15">
+                                <Grid Padding="5"  BackgroundColor="Transparent">
+                                    <Grid ColumnDefinitions="70,*,Auto" ColumnSpacing="15">
                                     <!-- Avatar avec initiales -->
                                     <Border Grid.Column="0" 
-                                            WidthRequest="60" 
-                                            HeightRequest="60"
-                                            Margin="0,0,0,0"
                                             StrokeThickness="0"
                                             StrokeShape="RoundRectangle 30">
                                         <Border.Background>
@@ -66,16 +66,13 @@
                                     
                                     <!-- Bouton supprimer -->
                                     <ImageButton Grid.Column="2"
-                                                WidthRequest="32"
-                                                HeightRequest="32"
                                                 VerticalOptions="Center"
-                                                Background="Transparent"
                                                 Padding="0"
-                                                CornerRadius="16"
+                                                BackgroundColor="Transparent"
                                                 Clicked="OnDeleteProfileClicked">
                                         <ImageButton.Source>
                                             <FontImageSource FontFamily="SegoeMDL2" 
-                                                           Glyph="&#xE74D;" 
+                                                           Glyph="&#xECC9;" 
                                                            Size="18"
                                                            Color="{StaticResource Gray500}" />
                                         </ImageButton.Source>
@@ -264,12 +261,14 @@
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                 <Label Text="Pas encore de compte ?" 
                        TextColor="{StaticResource Gray500}"
+                       FontSize="14"
                        VerticalOptions="Center" />
                 <Button Text="Créer un compte" 
                         Command="{Binding NavigateToRegisterCommand}"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource Primary}"
                         FontAttributes="Bold"
+                        FontSize="14"
                         BorderWidth="0"
                         Padding="0"
                         VerticalOptions="Center" />
