@@ -144,12 +144,13 @@
                 </Border>
 
                 <!-- Card Paramètres avec Fluent Design -->
-                <Border StrokeShape="RoundRectangle 12"
+                <Border x:Name="SettingsCard"
+                        StrokeShape="RoundRectangle 12"
                         BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
                         StrokeThickness="0"
                         Padding="0">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" Tapped="OnSettingsCardTapped" />
                     </Border.GestureRecognizers>
                     <Border.Shadow>
                         <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
@@ -195,8 +196,11 @@
                 </Border>
                 
                 <!-- Bouton Déconnexion (visible uniquement sur mobile) -->
-                <Button Text="Déconnexion"
+                <Button x:Name="LogoutButton"
+                        Text="Déconnexion"
                         Command="{Binding LogoutCommand}"
+                        Pressed="OnButtonPressed"
+                        Released="OnButtonReleased"
                         BackgroundColor="{AppThemeBinding Light=#E53935, Dark=Transparent}"
                         TextColor="{AppThemeBinding Light=White, Dark=#E53935}"
                         FontSize="16"

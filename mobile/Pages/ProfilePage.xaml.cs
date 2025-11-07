@@ -32,8 +32,18 @@ namespace mobile.Pages
             }
         }
 
-        private void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
+        private async void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
         {
+            // Retour haptique sur toggle
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
+            // Animation subtile du switch
+            if (sender is Switch switchControl)
+            {
+                await switchControl.ScaleTo(1.05, 100, Easing.CubicOut);
+                await switchControl.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
+            
             if (Application.Current != null)
             {
                 Application.Current.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
@@ -251,6 +261,39 @@ namespace mobile.Pages
                 a.Green + (b.Green - a.Green) * t,
                 a.Blue + (b.Blue - a.Blue) * t,
                 a.Alpha + (b.Alpha - a.Alpha) * t);
+        }
+
+        // Animations UX pour les interactions
+        private async void OnSettingsCardTapped(object sender, TappedEventArgs e)
+        {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
+            if (sender is Border border)
+            {
+                // Animation de scale
+                await border.ScaleTo(0.97, 100, Easing.CubicOut);
+                await border.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
+        }
+
+        async void OnButtonPressed(object sender, EventArgs e)
+        {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
+            if (sender is Button button)
+            {
+                await button.ScaleTo(0.95, 100, Easing.CubicOut);
+            }
+        }
+
+        async void OnButtonReleased(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
         }
     }
 }
