@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Frame xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       x:Class="mobile.Controls.NotificationCard"
-       x:Name="CardFrame"
-       Padding="16,12"
-       CornerRadius="12"
-       HasShadow="True"
-       BorderColor="Transparent"
-       BackgroundColor="White"
-       HorizontalOptions="End"
-       VerticalOptions="Start"
-       MinimumWidthRequest="300"
-       MaximumWidthRequest="400"
-       Margin="16,8"
-       IsVisible="False"
-       Opacity="0"
-       TranslationX="400">
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Controls.NotificationCard"
+             HorizontalOptions="End"
+             VerticalOptions="Start"
+             MinimumWidthRequest="300"
+             MaximumWidthRequest="400"
+             Margin="16,8"
+             IsVisible="False"
+             Opacity="0"
+             TranslationX="400">
+    
+    <Border x:Name="CardBorder"
+            Padding="16,12"
+            StrokeShape="RoundRectangle 12"
+            StrokeThickness="0"
+            BackgroundColor="{DynamicResource CardBackgroundColor}">
+        <Border.Shadow>
+            <Shadow Brush="{DynamicResource ShadowColor}" Opacity="0.15" Radius="12" Offset="0,4" />
+        </Border.Shadow>
     
     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" RowSpacing="4">
         <!-- Barre de couleur à gauche -->
@@ -33,14 +36,14 @@
             <Label x:Name="TitleLabel"
                    FontSize="14"
                    FontAttributes="Bold"
-                   TextColor="#1F2937"
+                   TextColor="{DynamicResource PrimaryTextColor}"
                    LineBreakMode="TailTruncation"
                    MaxLines="1"/>
             
             <!-- Message -->
             <Label x:Name="MessageLabel"
                    FontSize="13"
-                   TextColor="#6B7280"
+                   TextColor="{DynamicResource SecondaryTextColor}"
                    LineBreakMode="WordWrap"
                    MaxLines="3"/>
         </VerticalStackLayout>
@@ -61,7 +64,7 @@
             
             <Label Text="✕"
                    FontSize="16"
-                   TextColor="#9CA3AF"
+                   TextColor="{DynamicResource TertiaryTextColor}"
                    VerticalOptions="Center"
                    HorizontalOptions="Center"/>
         </Border>
@@ -72,7 +75,7 @@
                  Grid.ColumnSpan="3"
                  Grid.Row="1"
                  HeightRequest="2"
-                 BackgroundColor="#E5E7EB"
+                 BackgroundColor="{DynamicResource BorderColor}"
                  HorizontalOptions="Fill"
                  VerticalOptions="End"
                  Margin="0,8,0,-12">
@@ -81,4 +84,5 @@
             </BoxView.Clip>
         </BoxView>
     </Grid>
-</Frame>
+    </Border>
+</ContentView>

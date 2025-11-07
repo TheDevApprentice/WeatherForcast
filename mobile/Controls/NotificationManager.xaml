@@ -6,16 +6,18 @@
                 InputTransparent="True"
                 IsVisible="True"
                 BackgroundColor="Transparent"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
                 AbsoluteLayout.LayoutBounds="0,0,1,1"
                 AbsoluteLayout.LayoutFlags="All">
     
-    <!-- Conteneur des notifications (en haut à droite) -->
+    <!-- Conteneur des notifications (en haut à droite, position absolue) -->
     <VerticalStackLayout x:Name="NotificationStack"
                          Spacing="8"
-                         Padding="0,60,0,0"
+                         Padding="0,20,16,0"
                          VerticalOptions="Start"
                          HorizontalOptions="End"
-                         AbsoluteLayout.LayoutBounds="1, 0, AutoSize, AutoSize"
+                         AbsoluteLayout.LayoutBounds="1,0,AutoSize,AutoSize"
                          AbsoluteLayout.LayoutFlags="PositionProportional"
                          InputTransparent="False"/>
     

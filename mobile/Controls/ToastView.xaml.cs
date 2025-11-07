@@ -3,7 +3,7 @@ namespace mobile.Controls
     /// <summary>
     /// Toast personnalisé avec animations
     /// </summary>
-    public partial class ToastView : Frame
+    public partial class ToastView : ContentView
     {
         private CancellationTokenSource? _cancellationTokenSource;
 
@@ -54,28 +54,36 @@ namespace mobile.Controls
             switch (type)
             {
                 case ToastType.Success:
-                    BackgroundColor = Color.FromArgb("#10B981"); // Vert
+                    ToastBorder.BackgroundColor = Color.FromArgb("#10B981"); // Vert
                     IconLabel.Text = "✓";
                     break;
 
                 case ToastType.Error:
-                    BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
+                    ToastBorder.BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
                     IconLabel.Text = "✕";
                     break;
 
                 case ToastType.Warning:
-                    BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
+                    ToastBorder.BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
                     IconLabel.Text = "⚠";
                     break;
 
                 case ToastType.Info:
-                    BackgroundColor = Color.FromArgb("#3B82F6"); // Bleu
+                    ToastBorder.BackgroundColor = Color.FromArgb("#3B82F6"); // Bleu
                     IconLabel.Text = "ℹ";
                     break;
 
                 case ToastType.Default:
                 default:
-                    BackgroundColor = Color.FromArgb("#2D3748"); // Gris foncé
+                    // Utiliser la couleur dynamique du thème
+                    if (Application.Current?.Resources.TryGetValue("ToastBackgroundColor", out var bgColor) == true && bgColor is Color color)
+                    {
+                        ToastBorder.BackgroundColor = color;
+                    }
+                    else
+                    {
+                        ToastBorder.BackgroundColor = Color.FromArgb("#2D3748"); // Fallback
+                    }
                     IconLabel.Text = "•";
                     break;
             }

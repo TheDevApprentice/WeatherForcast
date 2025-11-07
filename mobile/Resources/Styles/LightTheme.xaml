@@ -61,6 +61,10 @@
     <!-- Shadows -->
     <Color x:Key="ShadowColor">#000000</Color>
     
+    <!-- Toast & Notifications -->
+    <Color x:Key="ToastBackgroundColor">#1F2937</Color>
+    <Color x:Key="ToastTextColor">#FFFFFF</Color>
+    
     <!-- Overlay for theme transition -->
     <Color x:Key="ThemeOverlayColor">#FFFFFF</Color>
     

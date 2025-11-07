@@ -3,7 +3,7 @@ namespace mobile.Controls
     /// <summary>
     /// Carte de notification individuelle avec timer et animations
     /// </summary>
-    public partial class NotificationCard : Frame
+    public partial class NotificationCard : ContentView
     {
         private CancellationTokenSource? _cancellationTokenSource;
         private bool _isClosing = false;
