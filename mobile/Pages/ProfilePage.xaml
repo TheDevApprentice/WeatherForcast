@@ -7,21 +7,21 @@
              BackgroundColor="{DynamicResource PageBackgroundColor}"
              Shell.NavBarIsVisible="False">
 
-    <ScrollView x:Name="RootScroll" Scrolled="OnScrollViewScrolled">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView x:Name="RootScroll" Scrolled="OnScrollViewScrolled" Grid.Row="0">
         <VerticalStackLayout x:Name="RootStack" Spacing="0">
             
             <!-- Header avec gradient Fluent -->
-            <Grid x:Name="HeaderGrid" RowDefinitions="180,Auto" Margin="0,0,0,20">
+            <Grid x:Name="HeaderGrid" RowDefinitions="130,Auto" Margin="0,0,0,20">
                 <!-- Gradient background -->
                 <Border x:Name="HeaderBackground" Grid.RowSpan="2"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 0,0,32,32">
                     <Border.Background>
-                        <!-- Animatable gradient (different Light/Dark palettes) -->
-                        <LinearGradientBrush x:Name="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
-                            <!-- Plus violet (moins bleu) -->
-                            <GradientStop x:Name="HeaderGradStop1" Color="{DynamicResource ProfileHeaderGradientStart}" Offset="0.0" />
-                            <GradientStop x:Name="HeaderGradStop2" Color="{DynamicResource ProfileHeaderGradientEnd}" Offset="1.0" />
+                        <!-- Gradient statique (plus d'animation) -->
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="{DynamicResource DarkBackground}" Offset="0.0" />
+                            <GradientStop Color="{DynamicResource DarkBackground}" Offset="1.0" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
@@ -39,10 +39,9 @@
                                 StrokeThickness="0"
                                 StrokeShape="RoundRectangle 60">
                             <Border.Background>
-                                <LinearGradientBrush x:Name="RingGradient" StartPoint="0,0" EndPoint="1,1">
-                                    <!-- Plus clair / moins saturé -->
-                                    <GradientStop x:Name="RingStop1" Color="{DynamicResource ProfileAvatarRingGradientStart}" Offset="0.0" />
-                                    <GradientStop x:Name="RingStop2" Color="{DynamicResource ProfileAvatarRingGradientEnd}" Offset="1.0" />
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{DynamicResource ProfileAvatarRingGradientStart}" Offset="0.0" />
+                                    <GradientStop Color="{DynamicResource ProfileAvatarRingGradientEnd}" Offset="1.0" />
                                 </LinearGradientBrush>
                             </Border.Background>
                             <Border.Shadow>
@@ -171,27 +170,31 @@
                     </Grid>
                 </Border>
                 
-                <!-- Bouton Déconnexion (visible uniquement sur mobile) -->
-                <Button x:Name="LogoutButton"
-                        Text="Déconnexion"
-                        Command="{Binding LogoutCommand}"
-                        Pressed="OnButtonPressed"
-                        Released="OnButtonReleased"
-                        BackgroundColor="#E53935"
-                        TextColor="White"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        CornerRadius="12"
-                        HeightRequest="56"
-                        IsVisible="{Binding ShowLogoutButton}"
-                        IsEnabled="{Binding CanLogout}"
-                        Opacity="{Binding CanLogout, Converter={StaticResource BoolToOpacityConverter}}">
-                    <Button.Shadow>
-                        <Shadow Brush="#E53935" Opacity="0.04" Radius="8" Offset="0,2" />
-                    </Button.Shadow>
-                </Button>
             </VerticalStackLayout>
         </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+
+        <!-- Bouton Déconnexion fixé en bas (visible uniquement sur mobile) -->
+        <Button x:Name="LogoutButton"
+                Grid.Row="1"
+                Text="Déconnexion"
+                Command="{Binding LogoutCommand}"
+                Pressed="OnButtonPressed"
+                Released="OnButtonReleased"
+                BackgroundColor="#E53935"
+                TextColor="White"
+                FontSize="16"
+                FontAttributes="Bold"
+                CornerRadius="12"
+                HeightRequest="56"
+                Margin="20,10,20,20"
+                IsVisible="{Binding ShowLogoutButton}"
+                IsEnabled="{Binding CanLogout}"
+                Opacity="{Binding CanLogout, Converter={StaticResource BoolToOpacityConverter}}">
+            <Button.Shadow>
+                <Shadow Brush="#E53935" Opacity="0.04" Radius="8" Offset="0,2" />
+            </Button.Shadow>
+        </Button>
+    </Grid>
 
 </ContentPage>

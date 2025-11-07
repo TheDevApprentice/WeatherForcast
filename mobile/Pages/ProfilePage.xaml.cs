@@ -158,7 +158,7 @@ namespace mobile.Pages
             _animCts?.Cancel();
             _animCts = new CancellationTokenSource();
             _ = StartRingRotationAsync(_animCts.Token);
-            _ = StartHeaderGradientAnimationAsync(_animCts.Token);
+            // Animation du gradient désactivée
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace mobile.Pages
             }
             catch { /* Ignore cancellation errors */ }
 
-            this.AbortAnimation("HeaderGradientAnim");
+            // this.AbortAnimation("HeaderGradientAnim");
         }
 
         /// <summary>
@@ -185,8 +185,7 @@ namespace mobile.Pages
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    this.AbortAnimation("HeaderGradientAnim");
-                    _ = StartHeaderGradientAnimationAsync(_animCts?.Token ?? CancellationToken.None);
+                    // Animation du gradient désactivée
                 });
             }
         }
@@ -206,63 +205,10 @@ namespace mobile.Pages
             catch { /* ignore on cancel */ }
         }
 
+        // Animation du gradient désactivée complètement
         private Task StartHeaderGradientAnimationAsync (CancellationToken token)
         {
-            if (HeaderGradStop1 == null || HeaderGradStop2 == null)
-                return Task.CompletedTask;
-
-            // Palettes Light / Dark
-            var light1A = Color.FromArgb("#4F46E5");
-            var light1B = Color.FromArgb("#06B6D4");
-            var light2A = Color.FromArgb("#06B6D4");
-            var light2B = Color.FromArgb("#22D3EE");
-
-            var dark1A = Color.FromArgb("#0EA5E9");
-            var dark1B = Color.FromArgb("#8B5CF6");
-            var dark2A = Color.FromArgb("#8B5CF6");
-            var dark2B = Color.FromArgb("#22D3EE");
-
-            bool reverse = false;
-            var animation = new Animation(t =>
-            {
-                var tt = reverse ? 1 - t : t;
-                if (Application.Current?.RequestedTheme == AppTheme.Dark)
-                {
-                    HeaderGradStop1.Color = Lerp(dark1A, dark1B, tt);
-                    HeaderGradStop2.Color = Lerp(dark2A, dark2B, tt);
-                }
-                else
-                {
-                    HeaderGradStop1.Color = Lerp(light1A, light1B, tt);
-                    HeaderGradStop2.Color = Lerp(light2A, light2B, tt);
-                }
-            });
-
-            void start ()
-            {
-                this.AbortAnimation("HeaderGradientAnim");
-                animation.Commit(this, "HeaderGradientAnim", rate: 16, length: 14000u, easing: Easing.Linear,
-                    finished: (v, c) => { },
-                    repeat: () =>
-                    {
-                        if (token.IsCancellationRequested) return false;
-                        reverse = !reverse; // auto-reverse
-                        return true;
-                    });
-            }
-
-            start();
             return Task.CompletedTask;
-        }
-
-        private static Color Lerp (Color a, Color b, double t)
-        {
-            t = Clamp(t, 0, 1);
-            return Color.FromRgba(
-                a.Red + (b.Red - a.Red) * t,
-                a.Green + (b.Green - a.Green) * t,
-                a.Blue + (b.Blue - a.Blue) * t,
-                a.Alpha + (b.Alpha - a.Alpha) * t);
         }
 
         // Animations UX pour les interactions
