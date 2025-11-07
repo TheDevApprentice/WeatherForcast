@@ -11,7 +11,6 @@ namespace mobile.Services
     {
         private readonly ILogger<NotificationService> _logger;
         private NotificationManager? _notificationManager;
-        private ToastContainer? _toastContainer;
         private bool _isInitialized = false;
         private bool _isMobile = false;
 
@@ -25,10 +24,9 @@ namespace mobile.Services
         /// </summary>
         private async Task EnsureInitializedAsync ()
         {
-            // ✅ Toujours vérifier si le NotificationManager est encore valide
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                // Si le manager existe et est toujours attaché à une page, on garde
+                // Vérifier si déjà initialisé (desktop uniquement)
                 if (_notificationManager != null && _notificationManager.Parent != null)
                 {
                     return;
@@ -43,8 +41,11 @@ namespace mobile.Services
                     return;
                 }
 
-                // Créer le gestionnaire de notifications
+                // Desktop uniquement: créer NotificationManager (notifications en haut à droite)
                 _notificationManager = new NotificationManager();
+
+                // Choisir le bon contrôle à ajouter
+                var overlayControl = _notificationManager;
 
                 // L'ajouter à la page (par-dessus tout en overlay)
                 if (currentPage.Content is Layout layout)
@@ -52,12 +53,12 @@ namespace mobile.Services
                     if (layout is Grid grid)
                     {
                         // Grid: ajouter par-dessus tout (dernier enfant = au-dessus)
-                        grid.Children.Add(_notificationManager);
+                        grid.Children.Add(overlayControl);
                     }
                     else if (layout is AbsoluteLayout absoluteLayout)
                     {
                         // AbsoluteLayout: ajouter par-dessus
-                        absoluteLayout.Children.Add(_notificationManager);
+                        absoluteLayout.Children.Add(overlayControl);
                     }
                     else
                     {
@@ -71,7 +72,7 @@ namespace mobile.Services
                         }
 
                         wrapper.Children.Add(layout);
-                        wrapper.Children.Add(_notificationManager);
+                        wrapper.Children.Add(overlayControl);
                     }
                 }
                 else
@@ -86,11 +87,11 @@ namespace mobile.Services
                         wrapper.Children.Add(oldContent);
                     }
 
-                    wrapper.Children.Add(_notificationManager);
+                    wrapper.Children.Add(overlayControl);
                 }
 
                 _isInitialized = true;
-                _logger.LogInformation("✅ Gestionnaire de notifications initialisé sur la page: {PageType}", currentPage?.GetType().Name);
+                _logger.LogInformation("✅ NotificationManager (desktop) initialisé sur la page: {PageType}", currentPage?.GetType().Name);
             });
         }
 
@@ -141,17 +142,41 @@ namespace mobile.Services
             {
                 _logger.LogInformation("🔔 Tentative d'affichage notification: {Title} - {Message}", title, message);
 
-                await EnsureInitializedAsync();
+                // Détecter la plateforme
+                _isMobile = DeviceInfo.Platform == DevicePlatform.Android || DeviceInfo.Platform == DevicePlatform.iOS;
 
-                if (_notificationManager != null)
+                if (_isMobile)
                 {
-                    _logger.LogInformation("✅ NotificationManager disponible, affichage en cours...");
-                    await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
-                    _logger.LogInformation("📢 Notification affichée avec succès: {Title} - {Message}", title, message);
+                    // Mobile: utiliser le toast natif CommunityToolkit
+                    _logger.LogInformation("✅ Utilisation du toast natif (mobile)");
+                    
+                    var toastMessage = string.IsNullOrEmpty(title) ? message : $"{title}: {message}";
+                    var toastDuration = durationMs switch
+                    {
+                        <= 2000 => ToastDuration.Short,
+                        _ => ToastDuration.Long
+                    };
+
+                    var toast = Toast.Make(toastMessage, toastDuration, 14);
+                    await toast.Show();
+                    
+                    _logger.LogInformation("📢 Toast natif affiché avec succès (mobile): {Message}", toastMessage);
                 }
                 else
                 {
-                    _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null)");
+                    // Desktop: afficher une notification en haut à droite
+                    await EnsureInitializedAsync();
+                    
+                    if (_notificationManager != null)
+                    {
+                        _logger.LogInformation("✅ NotificationManager disponible (desktop), affichage en cours...");
+                        await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
+                        _logger.LogInformation("📢 Notification affichée avec succès (desktop): {Title} - {Message}", title, message);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null)");
+                    }
                 }
             }
             catch (Exception ex)

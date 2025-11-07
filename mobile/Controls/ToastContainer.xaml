@@ -5,15 +5,19 @@
                 x:Name="Container"
                 InputTransparent="True"
                 IsVisible="True"
-                BackgroundColor="Transparent">
+                BackgroundColor="Transparent"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                AbsoluteLayout.LayoutFlags="All">
     
     <!-- Les toasts seront ajoutés dynamiquement ici -->
     <VerticalStackLayout x:Name="ToastStack"
                          Spacing="8"
-                         Padding="16"
+                         Padding="16,0,16,100"
                          VerticalOptions="End"
                          HorizontalOptions="Center"
-                         AbsoluteLayout.LayoutBounds="0.5, 1, AutoSize, AutoSize"
+                         AbsoluteLayout.LayoutBounds="0.5,1,AutoSize,AutoSize"
                          AbsoluteLayout.LayoutFlags="PositionProportional"
                          InputTransparent="False"/>
     
