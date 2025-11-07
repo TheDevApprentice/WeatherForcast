@@ -196,6 +196,16 @@ namespace mobile
 
         private async void OnLogoutClicked (object sender, EventArgs e)
         {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
+            // Animation du bouton
+            if (sender is TapGestureRecognizer tap && tap.Parent is Border border)
+            {
+                await border.ScaleTo(0.95, 100, Easing.CubicOut);
+                await border.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
+            
             try
             {
                 // Vérifier la connexion réseau
@@ -296,8 +306,18 @@ namespace mobile
             await toast.Show(cts.Token);
         }
 
-        private void ThemeSwitch_Toggled (object sender, ToggledEventArgs e)
+        private async void ThemeSwitch_Toggled (object sender, ToggledEventArgs e)
         {
+            // Retour haptique
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            
+            // Animation du switch
+            if (sender is Switch switchControl)
+            {
+                await switchControl.ScaleTo(1.05, 100, Easing.CubicOut);
+                await switchControl.ScaleTo(1.0, 100, Easing.CubicOut);
+            }
+            
             Application.Current!.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
         }
 
