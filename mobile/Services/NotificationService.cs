@@ -5,7 +5,7 @@ namespace mobile.Services
 {
     /// <summary>
     /// Service de notification professionnel avec queue et animations
-    /// Affiche les notifications en haut à droite comme sur le web
+    /// Affiche les notifications en haut à droite (desktop uniquement)
     /// </summary>
     public class NotificationService : INotificationService
     {
@@ -25,7 +25,7 @@ namespace mobile.Services
         {
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                // Vérifier si déjà initialisé (desktop uniquement)
+                // Vérifier si déjà initialisé
                 if (_notificationManager != null && _notificationManager.Parent != null)
                 {
                     return;
