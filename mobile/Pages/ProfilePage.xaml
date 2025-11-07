@@ -91,7 +91,7 @@
                            FontSize="14"
                            HorizontalOptions="Center"
                            Opacity="0.7"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray100}, Dark=#8E8E93}"/>
+                           TextColor="{AppThemeBinding Light={StaticResource White}, Dark=White}"/>
                 </VerticalStackLayout>
             </Grid>
 
@@ -132,7 +132,7 @@
                             <Label Text="Activer le mode sombre"
                                    FontSize="13"
                                    Opacity="0.6"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                                                             TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
                         </VerticalStackLayout>
                         
                         <!-- Switch -->
@@ -181,7 +181,7 @@
                             <Label Text="Gérer vos préférences"
                                    FontSize="13"
                                    Opacity="0.6"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark=White}"/>
                         </VerticalStackLayout>
                         
                         <!-- Chevron -->

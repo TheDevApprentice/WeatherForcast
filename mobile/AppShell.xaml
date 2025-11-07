@@ -54,7 +54,7 @@
                             <Shadow Brush="Black" Opacity="0.3" Radius="16" Offset="0,4" />
                         </Border.Shadow>
                         <Label x:Name="UserInitialsLabel"
-                               FontSize="28"
+                               FontSize="25"
                                FontAttributes="Bold"
                                TextColor="#5B5FC7"
                                HorizontalOptions="Center"

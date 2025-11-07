@@ -30,21 +30,23 @@
                                 </Border.GestureRecognizers>
 
                                 <Grid Padding="5"  BackgroundColor="Transparent">
-                                    <Grid ColumnDefinitions="70,*,Auto" ColumnSpacing="15">
+                                    <Grid ColumnDefinitions="80,*,Auto" ColumnSpacing="15" Padding="1">
                                     <!-- Avatar avec initiales -->
-                                    <Border Grid.Column="0" 
+                                    <Border Grid.Column="0"
+                                            HeightRequest="60"
+                                            WidthRequest="60"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
                                             StrokeThickness="0"
                                             StrokeShape="RoundRectangle 30">
                                         <Border.Background>
                                             <SolidColorBrush Color="{Binding Email, Converter={StaticResource StringToColorConverter}}" />
                                         </Border.Background>
                                         <Label Text="{Binding Initials}" 
-                                               FontSize="24" 
+                                               FontSize="14" 
                                                FontAttributes="Bold"
                                                FontFamily="SegoeSemibold"
-                                               TextColor="White"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center" />
+                                               TextColor="White" />
                                     </Border>
                                     
                                     <!-- Infos utilisateur -->
