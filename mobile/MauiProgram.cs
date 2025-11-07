@@ -62,7 +62,8 @@ namespace mobile
             // Service de gestion des thèmes
             builder.Services.AddSingleton<IThemeService, Services.Theme.ThemeService>();
 
-            // Service de notification - Toasts personnalisés:
+            // Services de notification
+            builder.Services.AddSingleton<INotificationStore, NotificationStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
             // Gestion des erreurs

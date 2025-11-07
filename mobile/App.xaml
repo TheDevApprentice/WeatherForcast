@@ -19,6 +19,7 @@
             <converters:StringToColorConverter x:Key="StringToColorConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

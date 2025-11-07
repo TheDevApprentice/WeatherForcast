@@ -10,12 +10,14 @@ namespace mobile.Services
     public class NotificationService : INotificationService
     {
         private readonly ILogger<NotificationService> _logger;
+        private readonly INotificationStore _notificationStore;
         private NotificationManager? _notificationManager;
         private bool _isInitialized = false;
 
-        public NotificationService (ILogger<NotificationService> logger)
+        public NotificationService (ILogger<NotificationService> logger, INotificationStore notificationStore)
         {
             _logger = logger;
+            _notificationStore = notificationStore;
         }
 
         /// <summary>
@@ -139,17 +141,37 @@ namespace mobile.Services
             {
                 _logger.LogInformation("🔔 Tentative d'affichage notification: {Title} - {Message}", title, message);
 
+                // Créer la notification et l'ajouter au store
+                var notification = new Models.Notification
+                {
+                    Title = title,
+                    Message = message,
+                    Type = type,
+                    Timestamp = DateTime.Now,
+                    IsRead = false,
+                    WasDisplayed = false
+                };
+
+                _notificationStore.AddNotification(notification);
+                _logger.LogInformation("📝 Notification ajoutée au store: {Id}", notification.Id);
+
+                // Afficher la notification à l'écran (desktop uniquement)
                 await EnsureInitializedAsync();
 
                 if (_notificationManager != null)
                 {
                     _logger.LogInformation("✅ NotificationManager disponible, affichage en cours...");
                     await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
-                    _logger.LogInformation("📢 Notification affichée avec succès: {Title} - {Message}", title, message);
+                    
+                    // Marquer comme affichée et lue
+                    notification.WasDisplayed = true;
+                    _notificationStore.MarkAsRead(notification.Id);
+                    
+                    _logger.LogInformation("📢 Notification affichée avec succès et marquée comme lue: {Title} - {Message}", title, message);
                 }
                 else
                 {
-                    _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null)");
+                    _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null) - notification stockée mais non affichée");
                 }
             }
             catch (Exception ex)

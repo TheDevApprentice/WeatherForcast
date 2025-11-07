@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:mobile.Controls"
+             x:Class="mobile.Pages.NotificationCenterPage"
+             Title="Centre de notifications"
+             BackgroundColor="Transparent">
+    
+    <!-- Overlay semi-transparent pour fermer au clic -->
+    <Grid>
+        <BoxView Color="Black" 
+                 Opacity="0.3"
+                 InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackgroundTapped"/>
+            </BoxView.GestureRecognizers>
+        </BoxView>
+        
+        <!-- Centre de notifications positionné en haut à droite -->
+        <controls:NotificationCenterView x:Name="NotificationCenter"
+                                         HorizontalOptions="End"
+                                         VerticalOptions="Start"
+                                         Margin="0,8,16,0"/>
+    </Grid>
+</ContentPage>
