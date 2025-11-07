@@ -125,7 +125,10 @@
                         <!-- Switch -->
                         <Switch Grid.Column="2"
                                 x:Name="ThemeSwitch"
+                                HorizontalOptions="Center"
                                 VerticalOptions="Center"
+                                OnColor="{DynamicResource PrimaryGradientStartColor}"
+                                ThumbColor="{DynamicResource LightSecondaryBackground}"
                                 Toggled="ThemeSwitch_Toggled"/>
                     </Grid>
                 </Border>
