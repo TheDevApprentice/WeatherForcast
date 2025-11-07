@@ -102,7 +102,8 @@
                 <Border StrokeShape="RoundRectangle 12"
                         BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
                         StrokeThickness="0"
-                        Padding="0">
+                        Padding="0"
+                        IsVisible="{Binding ShowThemeToggle}">
                     <Border.Shadow>
                         <Shadow Brush="Black" Opacity="0.04" Radius="8" Offset="0,2" />
                     </Border.Shadow>

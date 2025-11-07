@@ -37,6 +37,19 @@ namespace mobile.PageModels
             }
         }
 
+        // Sur desktop, le toggle de thème est dans le Flyout
+        public bool ShowThemeToggle
+        {
+            get
+            {
+#if ANDROID || IOS
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         public ProfilePageModel (
             IAuthenticationStateService authStateService,
             ILogger<ProfilePageModel> logger,
