@@ -94,7 +94,7 @@ namespace mobile.Pages.Auth
             
             // Récupérer la couleur depuis les ressources de manière sécurisée
             Color iconColor = Colors.Gray;
-            if (Application.Current?.Resources.TryGetValue("Gray500", out var colorResource) == true && colorResource is Color color)
+            if (Application.Current?.Resources.TryGetValue("SecondaryTextColor", out var colorResource) == true && colorResource is Color color)
             {
                 iconColor = color;
             }

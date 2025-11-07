@@ -1,18 +1,28 @@
 using Microsoft.Extensions.Logging;
+using mobile.Services.Theme;
 
 namespace mobile
 {
     public partial class MainWindow : Window
     {
         private readonly ILogger<MainWindow>? _logger;
+        private IThemeService? _themeService;
 
-        public MainWindow()
+        public MainWindow ()
         {
             InitializeComponent();
 
             try
             {
                 _logger = Handler?.MauiContext?.Services.GetService<ILogger<MainWindow>>();
+                _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
+#if WINDOWS
+                // S'abonner aux changements de thème
+                if (_themeService != null)
+                {
+                    _themeService.ThemeChanged += OnThemeChanged;
+                }
+#endif
             }
             catch { }
 
@@ -38,12 +48,30 @@ namespace mobile
                 }
             }
         }
+
+        private async void OnThemeChanged(object? sender, AppTheme newTheme)
+        {
+            if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
+            {
+                try
+                {
+                    // Petit délai pour s'assurer que les ressources sont mises à jour
+                    await Task.Delay(100);
+                    Platforms.Windows.WindowsTitleBarHelper.ApplyTheme(winUIWindow);
+                    _logger?.LogInformation("✅ Thème titlebar mis à jour: {Theme}", newTheme);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "❌ Erreur mise à jour thème titlebar");
+                }
+            }
+        }
 #endif
 
         /// <summary>
         /// Met à jour le bouton Account avec les infos utilisateur
         /// </summary>
-        public void UpdateAccountButton(string firstName, string lastName)
+        public void UpdateAccountButton (string firstName, string lastName)
         {
             // Générer les initiales
             var initials = GetInitials(firstName, lastName);
@@ -63,7 +91,7 @@ namespace mobile
         /// <summary>
         /// Génère les initiales à partir du prénom et du nom
         /// </summary>
-        private string GetInitials(string firstName, string lastName)
+        private string GetInitials (string firstName, string lastName)
         {
             var firstInitial = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
             var lastInitial = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
@@ -73,7 +101,7 @@ namespace mobile
         /// <summary>
         /// Cache le bouton Account (déconnexion)
         /// </summary>
-        public void ClearAccountButton()
+        public void ClearAccountButton ()
         {
             AccountButton.IsVisible = false;
             if (this.FindByName<ImageButton>("PeopleButton") is ImageButton people)
@@ -89,7 +117,7 @@ namespace mobile
         /// Masque tous les éléments de la title bar sauf l'icône account, le titre et le sous-titre
         /// Utilisé pendant le splash screen
         /// </summary>
-        public void HideTitleBarElements()
+        public void HideTitleBarElements ()
         {
             try
             {
@@ -127,7 +155,7 @@ namespace mobile
         /// <summary>
         /// Affiche les éléments de la title bar après le splash screen
         /// </summary>
-        public void ShowTitleBarElements(bool isAuthenticated)
+        public void ShowTitleBarElements (bool isAuthenticated)
         {
             try
             {
@@ -170,7 +198,7 @@ namespace mobile
         /// <summary>
         /// Active/désactive et montre/masque les boutons du TitleBar selon l'authentification
         /// </summary>
-        private void SetTitleBarAuthState(bool isAuthenticated)
+        private void SetTitleBarAuthState (bool isAuthenticated)
         {
             try
             {
@@ -214,7 +242,7 @@ namespace mobile
         /// <summary>
         /// Appelé quand on clique sur le bouton People (non connecté)
         /// </summary>
-        private async void OnPeopleTapped(object? sender, EventArgs e)
+        private async void OnPeopleTapped (object? sender, EventArgs e)
         {
             try
             {
@@ -233,7 +261,7 @@ namespace mobile
         /// <summary>
         /// Appelé quand on clique sur le bouton Notifications
         /// </summary>
-        private async void OnNotificationsTapped(object? sender, EventArgs e)
+        private async void OnNotificationsTapped (object? sender, EventArgs e)
         {
             try
             {
@@ -251,7 +279,7 @@ namespace mobile
         }
 
         // Alias pour correspondre à l'attribut XAML Clicked="NotificationsTapped"
-        private async void NotificationsTapped(object? sender, EventArgs e)
+        private async void NotificationsTapped (object? sender, EventArgs e)
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
@@ -273,7 +301,7 @@ namespace mobile
         /// <summary>
         /// Appelé quand on clique sur le bouton Messages
         /// </summary>
-        private async void OnMessagesTapped(object? sender, EventArgs e)
+        private async void OnMessagesTapped (object? sender, EventArgs e)
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
@@ -295,7 +323,7 @@ namespace mobile
         /// <summary>
         /// Appelé quand on clique sur le bouton Settings
         /// </summary>
-        private async void OnSettingsTapped(object? sender, EventArgs e)
+        private async void OnSettingsTapped (object? sender, EventArgs e)
         {
             try
             {
@@ -316,7 +344,7 @@ namespace mobile
         /// Appelé quand on clique sur le bouton Account
         /// Navigue vers la page de profil
         /// </summary>
-        private async void OnAccountTapped(object? sender, EventArgs e)
+        private async void OnAccountTapped (object? sender, EventArgs e)
         {
             try
             {
@@ -326,10 +354,10 @@ namespace mobile
                 {
                     // Fermer le flyout s'il est ouvert
                     shell.FlyoutIsPresented = false;
-                    
+
                     // Naviguer vers la page de profil
                     await shell.GoToAsync("///profile");
-                    
+
                     _logger?.LogInformation("✅ Navigation vers ProfilePage réussie");
                 }
             }
@@ -337,6 +365,22 @@ namespace mobile
             {
                 _logger?.LogError(ex, "❌ Erreur lors de la navigation vers ProfilePage");
             }
+        }
+
+        /// <summary>
+        /// Nettoyage lors de la destruction de la fenêtre
+        /// </summary>
+        protected override void OnHandlerChanging (HandlerChangingEventArgs args)
+        {
+            base.OnHandlerChanging(args);
+
+#if WINDOWS
+            // Se désabonner de l'événement ThemeChanged
+            if (_themeService != null)
+            {
+                _themeService.ThemeChanged -= OnThemeChanged;
+            }
+#endif
         }
     }
 }

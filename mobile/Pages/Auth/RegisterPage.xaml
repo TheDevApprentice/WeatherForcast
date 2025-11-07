@@ -5,13 +5,16 @@
              xmlns:viewmodels="clr-namespace:mobile.PageModels.Auth"
              x:DataType="viewmodels:RegisterPageModel"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource LightBackground}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
             
             <!-- Header avec gradient violet -->
-            <Frame CornerRadius="12" HasShadow="True" Padding="0" Margin="0,20,0,0">
+            <Border StrokeShape="RoundRectangle 12" Padding="0" Margin="0,20,0,0" StrokeThickness="0">
+                <Border.Shadow>
+                    <Shadow Brush="{DynamicResource ShadowColor}" Opacity="0.15" Radius="10" Offset="0,4" />
+                </Border.Shadow>
                 <Frame.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
@@ -32,15 +35,18 @@
                            Opacity="0.9"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Formulaire d'inscription -->
-            <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="White">
+            <Border StrokeShape="RoundRectangle 12" Padding="20" BackgroundColor="{DynamicResource CardBackgroundColor}" StrokeThickness="0">
+                <Border.Shadow>
+                    <Shadow Brush="{DynamicResource ShadowColor}" Opacity="0.1" Radius="8" Offset="0,2" />
+                </Border.Shadow>
                 <FlexLayout Direction="Row" Wrap="Wrap" AlignItems="Start" JustifyContent="SpaceBetween">
                     
                     <!-- Prénom -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
-                        <Label Text="Prénom" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                        <Label Text="Prénom" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                         <Entry x:Name="FirstNameEntry"
                                Text="{Binding FirstName}"
                                Placeholder="Jean"
@@ -50,7 +56,7 @@
 
                     <!-- Nom -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
-                        <Label Text="Nom" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                        <Label Text="Nom" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                         <Entry x:Name="LastNameEntry"
                                Text="{Binding LastName}"
                                Placeholder="Dupont"
@@ -60,7 +66,7 @@
 
                     <!-- Email -->
                     <VerticalStackLayout Spacing="6" FlexLayout.Basis="100%" Margin="0,0,0,10">
-                        <Label Text="Email" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                        <Label Text="Email" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                         <Entry x:Name="EmailEntryRegister"
                                Text="{Binding Email}"
                                Placeholder="votre@email.com"
@@ -71,7 +77,7 @@
 
                     <!-- Password -->
                     <VerticalStackLayout x:Name="PasswordGroup" Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
-                        <Label Text="Mot de passe" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                        <Label Text="Mot de passe" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Entry x:Name="PasswordEntry"
                                    Grid.Column="0"
@@ -86,7 +92,7 @@
                                          Padding="8"
                                          Clicked="OnTogglePasswordClicked">
                                 <ImageButton.Source>
-                                    <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE890;" Size="18" Color="{StaticResource Gray500}" />
+                                    <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE890;" Size="18" Color="{DynamicResource SecondaryTextColor}" />
                                 </ImageButton.Source>
                             </ImageButton>
                         </Grid>
@@ -94,7 +100,7 @@
 
                     <!-- Confirm Password -->
                     <VerticalStackLayout x:Name="ConfirmPasswordGroup" Spacing="6" FlexLayout.Basis="48%" Margin="0,0,0,10">
-                        <Label Text="Confirmer" FontAttributes="Bold" TextColor="{StaticResource DarkOnLightBackground}" />
+                        <Label Text="Confirmer" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Entry x:Name="ConfirmPasswordEntry"
                                    Grid.Column="0"
@@ -109,7 +115,7 @@
                                          Padding="8"
                                          Clicked="OnToggleConfirmPasswordClicked">
                                 <ImageButton.Source>
-                                    <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE890;" Size="18" Color="{StaticResource Gray500}" />
+                                    <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE890;" Size="18" Color="{DynamicResource SecondaryTextColor}" />
                                 </ImageButton.Source>
                             </ImageButton>
                         </Grid>
@@ -154,12 +160,12 @@
                     </Grid>
 
                 </FlexLayout>
-            </Frame>
+            </Border>
 
             <!-- Lien vers connexion -->
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
                 <Label Text="Déjà un compte ?" 
-                       TextColor="{StaticResource Gray500}"
+                       TextColor="{DynamicResource SecondaryTextColor}"
                        FontSize="14"
                        VerticalOptions="Center" />
                 <Button Text="Se connecter" 

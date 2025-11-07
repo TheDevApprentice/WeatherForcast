@@ -5,7 +5,7 @@
              x:Name="this">
     
     <Border x:Name="ItemCard"
-            BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1E}"
+            BackgroundColor="{DynamicResource CardBackgroundColor}"
             StrokeThickness="0"
             Padding="0.5"
             Margin="0"
@@ -18,7 +18,7 @@
                    Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="14"
                    WidthRequest="80"
-                   TextColor="{AppThemeBinding Light=#1C1C1E, Dark=#F5F5F7}"
+                   TextColor="{DynamicResource PrimaryTextColor}"
                    VerticalOptions="Center"/>
             
             <!-- Chevron -->

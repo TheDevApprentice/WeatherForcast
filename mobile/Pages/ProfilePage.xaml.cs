@@ -1,5 +1,4 @@
-using mobile.PageModels;
-using Microsoft.Maui.Graphics;
+using mobile.Services.Theme;
 
 namespace mobile.Pages
 {
@@ -7,17 +6,19 @@ namespace mobile.Pages
     {
         private CancellationTokenSource? _animCts;
         private bool _isPageActive = false;
+        private readonly IThemeService _themeService;
 
-        public ProfilePage(ProfilePageModel viewModel)
+        public ProfilePage (ProfilePageModel viewModel, IThemeService themeService)
         {
             InitializeComponent();
             BindingContext = viewModel;
-            
-            // S'abonner aux événements du cycle de vie de l'application
-            Application.Current!.RequestedThemeChanged += OnAppThemeChanged;
+            _themeService = themeService;
+
+            // S'abonner aux changements de thème via le service centralisé
+            _themeService.ThemeChanged += OnThemeChangedFromService;
 
             // Initialiser le switch selon le thème actuel
-            ThemeSwitch.IsToggled = Application.Current?.UserAppTheme == AppTheme.Dark;
+            ThemeSwitch.IsToggled = _themeService.CurrentTheme == AppTheme.Dark;
 
             // Etats init pour animation d'apparition
             if (HeaderContent != null)
@@ -32,25 +33,23 @@ namespace mobile.Pages
             }
         }
 
-        private async void ThemeSwitch_Toggled(object sender, ToggledEventArgs e)
+        private async void ThemeSwitch_Toggled (object sender, ToggledEventArgs e)
         {
             // Retour haptique sur toggle
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            
+
             // Animation subtile du switch
             if (sender is Switch switchControl)
             {
                 await switchControl.ScaleTo(1.05, 100, Easing.CubicOut);
                 await switchControl.ScaleTo(1.0, 100, Easing.CubicOut);
             }
-            
-            if (Application.Current != null)
-            {
-                Application.Current.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
-            }
+
+            // Utiliser le service centralisé pour changer le thème
+            await _themeService.SetThemeAsync(e.Value ? AppTheme.Dark : AppTheme.Light, animated: true);
         }
 
-        protected override async void OnAppearing()
+        protected override async void OnAppearing ()
         {
             base.OnAppearing();
             _isPageActive = true;
@@ -75,7 +74,7 @@ namespace mobile.Pages
             StartAnimations();
         }
 
-        private void OnScrollViewScrolled(object sender, ScrolledEventArgs e)
+        private void OnScrollViewScrolled (object sender, ScrolledEventArgs e)
         {
             double y = e.ScrollY;
 
@@ -139,10 +138,10 @@ namespace mobile.Pages
             }
         }
 
-        private static double Clamp(double value, double min, double max)
+        private static double Clamp (double value, double min, double max)
             => value < min ? min : (value > max ? max : value);
 
-        protected override void OnDisappearing()
+        protected override void OnDisappearing ()
         {
             base.OnDisappearing();
             _isPageActive = false;
@@ -152,7 +151,7 @@ namespace mobile.Pages
         /// <summary>
         /// Démarre les animations continues (ring et gradient)
         /// </summary>
-        private void StartAnimations()
+        private void StartAnimations ()
         {
             if (!_isPageActive) return;
 
@@ -165,31 +164,34 @@ namespace mobile.Pages
         /// <summary>
         /// Arrête toutes les animations continues
         /// </summary>
-        private void StopAnimations()
+        private void StopAnimations ()
         {
-            try 
-            { 
-                _animCts?.Cancel(); 
-            } 
+            try
+            {
+                _animCts?.Cancel();
+            }
             catch { /* Ignore cancellation errors */ }
-            
+
             this.AbortAnimation("HeaderGradientAnim");
         }
 
         /// <summary>
-        /// Gère le changement de thème de l'application
+        /// Gère le changement de thème via le service centralisé
         /// </summary>
-        private void OnAppThemeChanged(object? sender, AppThemeChangedEventArgs e)
+        private void OnThemeChangedFromService (object? sender, AppTheme theme)
         {
             // Redémarrer l'animation du gradient avec les nouvelles couleurs
             if (_isPageActive)
             {
-                this.AbortAnimation("HeaderGradientAnim");
-                _ = StartHeaderGradientAnimationAsync(_animCts?.Token ?? CancellationToken.None);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    this.AbortAnimation("HeaderGradientAnim");
+                    _ = StartHeaderGradientAnimationAsync(_animCts?.Token ?? CancellationToken.None);
+                });
             }
         }
 
-        private async Task StartRingRotationAsync(CancellationToken token)
+        private async Task StartRingRotationAsync (CancellationToken token)
         {
             if (AvatarRing == null) return;
             try
@@ -204,7 +206,7 @@ namespace mobile.Pages
             catch { /* ignore on cancel */ }
         }
 
-        private Task StartHeaderGradientAnimationAsync(CancellationToken token)
+        private Task StartHeaderGradientAnimationAsync (CancellationToken token)
         {
             if (HeaderGradStop1 == null || HeaderGradStop2 == null)
                 return Task.CompletedTask;
@@ -236,7 +238,7 @@ namespace mobile.Pages
                 }
             });
 
-            void start()
+            void start ()
             {
                 this.AbortAnimation("HeaderGradientAnim");
                 animation.Commit(this, "HeaderGradientAnim", rate: 16, length: 14000u, easing: Easing.Linear,
@@ -253,7 +255,7 @@ namespace mobile.Pages
             return Task.CompletedTask;
         }
 
-        private static Color Lerp(Color a, Color b, double t)
+        private static Color Lerp (Color a, Color b, double t)
         {
             t = Clamp(t, 0, 1);
             return Color.FromRgba(
@@ -264,11 +266,11 @@ namespace mobile.Pages
         }
 
         // Animations UX pour les interactions
-        private async void OnSettingsCardTapped(object sender, TappedEventArgs e)
+        private async void OnSettingsCardTapped (object sender, TappedEventArgs e)
         {
             // Retour haptique
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            
+
             if (sender is Border border)
             {
                 // Animation de scale
@@ -277,18 +279,18 @@ namespace mobile.Pages
             }
         }
 
-        async void OnButtonPressed(object sender, EventArgs e)
+        async void OnButtonPressed (object sender, EventArgs e)
         {
             // Retour haptique
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            
+
             if (sender is Button button)
             {
                 await button.ScaleTo(0.95, 100, Easing.CubicOut);
             }
         }
 
-        async void OnButtonReleased(object sender, EventArgs e)
+        async void OnButtonReleased (object sender, EventArgs e)
         {
             if (sender is Button button)
             {

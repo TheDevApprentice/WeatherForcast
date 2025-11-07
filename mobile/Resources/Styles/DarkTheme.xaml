@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="mobile.Resources.Styles.DarkTheme">
+
+    <!-- 🌙 Dark Theme Colors -->
+    
+    <!-- Page & Layout -->
+    <Color x:Key="PageBackgroundColor">#000000</Color>
+    <Color x:Key="CardBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="SecondaryBackgroundColor">#222228</Color>
+    
+    <!-- Text -->
+    <Color x:Key="PrimaryTextColor">#F5F5F7</Color>
+    <Color x:Key="SecondaryTextColor">#8E8E93</Color>
+    <Color x:Key="TertiaryTextColor">#636366</Color>
+    <Color x:Key="InverseTextColor">#1C1C1E</Color>
+    
+    <!-- Borders & Separators -->
+    <Color x:Key="BorderColor">#38383A</Color>
+    <Color x:Key="SeparatorColor">#2C2C2E</Color>
+    
+    <!-- Interactive Elements -->
+    <Color x:Key="SelectedItemBackground">#2C2C3E</Color>
+    <Color x:Key="HoverBackground">#2C2C2E</Color>
+    <Color x:Key="PressedBackground">#3A3A3C</Color>
+    
+    <!-- Shell & Navigation -->
+    <Color x:Key="ShellBackground">#1C1C1E</Color>
+    <Color x:Key="TabBarBackground">#1C1C1E</Color>
+    <Color x:Key="TabBarForeground">#F5F5F7</Color>
+    <Color x:Key="TabBarUnselected">#8E8E93</Color>
+    
+    <!-- Flyout -->
+    <Color x:Key="FlyoutBackground">#1C1C1E</Color>
+    <Color x:Key="FlyoutHeaderGradientStart">#2C2C2E</Color>
+    <Color x:Key="FlyoutHeaderGradientEnd">#2C2C2E</Color>
+    <Color x:Key="FlyoutItemBackground">Transparent</Color>
+    <Color x:Key="FlyoutItemSelectedBackground">#2C2C3E</Color>
+    
+    <!-- TitleBar (Windows/Mac) -->
+    <Color x:Key="TitleBarBackground">#1C1C1E</Color>
+    <Color x:Key="TitleBarForeground">#FFFFFF</Color>
+    <Color x:Key="TitleBarSearchBackground">#000000</Color>
+    <Color x:Key="TitleBarSearchText">#FFFFFF</Color>
+    <Color x:Key="TitleBarSearchPlaceholder">#FFFFFF</Color>
+    <Color x:Key="AccountButtonBackground">Transparent</Color>
+    <Color x:Key="AccountButtonBorderColor">#FFFFFF</Color>
+    <Color x:Key="PeopleButtonBackground">Transparent</Color>
+    <Color x:Key="PeopleButtonBorderColor">#FFFFFF</Color>
+    
+    <!-- Profile Page Specific -->
+    <Color x:Key="ProfileHeaderGradientStart">#7C3AED</Color>
+    <Color x:Key="ProfileHeaderGradientEnd">#5B21B6</Color>
+    <Color x:Key="ProfileAvatarRingGradientStart">#A78BFA</Color>
+    <Color x:Key="ProfileAvatarRingGradientEnd">#7C3AED</Color>
+    <Color x:Key="ProfileAvatarBackground">#0B0B0D</Color>
+    <Color x:Key="ProfileAvatarBackgroundEnd">#111827</Color>
+    <Color x:Key="ProfileAvatarBorder">#2E2E32</Color>
+    
+    <!-- Shadows -->
+    <Color x:Key="ShadowColor">#000000</Color>
+    
+    <!-- Overlay for theme transition -->
+    <Color x:Key="ThemeOverlayColor">#1C1C1E</Color>
+    
+    <!-- Offline Banner -->
+    <Color x:Key="OfflineBannerBackground">#D4A017</Color>
+    <Color x:Key="OfflineBannerText">#FFFFFF</Color>
+    
+    <!-- Splash Page -->
+    <Color x:Key="SplashGradientStart">#000000</Color>
+    <Color x:Key="SplashGradientEnd">#0A0A0A</Color>
+    <Color x:Key="SplashLoaderBackground">#1A2332</Color>
+    <Color x:Key="SplashStatusText">#94A3B8</Color>
+    <Color x:Key="SplashErrorBackground">#3D1F1F</Color>
+    <Color x:Key="SplashErrorText">#ef4444</Color>
+    
+    <!-- Icons & Labels (AppStyles) -->
+    <Color x:Key="IconColor">#F5F5F7</Color>
+    <Color x:Key="LabelTextColor">#F5F5F7</Color>
+    <Color x:Key="LabelDisabledColor">#636366</Color>
+    
+    <!-- Borders & Cards (AppStyles) -->
+    <Color x:Key="CardBackground">#1C1C1E</Color>
+    <Color x:Key="CardBorder">#38383A</Color>
+    
+    <!-- Styles.xaml - Base Controls -->
+    <!-- ActivityIndicator -->
+    <Color x:Key="ActivityIndicatorColor">#FFFFFF</Color>
+    
+    <!-- IndicatorView -->
+    <Color x:Key="IndicatorViewColor">#636366</Color>
+    <Color x:Key="IndicatorViewSelectedColor">#EBEBF5</Color>
+    
+    <!-- Border (base style) -->
+    <Color x:Key="BorderStrokeColor">#636366</Color>
+    
+    <!-- BoxView -->
+    <Color x:Key="BoxViewBackgroundColor">#E5E5EA</Color>
+    
+    <!-- Button -->
+    <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+    <Color x:Key="ButtonBackgroundColor">#667eea</Color>
+    <Color x:Key="ButtonDisabledTextColor">#E5E5EA</Color>
+    <Color x:Key="ButtonDisabledBackgroundColor">#636366</Color>
+    
+    <!-- CheckBox -->
+    <Color x:Key="CheckBoxColor">#FFFFFF</Color>
+    <Color x:Key="CheckBoxDisabledColor">#636366</Color>
+    
+    <!-- DatePicker -->
+    <Color x:Key="DatePickerTextColor">#FFFFFF</Color>
+    <Color x:Key="DatePickerDisabledTextColor">#636366</Color>
+    
+    <!-- Editor -->
+    <Color x:Key="EditorTextColor">#FFFFFF</Color>
+    <Color x:Key="EditorPlaceholderColor">#636366</Color>
+    <Color x:Key="EditorDisabledTextColor">#636366</Color>
+    
+    <!-- Entry -->
+    <Color x:Key="EntryTextColor">#F5F5F7</Color>
+    <Color x:Key="EntryPlaceholderColor">#636366</Color>
+    <Color x:Key="EntryDisabledTextColor">#636366</Color>
+    
+    <!-- Label (Styles.xaml base) -->
+    <Color x:Key="LabelBaseTextColor">#FFFFFF</Color>
+    <Color x:Key="LabelBaseDisabledColor">#636366</Color>
+    
+    <!-- Picker -->
+    <Color x:Key="PickerTextColor">#FFFFFF</Color>
+    <Color x:Key="PickerTitleColor">#8E8E93</Color>
+    <Color x:Key="PickerDisabledTextColor">#636366</Color>
+    
+    <!-- ProgressBar -->
+    <Color x:Key="ProgressBarColor">#667eea</Color>
+    
+    <!-- RadioButton -->
+    <Color x:Key="RadioButtonTextColor">#FFFFFF</Color>
+    <Color x:Key="RadioButtonDisabledTextColor">#636366</Color>
+    
+    <!-- RefreshView -->
+    <Color x:Key="RefreshViewColor">#667eea</Color>
+    
+    <!-- SearchBar -->
+    <Color x:Key="SearchBarTextColor">#FFFFFF</Color>
+    <Color x:Key="SearchBarPlaceholderColor">#8E8E93</Color>
+    <Color x:Key="SearchBarCancelButtonColor">#667eea</Color>
+    <Color x:Key="SearchBarDisabledTextColor">#636366</Color>
+    
+    <!-- Slider -->
+    <Color x:Key="SliderMinimumTrackColor">#667eea</Color>
+    <Color x:Key="SliderMaximumTrackColor">#636366</Color>
+    <Color x:Key="SliderThumbColor">#FFFFFF</Color>
+    <Color x:Key="SliderDisabledMinimumTrackColor">#636366</Color>
+    <Color x:Key="SliderDisabledMaximumTrackColor">#636366</Color>
+    
+    <!-- Stepper -->
+    <Color x:Key="StepperBackgroundColor">#667eea</Color>
+    <Color x:Key="StepperDisabledBackgroundColor">#636366</Color>
+    
+    <!-- Switch -->
+    <Color x:Key="SwitchOnColor">#10b981</Color>
+    <Color x:Key="SwitchThumbColor">#FFFFFF</Color>
+    <Color x:Key="SwitchDisabledOnColor">#636366</Color>
+    
+    <!-- TimePicker -->
+    <Color x:Key="TimePickerTextColor">#FFFFFF</Color>
+    <Color x:Key="TimePickerDisabledTextColor">#636366</Color>
+    
+    <!-- Page -->
+    <Color x:Key="PageBackgroundColorBase">#000000</Color>
+    
+    <!-- NavigationPage -->
+    <Color x:Key="NavigationBarBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="NavigationBarTextColor">#FFFFFF</Color>
+    <Color x:Key="NavigationIconColor">#FFFFFF</Color>
+    
+    <!-- Shadow -->
+    <Color x:Key="ShadowBrushColor">#000000</Color>
+    
+    <!-- Shell Styles -->
+    <Color x:Key="ShellBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="ShellForegroundColor">#667eea</Color>
+    <Color x:Key="ShellTitleColor">#F5F5F7</Color>
+    <Color x:Key="ShellDisabledColor">#636366</Color>
+    <Color x:Key="ShellUnselectedColor">#8E8E93</Color>
+    <Color x:Key="ShellTabBarBackgroundColor">#1C1C1E</Color>
+    <Color x:Key="ShellTabBarForegroundColor">#667eea</Color>
+    <Color x:Key="ShellTabBarTitleColor">#667eea</Color>
+    <Color x:Key="ShellTabBarUnselectedColor">#8E8E93</Color>
+    
+    <!-- FlyoutItem Styles -->
+    <Color x:Key="FlyoutItemForegroundColor">#667eea</Color>
+    <Color x:Key="FlyoutItemTitleColor">#8E8E93</Color>
+    <Color x:Key="FlyoutItemNormalForegroundColor">#8E8E93</Color>
+    <Color x:Key="FlyoutItemNormalTitleColor">#8E8E93</Color>
+    <Color x:Key="FlyoutItemSelectedBackgroundColor">#2C2C3E</Color>
+    <Color x:Key="FlyoutItemSelectedForegroundColor">#667eea</Color>
+    <Color x:Key="FlyoutItemSelectedTitleColor">#667eea</Color>
+    
+    <!-- ShellContent Styles -->
+    <Color x:Key="ShellContentForegroundColor">#667eea</Color>
+    <Color x:Key="ShellContentTitleColor">#8E8E93</Color>
+    
+    <!-- Gradient Colors -->
+    <Color x:Key="PrimaryGradientStartColor">#667eea</Color>
+    <Color x:Key="PrimaryGradientEndColor">#764ba2</Color>
+    <Color x:Key="DangerGradientStartColor">#ef4444</Color>
+    <Color x:Key="DangerGradientEndColor">#dc2626</Color>
+
+</ResourceDictionary>

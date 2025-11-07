@@ -6,10 +6,10 @@
     <!-- TitleBar .NET 9 personnalisée (Windows et Mac uniquement) -->
     <Window.TitleBar>
         <TitleBar Title="☁️ WeatherForecast"
-                  Subtitle="Prévisions météo en temps réel"
+                  Subtitle="Test"
                   Icon="appicon.png"
-                  BackgroundColor="{AppThemeBinding Light=#667eea, Dark=#1C1C1E}"
-                  ForegroundColor="{AppThemeBinding Light=White, Dark=White}"
+                  BackgroundColor="{DynamicResource TitleBarBackground}"
+                  ForegroundColor="{DynamicResource TitleBarForeground}"
                   HeightRequest="48">
             <TitleBar.LeadingContent>
                 <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
@@ -21,8 +21,9 @@
                             Padding="0"
                             FontFamily="SegoeSemibold"
                             Margin="5,0,0,0"
-                            Background="{AppThemeBinding Light=transparent, Dark=transparent}"
-                            BorderColor="White"
+                            TextColor="{DynamicResource TitleBarForeground}"
+                            Background="{DynamicResource AccountButtonBackground}"
+                            BorderColor="{DynamicResource AccountButtonBorderColor}"
                             BorderWidth="2"
                             CornerRadius="20"
                             Clicked="OnAccountTapped"
@@ -36,26 +37,27 @@
                                  WidthRequest="30"
                                  Padding="0"
                                  Margin="5,0,0,0"
-                                 BorderColor="White"
+                                 BorderColor="{DynamicResource PeopleButtonBorderColor}"
                                  BorderWidth="2"
                                  CornerRadius="20"
                                  Clicked="OnPeopleTapped"
                                  IsVisible="True"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                                 Background="{DynamicResource PeopleButtonBackground}">
                         <ImageButton.Source>
                             <FontImageSource Size="18"
                                              Glyph="&#xE716;"
-                                             FontFamily="SegoeMDL2" />
+                                             FontFamily="SegoeMDL2"
+                                             Color="{DynamicResource TitleBarForeground}" />
                         </ImageButton.Source>
                     </ImageButton>
                 </HorizontalStackLayout>
             </TitleBar.LeadingContent>
             <TitleBar.Content>
                 <SearchBar x:Name="TitleSearchBar" Placeholder="Rechercher une ville..."
-                           PlaceholderColor="{AppThemeBinding Light=#667eea, Dark=White}"
-                           TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                           PlaceholderColor="{DynamicResource TitleBarSearchPlaceholder}"
+                           TextColor="{DynamicResource TitleBarSearchText}"
                            MaximumWidthRequest="300"
-                           BackgroundColor="{AppThemeBinding Light=White, Dark=Black}"
+                           BackgroundColor="{DynamicResource TitleBarSearchBackground}"
                            HorizontalOptions="Fill"
                            VerticalOptions="Center" />
             </TitleBar.Content>
@@ -68,11 +70,12 @@
                                  WidthRequest="36"
                                  BorderWidth="0"
                                  Clicked="OnMessagesTapped"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                                 Background="Transparent">
                         <ImageButton.Source>
                             <FontImageSource Size="18"
                                              Glyph="&#xE8BD;"
-                                             FontFamily="SegoeMDL2" />
+                                             FontFamily="SegoeMDL2"
+                                             Color="{DynamicResource TitleBarForeground}" />
                         </ImageButton.Source>
                     </ImageButton>
                     <!-- Bouton Settings -->
@@ -81,11 +84,12 @@
                                  WidthRequest="36"
                                  BorderWidth="0"
                                  Clicked="NotificationsTapped"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                                 Background="Transparent">
                         <ImageButton.Source>
                             <FontImageSource Size="18"
                                              Glyph="&#xEDAC;"
-                                             FontFamily="SegoeMDL2" />
+                                             FontFamily="SegoeMDL2"
+                                             Color="{DynamicResource TitleBarForeground}" />
                         </ImageButton.Source>
                     </ImageButton>
                     <!-- Bouton Settings -->
@@ -94,11 +98,12 @@
                                  WidthRequest="36"
                                  BorderWidth="0"
                                  Clicked="OnSettingsTapped"
-                                 Background="{AppThemeBinding Light=transparent, Dark=transparent}">
+                                 Background="Transparent">
                         <ImageButton.Source>
                             <FontImageSource Size="18"
                                              Glyph="&#xE713;"
-                                             FontFamily="SegoeMDL2" />
+                                             FontFamily="SegoeMDL2"
+                                             Color="{DynamicResource TitleBarForeground}" />
                         </ImageButton.Source>
                     </ImageButton>
                 </HorizontalStackLayout>

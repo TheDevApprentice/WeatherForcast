@@ -4,7 +4,7 @@
              x:Class="mobile.Views.OfflineBanner">
     
     <Border x:Name="BannerBorder"
-            Background="{AppThemeBinding Light=#FFC107, Dark=#D4A017}"
+            Background="{DynamicResource OfflineBannerBackground}"
             StrokeThickness="0"
             HeightRequest="44"
             Padding="12,0"
@@ -22,7 +22,7 @@
             <Label x:Name="IconLabel"
                    Text="⚠️"
                    FontSize="20"
-                   TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                   TextColor="{DynamicResource OfflineBannerText}"
                    Margin="0,0,0,4"
                    VerticalOptions="Center" />
             
@@ -31,7 +31,7 @@
                    Text="Vous êtes hors ligne"
                    FontSize="14"
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                   TextColor="{DynamicResource OfflineBannerText}"
                    VerticalOptions="Center" />
             
         </HorizontalStackLayout>

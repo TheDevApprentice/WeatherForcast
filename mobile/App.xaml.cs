@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using mobile.Services.Theme;
 
 namespace mobile
 {
@@ -17,6 +18,8 @@ namespace mobile
             _exceptionHandler = exceptionHandler;
             _logger = logger;
             _serviceProvider = serviceProvider;
+
+            // L'overlay sera créé et enregistré dans CreateWindow
 
             // Démarrer la surveillance du réseau
             var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
@@ -69,6 +72,7 @@ namespace mobile
             Shell shell;
             var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
             var bannerManager = _serviceProvider.GetRequiredService<IOfflineBannerManager>();
+            var themeService = _serviceProvider.GetRequiredService<IThemeService>();
 
 #if ANDROID || IOS
             // Sur mobile : utiliser AppShellMobile avec TabBar
@@ -80,7 +84,7 @@ namespace mobile
             mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else
             // Sur desktop : utiliser AppShell avec Flyout
-            var desktopShell = new AppShell(bannerManager);
+            var desktopShell = new AppShell(bannerManager, themeService);
             shell = desktopShell;
             
             // Désactiver le flyout pendant le splash
@@ -108,6 +112,11 @@ namespace mobile
             // Utiliser Window standard (Android, iOS)
             var window = new Window(shell);
 #endif
+
+            // Créer et enregistrer l'overlay global pour les transitions de thème
+            // L'overlay sera créé dans ThemeService lors de la première transition
+            // Pour l'instant, on enregistre null et ThemeService créera l'overlay à la volée
+            _logger.LogInformation("✅ ThemeService prêt pour les transitions de thème");
 
             // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>

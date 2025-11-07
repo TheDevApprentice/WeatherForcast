@@ -6,6 +6,10 @@
     xmlns:auth="clr-namespace:mobile.Pages.Auth"
     xmlns:pages="clr-namespace:mobile.Pages"
     xmlns:controls="clr-namespace:mobile.Controls"
+    Shell.TabBarBackgroundColor="{DynamicResource TabBarBackground}"
+    Shell.TabBarForegroundColor="{DynamicResource TabBarForeground}"
+    Shell.TabBarTitleColor="{DynamicResource TabBarForeground}"
+    Shell.TabBarUnselectedColor="{DynamicResource TabBarUnselected}"
     Shell.FlyoutBehavior="Flyout">
 
     <!-- 🎨 Menu Items - Modern Card Style -->
@@ -23,8 +27,8 @@
             <!-- Gradient Background avec effet Acrylic -->
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{AppThemeBinding Light=#5B5FC7, Dark=#2C2C2E}" Offset="0.0" />
-                    <GradientStop Color="{AppThemeBinding Light=#5764BA2, Dark=#2C2C2E}" Offset="1.0" />
+                    <GradientStop Color="{DynamicResource FlyoutHeaderGradientStart}" Offset="0.0" />
+                    <GradientStop Color="{DynamicResource FlyoutHeaderGradientEnd}" Offset="1.0" />
                 </LinearGradientBrush>
             </Grid.Background>
             
@@ -143,7 +147,7 @@
         <Grid Padding="0,0,0,10" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
             <BoxView Grid.Row="0" 
                      HeightRequest="1" 
-                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark=#2C2C2E}" 
+                     BackgroundColor="{DynamicResource SeparatorColor}" 
                      Opacity="0.6"
                      Margin="0,0,0,8"/>
             
@@ -163,11 +167,11 @@
                         <FontImageSource FontFamily="SegoeMDL2"
                                          Glyph="&#xE706;"
                                          Size="22"
-                                         Color="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                                         Color="{DynamicResource SecondaryTextColor}"/>
                     </Image.Source>
                 </Image>
 
-                <!-- Switch centré -->
+                <!-- Switch au centre -->
                 <Switch Grid.Column="1"
                         x:Name="ThemeSwitch"
                         HorizontalOptions="Center"
@@ -178,13 +182,13 @@
                 <Image Grid.Column="2"
                        WidthRequest="24"
                        HeightRequest="24"
-                       HorizontalOptions="Start"
+                       HorizontalOptions="Center"
                        VerticalOptions="Center">
                     <Image.Source>
                         <FontImageSource FontFamily="SegoeMDL2"
                                          Glyph="&#xE708;"
                                          Size="22"
-                                         Color="{AppThemeBinding Light={StaticResource Gray600}, Dark=#8E8E93}"/>
+                                         Color="{DynamicResource SecondaryTextColor}"/>
                     </Image.Source>
                 </Image>
             </Grid>

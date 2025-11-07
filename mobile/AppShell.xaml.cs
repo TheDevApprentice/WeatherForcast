@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using mobile.Services.Theme;
 using Font = Microsoft.Maui.Font;
 
 namespace mobile
@@ -7,16 +8,21 @@ namespace mobile
     public partial class AppShell : Shell
     {
         private readonly IOfflineBannerManager _bannerManager;
+        private readonly IThemeService _themeService;
         private INetworkMonitorService? _networkMonitor;
 
-        public AppShell (IOfflineBannerManager bannerManager)
+        public AppShell (IOfflineBannerManager bannerManager, IThemeService themeService)
         {
             _bannerManager = bannerManager;
+            _themeService = themeService;
 
             InitializeComponent();
-            var currentTheme = Application.Current!.RequestedTheme;
+            
+            // S'abonner aux changements de thème
+            _themeService.ThemeChanged += OnThemeChangedFromService;
+            
             // Initialize the new Switch based on current theme
-            ThemeSwitch.IsToggled = currentTheme == AppTheme.Dark;
+            ThemeSwitch.IsToggled = _themeService.CurrentTheme == AppTheme.Dark;
 
             // Enregistrer les routes pour la navigation
             Routing.RegisterRoute("register", typeof(RegisterPage));
@@ -318,7 +324,20 @@ namespace mobile
                 await switchControl.ScaleTo(1.0, 100, Easing.CubicOut);
             }
             
-            Application.Current!.UserAppTheme = e.Value ? AppTheme.Dark : AppTheme.Light;
+            // Utiliser le service centralisé pour changer le thème
+            await _themeService.SetThemeAsync(e.Value ? AppTheme.Dark : AppTheme.Light, animated: true);
+        }
+
+        /// <summary>
+        /// Gère le changement de thème via le service centralisé
+        /// </summary>
+        private void OnThemeChangedFromService (object? sender, AppTheme theme)
+        {
+            // Mettre à jour le switch si le thème change depuis ailleurs
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ThemeSwitch.IsToggled = theme == AppTheme.Dark;
+            });
         }
 
     }

@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using mobile.Services.Handlers;
+using mobile.Services.Theme;
 using System.Reflection;
 
 namespace mobile
@@ -57,6 +58,9 @@ namespace mobile
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
             builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
             builder.Services.AddSingleton<IStartupService, StartupService>();
+            
+            // Service de gestion des thèmes
+            builder.Services.AddSingleton<IThemeService, Services.Theme.ThemeService>();
 
             // Service de notification - Toasts personnalisés:
             builder.Services.AddSingleton<INotificationService, NotificationService>();

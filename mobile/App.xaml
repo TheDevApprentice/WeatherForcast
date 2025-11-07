@@ -10,6 +10,9 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/AppStyles.xaml" />
+                
+                <!-- 🎨 Thème par défaut (Light) - sera remplacé dynamiquement par ThemeService -->
+                <ResourceDictionary Source="Resources/Styles/LightTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Converters -->

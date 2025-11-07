@@ -19,6 +19,7 @@
     <Color x:Key="Warning">#f59e0b</Color>
     <Color x:Key="Danger">#ef4444</Color>
     <Color x:Key="Info">#3b82f6</Color>
+    <Color x:Key="ErrorBackground">#FFEBEE</Color>
 
     <Color x:Key="DarkBackground">#17171a</Color>
     <Color x:Key="LightOnDarkBackground">#C3C3C3</Color>

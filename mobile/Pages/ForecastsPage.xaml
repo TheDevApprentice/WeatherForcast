@@ -41,7 +41,7 @@
             <CollectionView ItemsSource="{Binding Forecasts}"
                             Margin="20,0,20,20">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout Padding="40" Spacing="20" VerticalOptions="Center">
+                    <VerticalStackLayout Padding="40" Spacing="10" VerticalOptions="Center">
                         <Label Text="🌤️" 
                                FontSize="64" 
                                HorizontalOptions="Center"/>
@@ -60,7 +60,7 @@
                 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:WeatherForecast">
-                        <Frame Margin="0,5" Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White">
+                        <Border Margin="0,5" Padding="12">
                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="15">
                                 <!-- Indicateur de température (barre colorée) -->
                                 <BoxView Grid.Column="0" Grid.RowSpan="3"
@@ -73,7 +73,7 @@
                                        Text="{Binding Date, StringFormat='{0:dddd dd MMMM yyyy}'}"
                                        FontSize="16"
                                        FontAttributes="Bold"
-                                       TextColor="{StaticResource DarkOnLightBackground}"/>
+                                       TextColor="{DynamicResource PrimaryTextColor}"/>
                                 
                                 <!-- Température -->
                                 <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="10">
@@ -84,16 +84,16 @@
                                     <Label Text="{Binding TemperatureF, StringFormat='({0}°F)'}"
                                            FontSize="14"
                                            VerticalOptions="End"
-                                           TextColor="{StaticResource Gray500}"/>
+                                       TextColor="{DynamicResource LightOnDarkBackground}"/>
                                 </HorizontalStackLayout>
                                 
                                 <!-- Résumé -->
                                 <Label Grid.Column="1" Grid.Row="2"
                                        Text="{Binding Summary}"
                                        FontSize="14"
-                                       TextColor="{StaticResource Gray600}"/>
+                                       TextColor="{DynamicResource PrimaryTextColor}"/>
                             </Grid>
-                        </Frame>
+                        </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

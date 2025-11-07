@@ -10,8 +10,8 @@
         <BoxView>
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{AppThemeBinding Light=#FFFFFF, Dark=#000000}" Offset="0.0" />
-                    <GradientStop Color="{AppThemeBinding Light=#F0F4F8, Dark=#0A0A0A}" Offset="1.0" />
+                    <GradientStop Color="{DynamicResource SplashGradientStart}" Offset="0.0" />
+                    <GradientStop Color="{DynamicResource SplashGradientEnd}" Offset="1.0" />
                 </LinearGradientBrush>
             </BoxView.Background>
         </BoxView>
@@ -24,7 +24,7 @@
             <!-- Loader avec effet de glow -->
             <Grid WidthRequest="80" HeightRequest="80">
                 <!-- Cercle de fond avec glow -->
-                <Ellipse Fill="{AppThemeBinding Light=#E8F0FE, Dark=#1A2332}"
+                <Ellipse Fill="{DynamicResource SplashLoaderBackground}"
                          WidthRequest="80"
                          HeightRequest="80"
                          Opacity="0.3"/>
@@ -55,7 +55,7 @@
                            Text="Démarrage..."
                            FontSize="16"
                            FontAttributes="None"
-                           TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"
+                           TextColor="{DynamicResource SplashStatusText}"
                            LineBreakMode="WordWrap"
                            MaxLines="2"
                            WidthRequest="280"
@@ -95,13 +95,13 @@
             
             <!-- Icône d'erreur avec cercle -->
             <Grid WidthRequest="56" HeightRequest="56" HorizontalOptions="Center">
-                <Ellipse Fill="{AppThemeBinding Light=#FEF2F2, Dark=#3D1F1F}"
+                <Ellipse Fill="{DynamicResource SplashErrorBackground}"
                          WidthRequest="56"
                          HeightRequest="56"/>
                 <Label Text="\uEB90" 
                        FontFamily="SegoeMDL2"
                        FontSize="28"
-                       TextColor="{AppThemeBinding Light=#DC2626, Dark=#EF4444}"
+                       TextColor="{DynamicResource SplashErrorText}"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"/>
             </Grid>
@@ -111,11 +111,11 @@
                    FontSize="20" 
                    FontAttributes="Bold"
                    HorizontalOptions="Center"
-                   TextColor="{AppThemeBinding Light=#DC2626, Dark=#EF4444}"/>
+                   TextColor="{DynamicResource SplashErrorText}"/>
             
             <!-- Message d'erreur -->
             <Label x:Name="ErrorMessage" 
-                   TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"
+                   TextColor="{DynamicResource SplashStatusText}"
                    FontSize="14"
                    HorizontalOptions="Center"
                    HorizontalTextAlignment="Center"

@@ -39,14 +39,14 @@
             </Frame>
 
             <!-- Prochaines fonctionnalités -->
-            <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="White">
+            <Frame CornerRadius="12" HasShadow="True" Padding="20" BackgroundColor="{DynamicResource CardBackground}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🚀 Prochaines fonctionnalités" 
                            FontSize="18"
                            FontAttributes="Bold"
-                           TextColor="{StaticResource DarkOnLightBackground}" />
-                    
-                    <Label Text="• Synchronisation temps réel" FontSize="14" />
+                           TextColor="{DynamicResource PrimaryTextColor}" />
+
+                    <Label Text="• Synchronisation temps réel" FontSize="14" TextColor="{DynamicResource LightOnDarkBackground}" />
                 </VerticalStackLayout>
             </Frame>
 

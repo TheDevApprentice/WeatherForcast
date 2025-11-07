@@ -7,10 +7,10 @@
     xmlns:pages="clr-namespace:mobile.Pages"
     Shell.FlyoutBehavior="Disabled"
     Shell.TabBarIsVisible="True"
-    Shell.TabBarBackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1C1C1E}"
-    Shell.TabBarForegroundColor="{AppThemeBinding Light=#1C1C1E, Dark=#F5F5F7}"
-    Shell.TabBarTitleColor="{AppThemeBinding Light=#1C1C1E, Dark=#F5F5F7}"
-    Shell.TabBarUnselectedColor="{AppThemeBinding Light=#8E8E93, Dark=#8E8E93}">
+    Shell.TabBarBackgroundColor="{DynamicResource TabBarBackground}"
+    Shell.TabBarForegroundColor="{DynamicResource TabBarForeground}"
+    Shell.TabBarTitleColor="{DynamicResource TabBarForeground}"
+    Shell.TabBarUnselectedColor="{DynamicResource TabBarUnselected}">
 
     <!-- TabBar pour iOS et Android avec style moderne -->
     <TabBar>
