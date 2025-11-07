@@ -127,7 +127,7 @@
                                 x:Name="ThemeSwitch"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center"
-                                OnColor="{DynamicResource PrimaryGradientStartColor}"
+                                OnColor="{DynamicResource ProfileAvatarRingGradientStart}"
                                 ThumbColor="{DynamicResource LightSecondaryBackground}"
                                 Toggled="ThemeSwitch_Toggled"/>
                     </Grid>
