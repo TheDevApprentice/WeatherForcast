@@ -6,10 +6,6 @@
     xmlns:auth="clr-namespace:mobile.Pages.Auth"
     xmlns:pages="clr-namespace:mobile.Pages"
     xmlns:controls="clr-namespace:mobile.Controls"
-    Shell.TabBarBackgroundColor="{DynamicResource TabBarBackground}"
-    Shell.TabBarForegroundColor="{DynamicResource TabBarForeground}"
-    Shell.TabBarTitleColor="{DynamicResource TabBarForeground}"
-    Shell.TabBarUnselectedColor="{DynamicResource TabBarUnselected}"
     Shell.FlyoutBehavior="Flyout">
 
     <!-- 🎨 Menu Items - Modern Card Style -->
@@ -23,17 +19,10 @@
 
     <!-- Header moderne -->
     <Shell.FlyoutHeader>
-        <Grid HeightRequest="200" Padding="0">
-            <!-- Gradient Background avec effet Acrylic -->
-            <Grid.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{DynamicResource FlyoutHeaderGradientStart}" Offset="0.0" />
-                    <GradientStop Color="{DynamicResource FlyoutHeaderGradientEnd}" Offset="1.0" />
-                </LinearGradientBrush>
-            </Grid.Background>
-            
+        <Grid HeightRequest="120" Padding="0" Background="{DynamicResource DarkBackground}">
+
             <Grid Padding="24,24,24,20" RowDefinitions="Auto,*,Auto">
-                <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                <!--<HorizontalStackLayout Grid.Row="0" Spacing="10">
                     <Label Text="☁️" 
                            FontSize="28" 
                            VerticalOptions="Center"/>
@@ -43,10 +32,10 @@
                            TextColor="White"
                            Opacity="0.98"
                            VerticalOptions="Center"/>
-                </HorizontalStackLayout>
+                </HorizontalStackLayout>-->
                 
-                <HorizontalStackLayout Grid.Row="1" Spacing="12" VerticalOptions="Center">
-                    <Border StrokeShape="RoundRectangle 36"
+                <HorizontalStackLayout Grid.Row="0" Spacing="12" VerticalOptions="Center">
+                    <!--<Border StrokeShape="RoundRectangle 36"
                             BackgroundColor="White"
                             WidthRequest="72"
                             Padding="0"
@@ -65,7 +54,7 @@
                                VerticalOptions="Center"
                                Opacity="0"
                                Scale="0.5"/>
-                    </Border>
+                    </Border>-->
                     
                     <VerticalStackLayout VerticalOptions="Center" Spacing="6" MaximumWidthRequest="190">
                         <Label x:Name="UserFullNameLabel"
@@ -84,11 +73,7 @@
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
                 
-                <BoxView Grid.Row="2" 
-                         HeightRequest="1" 
-                         BackgroundColor="White" 
-                         Opacity="0.25"
-                         Margin="0,12,0,0"/>
+
             </Grid>
         </Grid>
     </Shell.FlyoutHeader>
@@ -176,6 +161,8 @@
                         x:Name="ThemeSwitch"
                         HorizontalOptions="Center"
                         VerticalOptions="Center"
+                        OnColor="{DynamicResource PrimaryGradientStartColor}"
+                        ThumbColor="{DynamicResource LightSecondaryBackground}"
                         Toggled="ThemeSwitch_Toggled" />
 
                 <!-- Icône Lune alignée à gauche de sa colonne -->

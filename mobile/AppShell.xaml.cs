@@ -17,10 +17,10 @@ namespace mobile
             _themeService = themeService;
 
             InitializeComponent();
-            
+
             // S'abonner aux changements de thème
             _themeService.ThemeChanged += OnThemeChangedFromService;
-            
+
             // Initialize the new Switch based on current theme
             ThemeSwitch.IsToggled = _themeService.CurrentTheme == AppTheme.Dark;
 
@@ -41,15 +41,15 @@ namespace mobile
         {
             _networkMonitor = networkMonitor;
             _networkMonitor.ConnectivityChanged += OnNetworkConnectivityChanged;
-            
+
             _bannerManager.Initialize(networkMonitor);
             _bannerManager.ApplyToCurrentPage();
-            
+
             // Initialiser l'état du bouton de déconnexion
             UpdateLogoutButtonState();
         }
 
-        private void OnNetworkConnectivityChanged(object? sender, NetworkAccess access)
+        private void OnNetworkConnectivityChanged (object? sender, NetworkAccess access)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -57,7 +57,7 @@ namespace mobile
             });
         }
 
-        private void UpdateLogoutButtonState()
+        private void UpdateLogoutButtonState ()
         {
             if (_networkMonitor != null && LogoutButton != null)
             {
@@ -93,10 +93,10 @@ namespace mobile
                 await Task.Delay(50);
 
                 // Animation 1 : Avatar apparait avec scale + fade (effet pop)
-                await Task.WhenAll(
-                    UserInitialsLabel.FadeTo(1, 400, Easing.CubicOut),
-                    UserInitialsLabel.ScaleTo(1, 400, Easing.SpringOut)
-                );
+                //await Task.WhenAll(
+                //    UserInitialsLabel.FadeTo(1, 400, Easing.CubicOut),
+                //    UserInitialsLabel.ScaleTo(1, 400, Easing.SpringOut)
+                //);
 
                 // Animation 2 : Nom glisse de gauche + fade
                 await Task.WhenAll(
@@ -113,8 +113,8 @@ namespace mobile
             catch
             {
                 // Si erreur, remettre tout visible
-                UserInitialsLabel.Opacity = 1;
-                UserInitialsLabel.Scale = 1;
+                //UserInitialsLabel.Opacity = 1;
+                //UserInitialsLabel.Scale = 1;
                 UserFullNameLabel.Opacity = 1;
                 UserFullNameLabel.TranslationX = 0;
                 UserEmailLabel.Opacity = 1;
@@ -171,7 +171,7 @@ namespace mobile
                         {
                             UserFullNameLabel.Text = authState.GetFullName();
                             UserEmailLabel.Text = authState.Email;
-                            UserInitialsLabel.Text = authState.GetInitials();
+                            //UserInitialsLabel.Text = authState.GetInitials();
 
 #if WINDOWS || MACCATALYST
                             // Synchroniser avec la titlebar (sauf si on est dans le splash)
@@ -188,7 +188,7 @@ namespace mobile
             {
                 UserFullNameLabel.Text = string.Empty;
                 UserEmailLabel.Text = string.Empty;
-                UserInitialsLabel.Text = string.Empty;
+                //UserInitialsLabel.Text = string.Empty;
 
 #if WINDOWS || MACCATALYST
                 // Masquer le bouton Account et afficher l'icône People dans la titlebar (sauf si on est dans le splash)
@@ -204,14 +204,14 @@ namespace mobile
         {
             // Retour haptique
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            
+
             // Animation du bouton
             if (sender is TapGestureRecognizer tap && tap.Parent is Border border)
             {
                 await border.ScaleTo(0.95, 100, Easing.CubicOut);
                 await border.ScaleTo(1.0, 100, Easing.CubicOut);
             }
-            
+
             try
             {
                 // Vérifier la connexion réseau
@@ -316,14 +316,14 @@ namespace mobile
         {
             // Retour haptique
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            
+
             // Animation du switch
             if (sender is Switch switchControl)
             {
                 await switchControl.ScaleTo(1.05, 100, Easing.CubicOut);
                 await switchControl.ScaleTo(1.0, 100, Easing.CubicOut);
             }
-            
+
             // Utiliser le service centralisé pour changer le thème
             await _themeService.SetThemeAsync(e.Value ? AppTheme.Dark : AppTheme.Light, animated: true);
         }
