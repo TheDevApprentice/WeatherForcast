@@ -1,8 +1,5 @@
 using Microsoft.Extensions.Logging;
 using mobile.Services.Theme;
-using mobile.Services;
-using mobile.Controls;
-using mobile.Pages;
 
 namespace mobile
 {
@@ -11,6 +8,10 @@ namespace mobile
         private readonly ILogger<MainWindow>? _logger;
         private IThemeService? _themeService;
         private INotificationStore? _notificationStore;
+        private IMessageStore? _messageStore;
+
+        private NotificationCenterPage? notificationCenterPage;
+        private MessageCenterPage? messageCenterPage;
 
         public MainWindow ()
         {
@@ -21,7 +22,8 @@ namespace mobile
                 _logger = Handler?.MauiContext?.Services.GetService<ILogger<MainWindow>>();
                 _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
                 _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
-                
+                _messageStore = Handler?.MauiContext?.Services.GetService<IMessageStore>();
+
 #if WINDOWS
                 // S'abonner aux changements de thème
                 if (_themeService != null)
@@ -35,6 +37,12 @@ namespace mobile
                 {
                     _notificationStore.PropertyChanged += OnNotificationStoreChanged;
                     UpdateNotificationBadge();
+                }
+
+                // S'abonner aux changements du store de messages
+                if (_messageStore != null)
+                {
+
                 }
             }
             catch { }
@@ -145,9 +153,12 @@ namespace mobile
                 var msg = this.FindByName<ImageButton>("MessagesButton");
                 var noti = this.FindByName<ImageButton>("NotificationsButton");
                 var set = this.FindByName<ImageButton>("SettingsButton");
-
+                var msgBdg = this.FindByName<Border>("MessageBadge");
+                var notiBdg = this.FindByName<Border>("NotificationBadge");
                 if (msg != null) msg.IsVisible = false;
+                if (msgBdg != null) msgBdg.IsVisible = false;
                 if (noti != null) noti.IsVisible = false;
+                if (notiBdg != null) notiBdg.IsVisible = false;
                 if (set != null) set.IsVisible = false;
 
                 // Masquer les boutons Account et People
@@ -217,7 +228,9 @@ namespace mobile
             {
                 // Boutons de droite (Messages, Notifications, Settings)
                 var msg = this.FindByName<ImageButton>("MessagesButton");
+                var msgBdg = this.FindByName<Border>("MessageBadge");
                 var noti = this.FindByName<ImageButton>("NotificationsButton");
+                var notiBdg = this.FindByName<Border>("NotificationBadge");
                 var set = this.FindByName<ImageButton>("SettingsButton");
                 var search = this.FindByName<SearchBar>("TitleSearchBar");
 
@@ -226,10 +239,20 @@ namespace mobile
                     msg.IsVisible = isAuthenticated;
                     msg.IsEnabled = isAuthenticated;
                 }
+                if (msgBdg != null)
+                {
+                    msgBdg.IsVisible = isAuthenticated;
+                    msgBdg.IsEnabled = isAuthenticated;
+                }
                 if (noti != null)
                 {
                     noti.IsVisible = isAuthenticated;
                     noti.IsEnabled = isAuthenticated;
+                }
+                if (notiBdg != null)
+                {
+                    notiBdg.IsVisible = isAuthenticated;
+                    notiBdg.IsEnabled = isAuthenticated;
                 }
                 if (set != null)
                 {
@@ -271,26 +294,6 @@ namespace mobile
             }
         }
 
-        /// <summary>
-        /// Appelé quand on clique sur le bouton Notifications
-        /// </summary>
-        private async void OnNotificationsTapped (object? sender, EventArgs e)
-        {
-            try
-            {
-                _logger?.LogInformation("🔔 Bouton Notifications cliqué");
-
-                if (this.Page != null)
-                {
-                    await this.Page.DisplayAlert("Notifications", "Aucune nouvelle notification", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "❌ Erreur lors du clic sur Notifications");
-            }
-        }
-
         // Alias pour correspondre à l'attribut XAML Clicked="NotificationsTapped"
         private async void NotificationsTapped (object? sender, EventArgs e)
         {
@@ -301,8 +304,21 @@ namespace mobile
                 // Ouvrir le centre de notifications en modal
                 if (this.Page != null)
                 {
-                    var notificationCenterPage = new NotificationCenterPage();
-                    await this.Page.Navigation.PushModalAsync(notificationCenterPage, animated: true);
+                    if (messageCenterPage != null)
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        messageCenterPage = null;
+                    }
+                    if (notificationCenterPage == null)
+                    {
+                        notificationCenterPage = new NotificationCenterPage();
+                        await this.Page.Navigation.PushModalAsync(notificationCenterPage, animated: true);
+                    }
+                    else
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        notificationCenterPage = null;
+                    }
                 }
             }
             catch (Exception ex)
@@ -314,7 +330,7 @@ namespace mobile
         /// <summary>
         /// Appelé quand le store de notifications change
         /// </summary>
-        private void OnNotificationStoreChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void OnNotificationStoreChanged (object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(INotificationStore.UnreadCount))
             {
@@ -325,7 +341,7 @@ namespace mobile
         /// <summary>
         /// Met à jour le badge de compteur de notifications
         /// </summary>
-        private void UpdateNotificationBadge()
+        private void UpdateNotificationBadge ()
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -335,11 +351,11 @@ namespace mobile
                     {
                         var unreadCount = _notificationStore.UnreadCount;
                         _logger?.LogInformation("🔔 Mise à jour badge: {Count} notifications non lues", unreadCount);
-                        
+
                         // Trouver les éléments par nom si pas encore initialisés
                         var badge = NotificationBadge ?? this.FindByName<Border>("NotificationBadge");
                         var badgeText = NotificationBadgeText ?? this.FindByName<Label>("NotificationBadgeText");
-                        
+
                         if (badge != null && badgeText != null)
                         {
                             badge.IsVisible = unreadCount > 0;
@@ -369,9 +385,24 @@ namespace mobile
                 try
                 {
                     _logger?.LogInformation("💬 Bouton Messages cliqué");
+                    // Ouvrir le centre de messages en modal
                     if (this.Page != null)
                     {
-                        await this.Page.DisplayAlert("Messages", "Aucun nouveau message", "OK");
+                        if (notificationCenterPage != null)
+                        {
+                            await this.Page.Navigation.PopModalAsync(animated: true);
+                            notificationCenterPage = null;
+                        }
+                        if (messageCenterPage == null)
+                        {
+                            messageCenterPage = new MessageCenterPage();
+                            await this.Page.Navigation.PushModalAsync(messageCenterPage, animated: true);
+                        }
+                        else
+                        {
+                            await this.Page.Navigation.PopModalAsync(animated: true);
+                            messageCenterPage = null;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -380,6 +411,56 @@ namespace mobile
                 }
             });
         }
+
+
+        /// <summary>
+        /// Appelé quand le store de messsage change
+        /// </summary>
+        private void OnMessageStoreChanged (object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IMessageStore.UnreadCount))
+            {
+                UpdateMessageBadge();
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le badge de compteur de messsages
+        /// </summary>
+        private void UpdateMessageBadge ()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    if (_messageStore != null)
+                    {
+                        var unreadCount = _messageStore.UnreadCount;
+                        _logger?.LogInformation("🔔 Mise à jour badge: {Count} messages non lues", unreadCount);
+
+                        // Trouver les éléments par nom si pas encore initialisés
+                        var badge = MessageBadge ?? this.FindByName<Border>("MessageBadge");
+                        var badgeText = MessageBadgeText ?? this.FindByName<Label>("MessageBadgeText");
+
+                        if (badge != null && badgeText != null)
+                        {
+                            badge.IsVisible = unreadCount > 0;
+                            badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
+                            _logger?.LogInformation("✅ Badge mis à jour: visible={Visible}, text={Text}", badge.IsVisible, badgeText.Text);
+                        }
+                        else
+                        {
+                            _logger?.LogWarning("⚠️ Badge ou BadgeText introuvable");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "❌ Erreur lors de la mise à jour du badge");
+                }
+            });
+        }
+
 
         /// <summary>
         /// Appelé quand on clique sur le bouton Settings

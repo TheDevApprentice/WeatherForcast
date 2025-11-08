@@ -1,8 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using mobile.Models;
-using mobile.Services;
 
 namespace mobile.Controls
 {
@@ -37,7 +35,7 @@ namespace mobile.Controls
             }
         }
 
-        public NotificationCenterView()
+        public NotificationCenterView ()
         {
             // Récupérer le store depuis le service provider
             _notificationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<INotificationStore>()
@@ -50,7 +48,7 @@ namespace mobile.Controls
             UpdateHasUnreadNotifications();
         }
 
-        private void OnStorePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnStorePropertyChanged (object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(INotificationStore.UnreadCount))
             {
@@ -58,17 +56,17 @@ namespace mobile.Controls
             }
         }
 
-        private void UpdateHasUnreadNotifications()
+        private void UpdateHasUnreadNotifications ()
         {
             HasUnreadNotifications = _notificationStore.UnreadCount > 0;
         }
 
-        private void OnMarkAllAsReadClicked(object sender, EventArgs e)
+        private void OnMarkAllAsReadClicked (object sender, EventArgs e)
         {
             _notificationStore.MarkAllAsRead();
         }
 
-        private void OnDeleteNotificationClicked(object sender, EventArgs e)
+        private void OnDeleteNotificationClicked (object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is string notificationId)
             {
@@ -76,12 +74,12 @@ namespace mobile.Controls
             }
         }
 
-        private void OnClearAllClicked(object sender, EventArgs e)
+        private void OnClearAllClicked (object sender, EventArgs e)
         {
             _notificationStore.ClearAll();
         }
 
-        private async void OnCloseClicked(object sender, EventArgs e)
+        private async void OnCloseClicked (object sender, EventArgs e)
         {
             // Fermer la page modale parente
             var parentPage = this.GetParentPage();
@@ -91,7 +89,7 @@ namespace mobile.Controls
             }
         }
 
-        private Page? GetParentPage()
+        private Page? GetParentPage ()
         {
             Element? parent = this.Parent;
             while (parent != null)
@@ -103,7 +101,7 @@ namespace mobile.Controls
             return null;
         }
 
-        protected new void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected new void OnPropertyChanged ([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

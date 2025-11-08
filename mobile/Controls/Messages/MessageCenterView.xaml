@@ -2,15 +2,15 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:mobile.Models"
-             x:Class="mobile.Controls.NotificationCenterView"
+             x:Class="mobile.Controls.MessageCenterView"
              x:Name="Root"
              WidthRequest="400"
              MaximumHeightRequest="600">
     
     <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
-            StrokeThickness="1"
+            StrokeThickness="3"
             Stroke="{DynamicResource BorderColor}"
-            StrokeShape="RoundRectangle 12"
+            StrokeShape="RoundRectangle 24"
             Padding="0">
         
         <Border.Shadow>
@@ -30,9 +30,10 @@
                     StrokeThickness="0">
                 
                 <Grid ColumnDefinitions="*,Auto,Auto">
-                    <Label Text="Notifications"
+                    <Label Text="Messages"
                            FontSize="18"
                            FontAttributes="Bold"
+                           TextDecorations="Underline"
                            TextColor="{DynamicResource PrimaryTextColor}"
                            VerticalOptions="Center"/>
                     
@@ -44,7 +45,7 @@
                             Padding="8,4"
                             Margin="0,0,8,0"
                             Clicked="OnMarkAllAsReadClicked"
-                            IsVisible="{Binding HasUnreadNotifications, Source={x:Reference Root}}"/>
+                            IsVisible="{Binding HasUnreadMessages, Source={x:Reference Root}}"/>
                     
                     <!-- Bouton fermer -->
                     <Button Grid.Column="2"
@@ -60,25 +61,25 @@
                 </Grid>
             </Border>
             
-            <!-- Liste des notifications -->
+            <!-- Liste des messages -->
             <ScrollView Grid.Row="1"
                         MaximumHeightRequest="500">
                 
-                <VerticalStackLayout x:Name="NotificationsList"
+                <VerticalStackLayout x:Name="MessagesList"
                                      Spacing="0"
                                      Padding="0"
-                                     BindableLayout.ItemsSource="{Binding Notifications, Source={x:Reference Root}}">
+                                     BindableLayout.ItemsSource="{Binding MessagesList, Source={x:Reference Root}}">
                     
                     <BindableLayout.EmptyView>
                         <Grid MinimumHeightRequest="300">
                             <VerticalStackLayout Spacing="12"
                                                  HorizontalOptions="Center"
                                                  VerticalOptions="Center">
-                                <Label Text="🔔"
+                                <Label Text="💭"
                                        FontSize="48"
                                        HorizontalOptions="Center"
                                        Opacity="0.3"/>
-                                <Label Text="Aucune notification"
+                                <Label Text="Aucuns messages"
                                        FontSize="16"
                                        TextColor="{DynamicResource SecondaryTextColor}"
                                        HorizontalOptions="Center"/>
@@ -87,7 +88,7 @@
                     </BindableLayout.EmptyView>
                     
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:Notification">
+                        <DataTemplate x:DataType="models:Message">
                             <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
                                     Padding="16,12"
                                     Margin="0"
@@ -131,7 +132,7 @@
                                     <!-- Message -->
                                     <Label Grid.Column="1"
                                            Grid.Row="1"
-                                           Text="{Binding Message}"
+                                           Text="{Binding Content}"
                                            FontSize="13"
                                            TextColor="{DynamicResource SecondaryTextColor}"
                                            LineBreakMode="WordWrap"
@@ -169,7 +170,7 @@
                                             WidthRequest="32"
                                             HeightRequest="32"
                                             VerticalOptions="Center"
-                                            Clicked="OnDeleteNotificationClicked"
+                                            Clicked="OnDeleteMessageClicked"
                                             CommandParameter="{Binding Id}"/>
                                 </Grid>
                             </Border>
@@ -185,13 +186,21 @@
                     StrokeShape="RoundRectangle 0,0,12,12"
                     StrokeThickness="0"
                     Stroke="{DynamicResource BorderColor}">
-                
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                 <Button Text="Effacer tout"
                         FontSize="13"
-                        TextColor="{DynamicResource ErrorColor}"
+                        TextColor="{DynamicResource PrimaryTextColor}"
                         BackgroundColor="Transparent"
                         HorizontalOptions="Center"
                         Clicked="OnClearAllClicked"/>
+                <Button Text="Voir tout"
+                            FontSize="12"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            BackgroundColor="Transparent"
+                            Padding="8,4"
+                            Margin="0,0,1,0"
+                            IsVisible="True"/>
+                    </HorizontalStackLayout>
             </Border>
         </Grid>
     </Border>

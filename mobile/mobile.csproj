@@ -85,5 +85,35 @@
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.10" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Controls\Messages\MessageCenterView.xaml.cs">
+	    <DependentUpon>MessageCenterView.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Messages\MessageCard.xaml.cs">
+	    <DependentUpon>MessageCard.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Messages\MessageManager.xaml.cs">
+	    <DependentUpon>MessageManager.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\MessageCenterPage.xaml.cs">
+	    <DependentUpon>MessageCenterPage.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Controls\Messages\MessageCenterView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\Messages\MessageCard.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\Messages\MessageManager.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\MessageCenterPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
 	
 </Project>

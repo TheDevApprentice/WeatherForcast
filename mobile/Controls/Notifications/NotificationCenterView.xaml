@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:mobile.Models"
+             x:Class="mobile.Controls.NotificationCenterView"
+             x:Name="Root"
+             WidthRequest="400"
+             MaximumHeightRequest="900">
+    
+    <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+            StrokeThickness="3"
+            Stroke="{DynamicResource BorderColor}"
+            StrokeShape="RoundRectangle 24"
+            Padding="0">
+        
+        <Border.Shadow>
+            <Shadow Brush="{DynamicResource ShadowColor}" 
+                    Opacity="0.2" 
+                    Radius="20" 
+                    Offset="0,8" />
+        </Border.Shadow>
+        
+        <Grid RowDefinitions="Auto,*,Auto">
+            
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                    Padding="20,16"
+                    StrokeShape="RoundRectangle 12,12,0,0"
+                    StrokeThickness="0">
+                
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Label Text="Notifications"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextDecorations="Underline"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           VerticalOptions="Center"/>
+                    
+                    <Button Grid.Column="1"
+                            Text="Tout marquer comme lu"
+                            FontSize="12"
+                            TextColor="{DynamicResource AccentColor}"
+                            BackgroundColor="Transparent"
+                            Padding="8,4"
+                            Margin="0,0,8,0"
+                            Clicked="OnMarkAllAsReadClicked"
+                            IsVisible="{Binding HasUnreadNotifications, Source={x:Reference Root}}"/>
+                    
+                    <!-- Bouton fermer -->
+                    <Button Grid.Column="2"
+                            Text="✕"
+                            FontSize="18"
+                            TextColor="{DynamicResource TertiaryTextColor}"
+                            BackgroundColor="Transparent"
+                            Padding="8"
+                            WidthRequest="36"
+                            HeightRequest="36"
+                            VerticalOptions="Center"
+                            Clicked="OnCloseClicked"/>
+                </Grid>
+            </Border>
+            
+            <!-- Liste des notifications -->
+            <ScrollView Grid.Row="1"
+                        MaximumHeightRequest="500">
+                
+                <VerticalStackLayout x:Name="NotificationsList"
+                                     Spacing="0"
+                                     Padding="0"
+                                     BindableLayout.ItemsSource="{Binding Notifications, Source={x:Reference Root}}">
+                    
+                    <BindableLayout.EmptyView>
+                        <Grid MinimumHeightRequest="300">
+                            <VerticalStackLayout Spacing="12"
+                                                 HorizontalOptions="Center"
+                                                 VerticalOptions="Center">
+                                <Label Text="🔔"
+                                       FontSize="48"
+                                       HorizontalOptions="Center"
+                                       Opacity="0.3"/>
+                                <Label Text="Aucune notification"
+                                       FontSize="16"
+                                       TextColor="{DynamicResource SecondaryTextColor}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </BindableLayout.EmptyView>
+                    
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Notification">
+                            <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                                    Padding="16,12"
+                                    Margin="0"
+                                    StrokeThickness="1"
+                                    Stroke="{DynamicResource BorderColor}">
+                                
+                                <!-- Fond différent si non lu -->
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border"
+                                                 Binding="{Binding IsRead}"
+                                                 Value="False">
+                                        <Setter Property="BackgroundColor" 
+                                                Value="{DynamicResource SelectedItemBackground}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="12"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      RowSpacing="4">
+                                    
+                                    <!-- Indicateur de type (couleur) -->
+                                    <BoxView Grid.Column="0"
+                                             Grid.RowSpan="3"
+                                             WidthRequest="4"
+                                             HeightRequest="40"
+                                             CornerRadius="2"
+                                             VerticalOptions="Center"
+                                             Color="{Binding Type, Converter={StaticResource StringToColorConverter}}"/>
+                                    
+                                    <!-- Titre -->
+                                    <Label Grid.Column="1"
+                                           Grid.Row="0"
+                                           Text="{Binding Title}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{DynamicResource PrimaryTextColor}"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
+                                    
+                                    <!-- Message -->
+                                    <Label Grid.Column="1"
+                                           Grid.Row="1"
+                                           Text="{Binding Message}"
+                                           FontSize="13"
+                                           TextColor="{DynamicResource SecondaryTextColor}"
+                                           LineBreakMode="WordWrap"
+                                           MaxLines="2"/>
+                                    
+                                    <!-- Timestamp -->
+                                    <Label Grid.Column="1"
+                                           Grid.Row="2"
+                                           Text="{Binding Timestamp, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                           FontSize="11"
+                                           TextColor="{DynamicResource TertiaryTextColor}"
+                                           Opacity="0.7"/>
+                                    
+                                    <!-- Badge "Non lu" -->
+                                    <Border Grid.Column="2"
+                                            Grid.Row="0"
+                                            WidthRequest="8"
+                                            HeightRequest="8"
+                                            BackgroundColor="{DynamicResource AccentColor}"
+                                            StrokeShape="Ellipse"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            IsVisible="{Binding IsRead, Converter={StaticResource InvertedBoolConverter}}"/>
+                                    
+                                    <!-- Bouton supprimer -->
+                                    <Button Grid.Column="2"
+                                            Grid.Row="1"
+                                            Grid.RowSpan="2"
+                                            Text="✕"
+                                            FontSize="16"
+                                            TextColor="{DynamicResource TertiaryTextColor}"
+                                            BackgroundColor="Transparent"
+                                            Padding="8"
+                                            WidthRequest="32"
+                                            HeightRequest="32"
+                                            VerticalOptions="Center"
+                                            Clicked="OnDeleteNotificationClicked"
+                                            CommandParameter="{Binding Id}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+            
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                    Padding="16,12"
+                    StrokeShape="RoundRectangle 0,0,12,12"
+                    StrokeThickness="0"
+                    Stroke="{DynamicResource BorderColor}">
+                
+                <Button Text="Effacer tout"
+                        FontSize="13"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="Center"
+                        Clicked="OnClearAllClicked"/>
+            </Border>
+        </Grid>
+    </Border>
+</ContentView>

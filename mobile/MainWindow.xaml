@@ -37,7 +37,7 @@
                                  HeightRequest="30"
                                  WidthRequest="30"
                                  Padding="0"
-                                 Margin="5,0,0,0"
+                                 Margin="10,0,5,0"
                                  BorderColor="{DynamicResource BorderColor}"
                                  BorderWidth="1.5"
                                  CornerRadius="20"
@@ -65,26 +65,58 @@
             <TitleBar.TrailingContent>
                 <HorizontalStackLayout Spacing="8"
                                        Padding="0,0,12,0">
-                    <!-- Bouton Settings -->
-                    <ImageButton x:Name="MessagesButton"
-                                 HeightRequest="36"
-                                 WidthRequest="36"
-                                 BorderWidth="0"
-                                 Clicked="OnMessagesTapped"
-                                 Background="Transparent">
-                        <ImageButton.Source>
-                            <FontImageSource Size="18"
-                                             Glyph="&#xE8BD;"
-                                             FontFamily="SegoeMDL2"
-                                             Color="{DynamicResource TitleBarForeground}" />
-                        </ImageButton.Source>
-                    </ImageButton>
+  
+                    <!-- Bouton message avec badge -->
+                    <Border Padding="0"
+                            BackgroundColor="Transparent"
+                            StrokeThickness="0">
+                        <Grid HeightRequest="41" 
+                              WidthRequest="41">
+                            <!-- Bouton Messages -->
+                            <ImageButton x:Name="MessagesButton"
+                               HeightRequest="36"
+                               WidthRequest="36"
+                               BorderWidth="0"
+                               Clicked="OnMessagesTapped"
+                               Background="Transparent">
+                                <ImageButton.Source>
+                                    <FontImageSource Size="18"
+                                           Glyph="&#xE8BD;"
+                                           FontFamily="SegoeMDL2"
+                                           Color="{DynamicResource TitleBarForeground}" />
+                                </ImageButton.Source>
+                            </ImageButton>
+
+                            <!-- Badge de compteur -->
+                            <Border x:Name="MessageBadge"
+                                    WidthRequest="10"
+                                    HeightRequest="10"
+                                    Background="#EF4444"
+                                    StrokeShape="Ellipse"
+                                    StrokeThickness="0"
+                                    Stroke="{DynamicResource TitleBarBackground}"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Start"
+                                    Margin="0,3,6,0"
+                                    IsVisible="True">
+                                <Label x:Name="MessageBadgeText"
+                                       Text="0"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="{DynamicResource PrimaryTextColor}" 
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,0,1"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
                     <!-- Bouton Notifications avec badge -->
                     <Border Padding="0"
                             BackgroundColor="Transparent"
                             StrokeThickness="0">
-                        <Grid HeightRequest="36" 
-                              WidthRequest="36">
+                        <Grid HeightRequest="41" 
+                              WidthRequest="41">
                             <ImageButton x:Name="NotificationsButton"
                                          HeightRequest="36"
                                          WidthRequest="36"
@@ -101,27 +133,28 @@
                             
                             <!-- Badge de compteur -->
                             <Border x:Name="NotificationBadge"
-                                    WidthRequest="18"
-                                    HeightRequest="18"
-                                    BackgroundColor="#EF4444"
+                                    WidthRequest="10"
+                                    HeightRequest="10"
+                                    Background="#EF4444"
                                     StrokeShape="Ellipse"
-                                    StrokeThickness="2"
+                                    StrokeThickness="0"
                                     Stroke="{DynamicResource TitleBarBackground}"
                                     HorizontalOptions="End"
                                     VerticalOptions="Start"
                                     Margin="0,-3,-3,0"
-                                    IsVisible="False">
+                                    IsVisible="True">
                                 <Label x:Name="NotificationBadgeText"
-                                       Text="0"
+                                       Text="1"
                                        FontSize="10"
                                        FontAttributes="Bold"
-                                       TextColor="White"
+                                       TextColor="{DynamicResource PrimaryTextColor}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"
                                        Margin="0,0,0,1"/>
                             </Border>
                         </Grid>
                     </Border>
+                    
                     <!-- Bouton Settings -->
                     <ImageButton x:Name="SettingsButton"
                                  HeightRequest="36"

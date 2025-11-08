@@ -58,12 +58,13 @@ namespace mobile
             builder.Services.AddSingleton<ISignalRService, SignalRService>();
             builder.Services.AddSingleton<ISessionValidationService, SessionValidationService>();
             builder.Services.AddSingleton<IStartupService, StartupService>();
-            
+
             // Service de gestion des thèmes
-            builder.Services.AddSingleton<IThemeService, Services.Theme.ThemeService>();
+            builder.Services.AddSingleton<IThemeService, ThemeService>();
 
             // Services de notification
             builder.Services.AddSingleton<INotificationStore, NotificationStore>();
+            builder.Services.AddSingleton<IMessageStore, MessageStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
             // Gestion des erreurs

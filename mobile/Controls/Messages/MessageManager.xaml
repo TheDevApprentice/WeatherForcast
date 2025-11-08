@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<AbsoluteLayout xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                x:Class="mobile.Controls.MessageManager"
+                x:Name="Container"
+                InputTransparent="True"
+                IsVisible="True"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                AbsoluteLayout.LayoutFlags="All">
+    
+    <!-- Conteneur des notifications (en haut à droite, position absolue) -->
+    <VerticalStackLayout x:Name="MessageStack"
+                         Spacing="8"
+                         Padding="0,20,16,0"
+                         VerticalOptions="Start"
+                         HorizontalOptions="End"
+                         AbsoluteLayout.LayoutBounds="1,0,AutoSize,AutoSize"
+                         AbsoluteLayout.LayoutFlags="PositionProportional"
+                         InputTransparent="False"/>
+    
+</AbsoluteLayout>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Controls.MessageCard"
+             HorizontalOptions="End"
+             VerticalOptions="Start"
+             MinimumWidthRequest="300"
+             MaximumWidthRequest="400"
+             Margin="16,8"
+             IsVisible="False"
+             Opacity="0"
+             TranslationX="400">
+    
+    <Border x:Name="CardBorder"
+            Padding="16,12"
+            StrokeShape="RoundRectangle 12"
+            StrokeThickness="0"
+            BackgroundColor="{DynamicResource CardBackgroundColor}">
+        <Border.Shadow>
+            <Shadow Brush="{DynamicResource ShadowColor}" Opacity="0.15" Radius="12" Offset="0,4" />
+        </Border.Shadow>
+    
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" RowSpacing="4">
+        <!-- Barre de couleur à gauche -->
+        <BoxView x:Name="ColorBar"
+                 Grid.Column="0"
+                 Grid.RowSpan="2"
+                 WidthRequest="4"
+                 CornerRadius="2"
+                 BackgroundColor="#10B981"
+                 VerticalOptions="Fill"/>
+        
+        <!-- Contenu -->
+        <VerticalStackLayout Grid.Column="1" Spacing="4">
+            <!-- Titre -->
+            <Label x:Name="TitleLabel"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"/>
+            
+            <!-- Message -->
+            <Label x:Name="MessageLabel"
+                   FontSize="13"
+                   TextColor="{DynamicResource SecondaryTextColor}"
+                   LineBreakMode="WordWrap"
+                   MaxLines="3"/>
+        </VerticalStackLayout>
+        
+        <!-- Bouton Fermer -->
+        <Border Grid.Column="2"
+                Grid.RowSpan="2"
+                Padding="8"
+                BackgroundColor="Transparent"
+                StrokeThickness="0"
+                VerticalOptions="Start">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="6"/>
+            </Border.StrokeShape>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnCloseTapped"/>
+            </Border.GestureRecognizers>
+            
+            <Label Text="✕"
+                   FontSize="16"
+                   TextColor="{DynamicResource TertiaryTextColor}"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"/>
+        </Border>
+        
+        <!-- Barre de progression (timer) -->
+        <BoxView x:Name="ProgressBar"
+                 Grid.Column="0"
+                 Grid.ColumnSpan="3"
+                 Grid.Row="1"
+                 HeightRequest="2"
+                 BackgroundColor="{DynamicResource BorderColor}"
+                 HorizontalOptions="Fill"
+                 VerticalOptions="End"
+                 Margin="0,8,0,-12">
+            <BoxView.Clip>
+                <RectangleGeometry x:Name="ProgressClip" Rect="0,0,0,2"/>
+            </BoxView.Clip>
+        </BoxView>
+    </Grid>
+    </Border>
+</ContentView>
