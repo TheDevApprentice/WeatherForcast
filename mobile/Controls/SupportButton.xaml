@@ -27,7 +27,7 @@
         </Border.GestureRecognizers>
         
         <!-- Grid pour centrer parfaitement l'icône -->
-        <Grid>
+        <Grid Padding="0" Margin="0" VerticalOptions="Center" HorizontalOptions="Center">
             <Label FontFamily="SegoeMDL2"
                    Text="&#xE95B;"
                    FontSize="24"

@@ -37,6 +37,9 @@ namespace mobile.Controls
             // Charger les messages
             LoadMessages();
 
+            // Marquer tous les messages de la conversation Support comme lus
+            MarkSupportMessagesAsRead();
+
             // Cacher le bouton Support
             var supportButton = FindSupportButton();
             if (supportButton != null)
@@ -66,8 +69,32 @@ namespace mobile.Controls
 
             // Mettre à jour le titre et la description
             ConversationTitleLabel.Text = supportConversation.Title ?? "Support";
+        }
 
+        /// <summary>
+        /// Marque tous les messages de la conversation Support comme lus
+        /// </summary>
+        private void MarkSupportMessagesAsRead ()
+        {
+            if (_conversationStore == null) return;
 
+            var supportConversation = _conversationStore.GetConversation(SUPPORT_CONVERSATION_ID);
+            if (supportConversation == null) return;
+
+            // Marquer tous les messages non lus comme lus
+            var hasChanges = false;
+            foreach (var message in supportConversation.Messages.Where(m => !m.IsRead))
+            {
+                message.IsRead = true;
+                hasChanges = true;
+            }
+
+            // Notifier les changements si nécessaire
+            if (hasChanges)
+            {
+                supportConversation.NotifyPropertyChanged(nameof(supportConversation.Messages));
+                System.Diagnostics.Debug.WriteLine($"✅ Messages Support marqués comme lus");
+            }
         }
 
         /// <summary>
@@ -173,6 +200,9 @@ namespace mobile.Controls
             // Vider le champ immédiatement
             MessageEntry.Text = string.Empty;
 
+            // Marquer tous les messages précédents comme lus (l'utilisateur a forcément lu pour envoyer un message)
+            MarkSupportMessagesAsRead();
+
             // Créer le message
             var message = new Message
             {
@@ -214,10 +244,18 @@ namespace mobile.Controls
                 Content = responseText,
                 Type = MessageType.Support,
                 Timestamp = DateTime.Now,
-                IsRead = false
+                IsRead = false // Sera marqué comme lu juste après
             };
 
             _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
+
+            // Si le popup est toujours visible, marquer comme lu
+            if (this.IsVisible)
+            {
+                await Task.Delay(50);
+                MarkSupportMessagesAsRead();
+                System.Diagnostics.Debug.WriteLine("✅ Réponse simulée marquée comme lue (popup ouvert)");
+            }
         }
 
         private async void OnCloseClicked (object? sender, EventArgs e)
@@ -295,17 +333,25 @@ namespace mobile.Controls
                     Content = answer,
                     Type = MessageType.Info,
                     Timestamp = DateTime.Now,
-                    IsRead = false
+                    IsRead = false // Sera marqué comme lu juste après
                 };
 
                 // Ajouter à la conversation (OnConversationsChanged va recharger automatiquement)
                 _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
 
-                // Scroll vers le bas après un court délai
+                // Marquer immédiatement comme lu car le popup est ouvert
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     System.Diagnostics.Debug.WriteLine("💬 FAQ answer added to conversation");
-                    await Task.Delay(150);
+                    
+                    // Petit délai pour laisser le message s'ajouter
+                    await Task.Delay(50);
+                    
+                    // Marquer comme lu car l'utilisateur voit le message dans le popup ouvert
+                    MarkSupportMessagesAsRead();
+                    
+                    // Scroll vers le bas
+                    await Task.Delay(100);
                     await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
                 });
             }

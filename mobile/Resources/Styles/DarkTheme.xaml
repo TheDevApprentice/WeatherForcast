@@ -59,7 +59,7 @@
     <Color x:Key="ProfileAvatarBorder">#2E2E32</Color>
     
     <!-- Shadows -->
-    <Color x:Key="ShadowColor">#000000</Color>
+    <Color x:Key="ShadowColor">#FFFFFF</Color>
     
     <!-- Toast & Notifications -->
     <Color x:Key="ToastBackgroundColor">#374151</Color>
