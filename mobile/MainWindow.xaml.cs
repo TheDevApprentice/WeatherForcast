@@ -12,6 +12,7 @@ namespace mobile
 
         private NotificationCenterPage? notificationCenterPage;
         private MessageCenterPage? messageCenterPage;
+        private ParameterCenterPage? parameterCenterPage;
 
         public MainWindow ()
         {
@@ -309,6 +310,11 @@ namespace mobile
                         await this.Page.Navigation.PopModalAsync(animated: true);
                         messageCenterPage = null;
                     }
+                    if (parameterCenterPage != null)
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        parameterCenterPage = null;
+                    }
                     if (notificationCenterPage == null)
                     {
                         notificationCenterPage = new NotificationCenterPage();
@@ -393,6 +399,11 @@ namespace mobile
                             await this.Page.Navigation.PopModalAsync(animated: true);
                             notificationCenterPage = null;
                         }
+                        if (parameterCenterPage == null)
+                        {
+                            await this.Page.Navigation.PopModalAsync(animated: true);
+                            parameterCenterPage = null;
+                        }
                         if (messageCenterPage == null)
                         {
                             messageCenterPage = new MessageCenterPage();
@@ -473,7 +484,29 @@ namespace mobile
 
                 if (this.Page != null)
                 {
-                    await this.Page.DisplayAlert("Paramètres", "Page de paramètres (à implémenter)", "OK");
+                    // Fermer les autres centres s'ils sont ouverts
+                    if (notificationCenterPage != null)
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        notificationCenterPage = null;
+                    }
+                    if (messageCenterPage != null)
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        messageCenterPage = null;
+                    }
+
+                    // Toggle le centre de paramètres
+                    if (parameterCenterPage == null)
+                    {
+                        parameterCenterPage = new ParameterCenterPage();
+                        await this.Page.Navigation.PushModalAsync(parameterCenterPage, animated: true);
+                    }
+                    else
+                    {
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        parameterCenterPage = null;
+                    }
                 }
             }
             catch (Exception ex)

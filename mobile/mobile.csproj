@@ -96,8 +96,20 @@
 	  <Compile Update="Controls\Messages\MessageManager.xaml.cs">
 	    <DependentUpon>MessageManager.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Controls\Parameters\ParameterManager.xaml.cs">
+	    <DependentUpon>ParameterManager.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Parameters\ParameterCenterView.xaml.cs">
+	    <DependentUpon>ParameterCenterView.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Parameters\ParameterCard.xaml.cs">
+	    <DependentUpon>ParameterCard.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\MessageCenterPage.xaml.cs">
 	    <DependentUpon>MessageCenterPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\ParameterCenterPage.xaml.cs">
+	    <DependentUpon>ParameterCenterPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
@@ -111,7 +123,19 @@
 	  <MauiXaml Update="Controls\Messages\MessageManager.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Controls\Parameters\ParameterCard.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\Parameters\ParameterCenterView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\Parameters\ParameterManager.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\MessageCenterPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\ParameterCenterPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

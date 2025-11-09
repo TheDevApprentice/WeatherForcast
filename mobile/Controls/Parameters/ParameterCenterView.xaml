@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Controls.ParameterCenterView"
+             x:Name="Root"
+             WidthRequest="400">
+    
+    <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+            StrokeThickness="3"
+            Stroke="{DynamicResource BorderColor}"
+            StrokeShape="RoundRectangle 24"
+            Padding="0">
+        
+        <Border.Shadow>
+            <Shadow Brush="{DynamicResource ShadowColor}" 
+                    Opacity="0.2" 
+                    Radius="20" 
+                    Offset="0,8" />
+        </Border.Shadow>
+        
+        <Grid RowDefinitions="Auto,*">
+            
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                    Padding="20,16"
+                    StrokeShape="RoundRectangle 12,12,0,0"
+                    StrokeThickness="0">
+                
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Paramètres"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextDecorations="Underline"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           VerticalOptions="Center"/>
+                    
+                    <!-- Bouton fermer -->
+                    <Button Grid.Column="1"
+                            Text="✕"
+                            FontSize="18"
+                            TextColor="{DynamicResource TertiaryTextColor}"
+                            BackgroundColor="Transparent"
+                            Padding="8"
+                            WidthRequest="36"
+                            HeightRequest="36"
+                            VerticalOptions="Center"
+                            Clicked="OnCloseClicked"/>
+                </Grid>
+            </Border>
+            
+            <!-- Liste des paramètres -->
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="0" Padding="0">
+                    
+                    <!-- Carte Thème -->
+                    <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
+                            Padding="20,16"
+                            Margin="0"
+                            StrokeThickness="1"
+                            Stroke="{DynamicResource BorderColor}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnThemeCardTapped"/>
+                        </Border.GestureRecognizers>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="16"
+                              RowDefinitions="Auto,Auto,*"
+                              RowSpacing="6">
+                            
+                            <!-- Icône -->
+                            <Border Grid.Column="0"
+                                    Grid.RowSpan="1"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                                    StrokeShape="RoundRectangle 12"
+                                    StrokeThickness="0"
+                                    VerticalOptions="Center">
+                                <!-- Icône Soleil alignée à droite de sa colonne -->
+                                <Image 
+                                   WidthRequest="24"
+                                   HeightRequest="24"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center">
+                                    <Image.Source>
+                                        <FontImageSource FontFamily="SegoeMDL2"
+                                         Glyph="&#xE706;"
+                                         Size="22"
+                                         Color="{DynamicResource SecondaryTextColor}"/>
+                                    </Image.Source>
+                                </Image>
+                            </Border>
+                            
+                            <!-- Titre et description -->
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Grid.RowSpan="2"
+                                                 Spacing="4"
+                                                 VerticalOptions="Center"
+                                                 HorizontalOptions="Start">
+                                <Label Text="Thème sombre"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="{DynamicResource PrimaryTextColor}"/>
+                                <Label Text="Activer le mode sombre"
+                                       FontSize="13"
+                                       TextColor="{DynamicResource SecondaryTextColor}"/>
+                            </VerticalStackLayout>
+                            
+                            <!-- Switch -->
+                            <Switch x:Name="ThemeSwitch"
+                                    Grid.Column="2"
+                                    Grid.RowSpan="2"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    OnColor="{DynamicResource PrimaryGradientStartColor}"
+                                    ThumbColor="{DynamicResource LightSecondaryBackground}"
+                                    Toggled="OnThemeSwitchToggled"/>
+                        </Grid>
+                    </Border>
+                    
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Border>
+</ContentView>
