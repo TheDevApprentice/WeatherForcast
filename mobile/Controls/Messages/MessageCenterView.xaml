@@ -38,9 +38,9 @@
                            VerticalOptions="Center"/>
                     
                     <Button Grid.Column="1"
-                            Text="Tout marquer comme lu"
+                            Text="Marquer comme lu"
                             FontSize="12"
-                            TextColor="{DynamicResource AccentColor}"
+                            TextColor="{DynamicResource PrimaryTextColor}"
                             BackgroundColor="Transparent"
                             Padding="8,4"
                             Margin="0,0,8,0"
@@ -69,20 +69,24 @@
                                      Spacing="0"
                                      Padding="0">
                     
-                    <!-- Empty view si aucune conversation -->
+                    <!-- Empty view si aucune notification -->
                     <Grid x:Name="EmptyView"
                           MinimumHeightRequest="300"
                           IsVisible="False">
                         <VerticalStackLayout Spacing="12"
                                              HorizontalOptions="Center"
                                              VerticalOptions="Center">
-                            <Label Text="💭"
+                            <Label Text="✅"
                                    FontSize="48"
                                    HorizontalOptions="Center"
                                    Opacity="0.3"/>
-                            <Label Text="Aucune conversation"
+                            <Label Text="Aucune notification"
                                    FontSize="16"
                                    TextColor="{DynamicResource SecondaryTextColor}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Vous êtes à jour !"
+                                   FontSize="14"
+                                   TextColor="{DynamicResource TertiaryTextColor}"
                                    HorizontalOptions="Center"/>
                         </VerticalStackLayout>
                     </Grid>
@@ -96,22 +100,25 @@
                     StrokeShape="RoundRectangle 0,0,12,12"
                     StrokeThickness="0"
                     Stroke="{DynamicResource BorderColor}">
-                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Button Text="Effacer tout"
-                        FontSize="13"
-                        TextColor="{DynamicResource PrimaryTextColor}"
-                        BackgroundColor="Transparent"
-                        HorizontalOptions="Center"
-                        Clicked="OnClearAllClicked"/>
-                <Button Text="Voir tout"
-                            FontSize="12"
+                <HorizontalStackLayout HorizontalOptions="Center" 
+                                       VerticalOptions="Center"
+                                       Spacing="16">
+                    <Button Text="Tout marquer comme lu"
+                            FontSize="13"
+                            TextColor="{DynamicResource AccentColor}"
+                            BackgroundColor="Transparent"
+                            HorizontalOptions="Center"
+                            Clicked="OnClearAllClicked"
+                            IsVisible="{Binding HasUnreadMessages, Source={x:Reference Root}}"/>
+                    <Button Text="Voir toutes les conversations"
+                            FontSize="13"
+                            FontAttributes="Bold"
                             TextColor="{DynamicResource PrimaryTextColor}"
                             BackgroundColor="Transparent"
                             Padding="8,4"
-                            Margin="0,0,1,0"
                             Clicked="OnViewAllClicked"
                             IsVisible="True"/>
-                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
             </Border>
         </Grid>
     </Border>

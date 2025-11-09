@@ -69,5 +69,11 @@ namespace mobile
         /// Initialise le store avec la conversation de support
         /// </summary>
         void Initialize(string currentUserId, string currentUserDisplayName);
+
+        /// <summary>
+        /// Obtient les conversations à afficher dans le hub de notifications
+        /// (conversations épinglées + conversations avec messages non lus)
+        /// </summary>
+        List<Conversation> GetNotificationConversations();
     }
 }

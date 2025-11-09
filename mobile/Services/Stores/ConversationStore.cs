@@ -116,6 +116,10 @@ namespace mobile
             if (conversation != null)
             {
                 conversation.Messages.Add(message);
+                
+                // Notifier les changements sur la conversation
+                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
+                
                 SortConversations();
                 OnPropertyChanged(nameof(TotalUnreadCount));
             }
@@ -133,6 +137,9 @@ namespace mobile
                 {
                     message.IsRead = true;
                 }
+                
+                // Notifier les changements sur la conversation
+                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
                 OnPropertyChanged(nameof(TotalUnreadCount));
             }
         }
@@ -148,6 +155,9 @@ namespace mobile
                 {
                     message.IsRead = true;
                 }
+                
+                // Notifier les changements sur chaque conversation
+                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
             }
             OnPropertyChanged(nameof(TotalUnreadCount));
         }
@@ -200,7 +210,7 @@ namespace mobile
         }
 
         /// <summary>
-        /// Efface toutes les conversations sauf support
+        /// Efface toutes les conversations sauf la conversation de support
         /// </summary>
         public void ClearAll()
         {
@@ -212,8 +222,19 @@ namespace mobile
             {
                 _conversations.Remove(conversation);
             }
+        }
 
-            OnPropertyChanged(nameof(TotalUnreadCount));
+        /// <summary>
+        /// Obtient les conversations à afficher dans le hub de notifications
+        /// (conversations épinglées + conversations avec messages non lus)
+        /// </summary>
+        public List<Conversation> GetNotificationConversations()
+        {
+            return _conversations
+                .Where(c => c.IsPinned || c.HasUnreadMessages)
+                .OrderByDescending(c => c.IsPinned)
+                .ThenByDescending(c => c.LastActivity)
+                .ToList();
         }
 
         /// <summary>

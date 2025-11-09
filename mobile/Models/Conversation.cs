@@ -1,10 +1,14 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace mobile.Models
 {
     /// <summary>
     /// Modèle représentant une conversation entre utilisateurs
     /// </summary>
-    public class Conversation
+    public class Conversation : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
         /// <summary>
         /// Identifiant unique de la conversation
         /// </summary>
@@ -104,6 +108,22 @@ namespace mobile.Models
             }
 
             return "GR";
+        }
+
+        /// <summary>
+        /// Notifie les changements de propriété pour le binding
+        /// </summary>
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            
+            // Si les messages changent, notifier aussi les propriétés calculées
+            if (propertyName == nameof(Messages))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UnreadCount)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasUnreadMessages)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastMessage)));
+            }
         }
     }
 

@@ -68,11 +68,15 @@ namespace mobile.Controls
                 // Vider la liste actuelle
                 ConversationsList.Children.Clear();
 
-                // Afficher l'empty view si aucune conversation
-                EmptyView.IsVisible = _conversationStore.Conversations.Count == 0;
+                // Obtenir uniquement les conversations à afficher dans le hub de notifications
+                // (épinglées + avec messages non lus)
+                var notificationConversations = _conversationStore.GetNotificationConversations();
+
+                // Afficher l'empty view si aucune conversation à notifier
+                EmptyView.IsVisible = notificationConversations.Count == 0;
 
                 // Ajouter les cartes de conversation
-                foreach (var conversation in _conversationStore.Conversations)
+                foreach (var conversation in notificationConversations)
                 {
                     var card = new ConversationCard();
                     card.Initialize(conversation, _currentUserId);
@@ -83,7 +87,7 @@ namespace mobile.Controls
 
         private void UpdateHasUnreadMessages ()
         {
-            _hasUnreadMessages = _conversationStore.TotalUnreadCount > 0;
+            HasUnreadMessages = _conversationStore.TotalUnreadCount > 0;
         }
 
         private void OnMarkAllAsReadClicked (object sender, EventArgs e)
@@ -93,7 +97,10 @@ namespace mobile.Controls
 
         private void OnClearAllClicked (object sender, EventArgs e)
         {
-            _conversationStore.ClearAll();
+            // Marquer toutes les conversations comme lues
+            // Cela vide le hub de notifications car on n'affiche que les conversations
+            // épinglées ou avec messages non lus
+            _conversationStore.MarkAllAsRead();
         }
 
         private async void OnViewAllClicked(object sender, EventArgs e)
