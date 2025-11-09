@@ -62,9 +62,10 @@ namespace mobile
             // Service de gestion des thèmes
             builder.Services.AddSingleton<IThemeService, ThemeService>();
 
-            // Services de notification
+            // Services de notification et conversations
             builder.Services.AddSingleton<INotificationStore, NotificationStore>();
             builder.Services.AddSingleton<IMessageStore, MessageStore>();
+            builder.Services.AddSingleton<IConversationStore, ConversationStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
             // Gestion des erreurs

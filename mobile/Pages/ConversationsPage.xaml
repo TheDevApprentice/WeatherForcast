@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:mobile.Models"
+             x:Class="mobile.Pages.ConversationsPage"
+             Title="Messages"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+    
+    <Grid RowDefinitions="Auto,*">
+        
+        <!-- Header avec recherche -->
+        <Border Grid.Row="0"
+                BackgroundColor="{DynamicResource CardBackgroundColor}"
+                Padding="16,12"
+                Margin="0,0,0,8"
+                StrokeThickness="0">
+            <Grid ColumnDefinitions="*,Auto">
+                <SearchBar x:Name="SearchBar"
+                           Placeholder="Rechercher une conversation..."
+                           PlaceholderColor="{DynamicResource TertiaryTextColor}"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           BackgroundColor="{DynamicResource PageBackgroundColor}"
+                           TextChanged="OnSearchTextChanged"/>
+                
+                <!-- Bouton nouvelle conversation -->
+                <Button Grid.Column="1"
+                        Text="+"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        WidthRequest="48"
+                        HeightRequest="48"
+                        CornerRadius="24"
+                        BackgroundColor="{DynamicResource AccentColor}"
+                        TextColor="White"
+                        Margin="8,0,0,0"
+                        Clicked="OnNewConversationClicked"/>
+            </Grid>
+        </Border>
+        
+        <!-- Liste des conversations -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout x:Name="ConversationsList"
+                                 Spacing="0"
+                                 Padding="0">
+                
+                <!-- Empty view -->
+                <Grid x:Name="EmptyView"
+                      MinimumHeightRequest="400"
+                      IsVisible="False">
+                    <VerticalStackLayout Spacing="16"
+                                         HorizontalOptions="Center"
+                                         VerticalOptions="Center">
+                        <Label Text="💬"
+                               FontSize="64"
+                               HorizontalOptions="Center"
+                               Opacity="0.3"/>
+                        <Label Text="Aucune conversation"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Commencez une nouvelle conversation"
+                               FontSize="14"
+                               TextColor="{DynamicResource SecondaryTextColor}"
+                               HorizontalOptions="Center"/>
+                        <Button Text="Nouvelle conversation"
+                                BackgroundColor="{DynamicResource AccentColor}"
+                                TextColor="White"
+                                Padding="20,12"
+                                CornerRadius="8"
+                                Margin="0,16,0,0"
+                                Clicked="OnNewConversationClicked"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

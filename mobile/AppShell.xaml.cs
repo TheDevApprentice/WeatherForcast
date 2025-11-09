@@ -26,6 +26,7 @@ namespace mobile
 
             // Enregistrer les routes pour la navigation
             Routing.RegisterRoute("register", typeof(RegisterPage));
+            Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
 
             // Écouter l'ouverture/fermeture du flyout pour animer
             this.PropertyChanged += OnShellPropertyChanged;

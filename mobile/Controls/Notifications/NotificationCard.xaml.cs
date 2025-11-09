@@ -11,7 +11,7 @@ namespace mobile.Controls
 
         public string NotificationId { get; set; } = Guid.NewGuid().ToString();
 
-        public NotificationCard()
+        public NotificationCard ()
         {
             InitializeComponent();
         }
@@ -19,7 +19,7 @@ namespace mobile.Controls
         /// <summary>
         /// Affiche la notification avec animation et timer
         /// </summary>
-        public async Task ShowAsync(string title, string message, NotificationType type, int durationMs = 5000)
+        public async Task ShowAsync (string title, string message, NotificationType type, int durationMs = 5000)
         {
             // Configurer l'apparence
             ConfigureAppearance(title, message, type);
@@ -35,7 +35,7 @@ namespace mobile.Controls
         /// <summary>
         /// Configure l'apparence selon le type
         /// </summary>
-        private void ConfigureAppearance(string title, string message, NotificationType type)
+        private void ConfigureAppearance (string title, string message, NotificationType type)
         {
             TitleLabel.Text = title;
             MessageLabel.Text = message;
@@ -67,7 +67,7 @@ namespace mobile.Controls
         /// <summary>
         /// Animation d'entrée (slide from right + fade in)
         /// </summary>
-        private async Task AnimateInAsync()
+        private async Task AnimateInAsync ()
         {
             IsVisible = true;
             Opacity = 0;
@@ -82,7 +82,7 @@ namespace mobile.Controls
         /// <summary>
         /// Animation de sortie (slide to right + fade out)
         /// </summary>
-        private async Task AnimateOutAsync()
+        private async Task AnimateOutAsync ()
         {
             if (_isClosing) return;
             _isClosing = true;
@@ -99,7 +99,7 @@ namespace mobile.Controls
         /// <summary>
         /// Démarre le timer avec barre de progression
         /// </summary>
-        private async Task StartTimerAsync(int durationMs, CancellationToken cancellationToken)
+        private async Task StartTimerAsync (int durationMs, CancellationToken cancellationToken)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace mobile.Controls
         /// <summary>
         /// Fermer manuellement la notification
         /// </summary>
-        private void OnCloseTapped(object? sender, EventArgs e)
+        private void OnCloseTapped (object? sender, EventArgs e)
         {
             _cancellationTokenSource?.Cancel();
             _ = AnimateOutAsync();
@@ -147,7 +147,7 @@ namespace mobile.Controls
         /// <summary>
         /// Nettoyer les ressources
         /// </summary>
-        public void Dispose()
+        public void Dispose ()
         {
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
