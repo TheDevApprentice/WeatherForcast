@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using mobile.Services.Stores;
 using mobile.Services.Theme;
 
 namespace mobile
@@ -8,7 +9,7 @@ namespace mobile
         private readonly ILogger<MainWindow>? _logger;
         private IThemeService? _themeService;
         private INotificationStore? _notificationStore;
-        private IMessageStore? _messageStore;
+        private IConversationStore? _conversationStore;
 
         private NotificationCenterPage? notificationCenterPage;
         private MessageCenterPage? messageCenterPage;
@@ -23,7 +24,7 @@ namespace mobile
                 _logger = Handler?.MauiContext?.Services.GetService<ILogger<MainWindow>>();
                 _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
                 _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
-                _messageStore = Handler?.MauiContext?.Services.GetService<IMessageStore>();
+                _conversationStore = Handler?.MauiContext?.Services.GetService<IConversationStore>();
 
 #if WINDOWS
                 // S'abonner aux changements de thème
@@ -40,10 +41,11 @@ namespace mobile
                     UpdateNotificationBadge();
                 }
 
-                // S'abonner aux changements du store de messages
-                if (_messageStore != null)
+                // S'abonner aux changements du store de conversations
+                if (_conversationStore != null)
                 {
-
+                    _conversationStore.PropertyChanged += OnConversationStoreChanged;
+                    UpdateMessageBadge();
                 }
             }
             catch { }
@@ -425,11 +427,11 @@ namespace mobile
 
 
         /// <summary>
-        /// Appelé quand le store de messsage change
+        /// Appelé quand le store de conversations change
         /// </summary>
-        private void OnMessageStoreChanged (object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void OnConversationStoreChanged (object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IMessageStore.UnreadCount))
+            if (e.PropertyName == nameof(IConversationStore.TotalUnreadCount))
             {
                 UpdateMessageBadge();
             }
@@ -444,10 +446,10 @@ namespace mobile
             {
                 try
                 {
-                    if (_messageStore != null)
+                    if (_conversationStore != null)
                     {
-                        var unreadCount = _messageStore.UnreadCount;
-                        _logger?.LogInformation("🔔 Mise à jour badge: {Count} messages non lues", unreadCount);
+                        var unreadCount = _conversationStore.TotalUnreadCount;
+                        _logger?.LogInformation("🔔 Mise à jour badge: {Count} messages non lus", unreadCount);
 
                         // Trouver les éléments par nom si pas encore initialisés
                         var badge = MessageBadge ?? this.FindByName<Border>("MessageBadge");

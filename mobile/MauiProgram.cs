@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using mobile.Services.Handlers;
+using mobile.Services.Stores;
 using mobile.Services.Theme;
 using System.Reflection;
 
@@ -64,7 +65,6 @@ namespace mobile
 
             // Services de notification et conversations
             builder.Services.AddSingleton<INotificationStore, NotificationStore>();
-            builder.Services.AddSingleton<IMessageStore, MessageStore>();
             builder.Services.AddSingleton<IConversationStore, ConversationStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
 
