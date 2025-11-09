@@ -11,12 +11,12 @@ namespace mobile.Views
             set => SetValue(IsOnlineProperty, value);
         }
 
-        public OfflineBanner()
+        public OfflineBanner ()
         {
             InitializeComponent();
         }
 
-        private static void OnIsOnlineChanged(BindableObject bindable, object oldValue, object newValue)
+        private static void OnIsOnlineChanged (BindableObject bindable, object oldValue, object newValue)
         {
             if (bindable is OfflineBanner banner)
             {
@@ -24,17 +24,17 @@ namespace mobile.Views
             }
         }
 
-        private void UpdateBannerState()
+        private void UpdateBannerState ()
         {
             var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
             if (IsOnline)
             {
                 // État "Connecté" - Vert
-                BannerBorder.Background = isDark 
+                BannerBorder.Background = isDark
                     ? Color.FromArgb("#2E7D32") // Vert foncé pour dark mode
                     : Color.FromArgb("#4CAF50"); // Vert vif pour light mode
-                
+
                 IconLabel.Text = "✓";
                 MessageLabel.Text = "Vous êtes à nouveau connecté !";
             }
@@ -44,7 +44,7 @@ namespace mobile.Views
                 BannerBorder.Background = isDark
                     ? Color.FromArgb("#D4A017") // Jaune ambré pour dark mode
                     : Color.FromArgb("#FFC107"); // Jaune vif pour light mode
-                
+
                 IconLabel.Text = "⚠️";
                 MessageLabel.Text = "Vous êtes hors ligne";
             }

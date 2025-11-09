@@ -103,6 +103,10 @@ namespace mobile.Services.Handlers
                     // Si HandleErrorResponseAsync ne lève pas d'exception, retourner la réponse
                     return response;
                 }
+                catch (ApiUnavailableException ex)
+                {
+                    throw new ApiUnavailableException(ex.Message, ex);
+                }
                 catch (HttpRequestException ex) when (attempt < MaxRetries)
                 {
                     // Erreur réseau : l'API n'est probablement pas encore démarrée
@@ -110,12 +114,6 @@ namespace mobile.Services.Handlers
                     _logger.LogWarning(ex, "Erreur réseau (tentative {Attempt}/{Max}), nouvelle tentative dans {Delay}ms...",
                         attempt, MaxRetries, delay);
                     await Task.Delay(delay, cancellationToken);
-                }
-                catch (HttpRequestException ex) when (attempt == MaxRetries)
-                {
-                    // Dernière tentative échouée - Lever ApiUnavailableException
-                    _logger.LogError(ex, "Erreur réseau après {Attempts} tentatives", MaxRetries);
-                    throw new ApiUnavailableException("API non joignable - Erreur réseau", ex);
                 }
                 catch (TaskCanceledException ex) when (attempt < MaxRetries)
                 {
