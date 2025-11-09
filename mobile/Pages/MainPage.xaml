@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="mobile.Pages.MainPage"
              xmlns:viewmodels="clr-namespace:mobile.PageModels"
+             xmlns:controls="clr-namespace:mobile.Controls"
              x:DataType="viewmodels:MainPageModel"
              Shell.NavBarIsVisible="False">
     
@@ -11,7 +12,8 @@
         <Grid />
     </Shell.TitleView>-->
 
-    <ScrollView>
+    <Grid>
+        <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
             
             <!-- Header avec gradient violet -->
@@ -52,4 +54,13 @@
 
         </VerticalStackLayout>
     </ScrollView>
+        
+        <!-- Chat Support popup -->
+        <controls:SupportChatPopup/>
+        
+        <!-- Bouton Support flottant -->
+        <controls:SupportButton HorizontalOptions="End"
+                                VerticalOptions="End"
+                                Margin="0,0,20,20"/>
+    </Grid>
 </ContentPage>
