@@ -53,7 +53,7 @@
                     </ImageButton>
                 </HorizontalStackLayout>
             </TitleBar.LeadingContent>
-            <TitleBar.Content>
+            <!--<TitleBar.Content>
                 <SearchBar x:Name="TitleSearchBar" Placeholder="Rechercher une ville..."
                            PlaceholderColor="{DynamicResource TitleBarSearchPlaceholder}"
                            TextColor="{DynamicResource TitleBarSearchText}"
@@ -61,7 +61,7 @@
                            BackgroundColor="{DynamicResource TitleBarSearchBackground}"
                            HorizontalOptions="Fill"
                            VerticalOptions="Center" />
-            </TitleBar.Content>
+            </TitleBar.Content>-->
             <TitleBar.TrailingContent>
                 <HorizontalStackLayout Spacing="8"
                                        Padding="0,0,12,0">
