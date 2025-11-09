@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using mobile.Models;
 
-namespace mobile.Services
+namespace mobile.Services.Stores
 {
     /// <summary>
     /// Store centralisé pour gérer toutes les notifications de l'application
@@ -23,27 +22,27 @@ namespace mobile.Services
         /// <summary>
         /// Ajoute une nouvelle notification au store
         /// </summary>
-        void AddNotification(Notification notification);
+        void AddNotification (Notification notification);
 
         /// <summary>
         /// Marque une notification comme lue
         /// </summary>
-        void MarkAsRead(string notificationId);
+        void MarkAsRead (string notificationId);
 
         /// <summary>
         /// Marque toutes les notifications comme lues
         /// </summary>
-        void MarkAllAsRead();
+        void MarkAllAsRead ();
 
         /// <summary>
         /// Supprime une notification
         /// </summary>
-        void RemoveNotification(string notificationId);
+        void RemoveNotification (string notificationId);
 
         /// <summary>
         /// Supprime toutes les notifications
         /// </summary>
-        void ClearAll();
+        void ClearAll ();
     }
 
     /// <summary>
@@ -71,13 +70,13 @@ namespace mobile.Services
             }
         }
 
-        public NotificationStore()
+        public NotificationStore ()
         {
             // S'abonner aux changements de la collection pour mettre à jour le compteur
             _notifications.CollectionChanged += (s, e) => UpdateUnreadCount();
         }
 
-        public void AddNotification(Notification notification)
+        public void AddNotification (Notification notification)
         {
             // Ajouter au début de la liste (plus récent en premier)
             MainThread.BeginInvokeOnMainThread(() =>
@@ -87,7 +86,7 @@ namespace mobile.Services
             });
         }
 
-        public void MarkAsRead(string notificationId)
+        public void MarkAsRead (string notificationId)
         {
             var notification = _notifications.FirstOrDefault(n => n.Id == notificationId);
             if (notification != null && !notification.IsRead)
@@ -100,7 +99,7 @@ namespace mobile.Services
             }
         }
 
-        public void MarkAllAsRead()
+        public void MarkAllAsRead ()
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -112,7 +111,7 @@ namespace mobile.Services
             });
         }
 
-        public void RemoveNotification(string notificationId)
+        public void RemoveNotification (string notificationId)
         {
             var notification = _notifications.FirstOrDefault(n => n.Id == notificationId);
             if (notification != null)
@@ -125,7 +124,7 @@ namespace mobile.Services
             }
         }
 
-        public void ClearAll()
+        public void ClearAll ()
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -134,12 +133,12 @@ namespace mobile.Services
             });
         }
 
-        private void UpdateUnreadCount()
+        private void UpdateUnreadCount ()
         {
             UnreadCount = _notifications.Count(n => !n.IsRead);
         }
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected virtual void OnPropertyChanged ([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

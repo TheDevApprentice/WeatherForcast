@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using mobile.Controls;
+using mobile.Services.Stores;
 
 namespace mobile.Services
 {

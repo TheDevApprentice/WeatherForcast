@@ -1,3 +1,4 @@
+using mobile.Services.Stores;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

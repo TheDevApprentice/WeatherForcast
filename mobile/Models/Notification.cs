@@ -1,12 +1,17 @@
 using mobile.Controls;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace mobile.Models
 {
     /// <summary>
     /// Modèle représentant une notification dans le système
     /// </summary>
-    public class Notification
+    public class Notification : INotifyPropertyChanged
     {
+        private bool _isRead;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
         /// <summary>
         /// Identifiant unique de la notification
         /// </summary>
@@ -35,11 +40,27 @@ namespace mobile.Models
         /// <summary>
         /// Indique si la notification a été lue/vue
         /// </summary>
-        public bool IsRead { get; set; } = false;
+        public bool IsRead
+        {
+            get => _isRead;
+            set
+            {
+                if (_isRead != value)
+                {
+                    _isRead = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Indique si la notification a été affichée à l'écran
         /// </summary>
         public bool WasDisplayed { get; set; } = false;
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
