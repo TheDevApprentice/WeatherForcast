@@ -126,9 +126,21 @@
 
             <!-- ========== VUE: PROFIL SÉLECTIONNÉ (Mot de passe) ========== -->
             <VerticalStackLayout x:Name="SelectedProfileView" IsVisible="{Binding SelectedProfile, Converter={StaticResource IsNotNullConverter}}" Spacing="15">
-                
+                 <HorizontalStackLayout HorizontalOptions="Start">
+                 
+                <ImageButton 
+                              BackgroundColor="Transparent"
+                              HorizontalOptions="Start"
+                              Padding="0">
+                              <ImageButton.Source>
+                                  <FontImageSource FontFamily="SegoeMDL2" 
+                                                  Glyph="&#xEC52;" 
+                                                  Size="14"
+                                                  Color="{DynamicResource Primary}" />
+                              </ImageButton.Source>
+                </ImageButton>
                 <!-- Bouton retour -->
-                <Button Text="← Retour aux profils"
+                <Button Text="Retour aux profils"
                         Command="{Binding BackToProfilesCommand}"
                         Clicked="OnBackToProfilesClicked"
                         Pressed="OnLinkPressed"
@@ -138,7 +150,8 @@
                         HorizontalOptions="Start"
                         Padding="0"
                         FontSize="14" />
-                
+
+                </HorizontalStackLayout>                
                 <!-- Card du profil sélectionné -->
                 <Border StrokeShape="RoundRectangle 12" Padding="20" BackgroundColor="{DynamicResource CardBackgroundColor}" StrokeThickness="0">
                     <Border.Shadow>
