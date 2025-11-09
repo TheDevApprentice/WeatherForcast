@@ -139,7 +139,7 @@
                                 
                                 <Label Grid.Column="1"
                                        x:Name="FaqToggleIcon"
-                                       Text="▼"
+                                       Text="▲"
                                        FontSize="12"
                                        TextColor="{DynamicResource SecondaryTextColor}"
                                        HorizontalOptions="End"/>
@@ -211,16 +211,16 @@
                 <!-- Zone de saisie du message -->
                 <Border Grid.Row="3"
                         Background="Transparent"
-                        Padding="12"
+                        Padding="0"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 0,0,16,16">
                     
                     <Grid ColumnDefinitions="*,Auto">
                         <!-- Champ de saisie -->
                         <Border Grid.Column="0"
-                                Background="{DynamicResource PageBackgroundColor}"
+                                Background="Transparent"
                                 StrokeThickness="1"
-                                Stroke="{DynamicResource PrimaryTextColor}"
+                                Stroke="{DynamicResource TertiaryTextColor}"
                                 StrokeShape="RoundRectangle 20"
                                 Padding="12,8">
                             <Entry x:Name="MessageEntry"

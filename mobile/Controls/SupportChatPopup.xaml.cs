@@ -226,42 +226,74 @@ namespace mobile.Controls
             _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
         }
 
-        private async void OnCloseClicked(object? sender, EventArgs e)
+        private async void OnCloseClicked (object? sender, EventArgs e)
         {
             await HideAsync();
         }
 
-        private void OnToggleFaqClicked(object? sender, EventArgs e)
+        private void OnToggleFaqClicked (object? sender, EventArgs e)
         {
             // Toggle la visibilité de la liste FAQ
             FaqList.IsVisible = !FaqList.IsVisible;
-            
+
             // Changer l'icône (▼ quand ouvert, ▲ quand fermé)
-            FaqToggleIcon.Text = FaqList.IsVisible ? "▼" : "▲";
+            FaqToggleIcon.Text = FaqList.IsVisible ? "▲" : "▼";
         }
 
-        private void OnFaqTapped(object? sender, EventArgs e)
+        private void OnFaqTapped (object? sender, EventArgs e)
         {
-            if (sender is not Element element) return;
-            
-            var question = element.GetValue(TapGestureRecognizer.CommandParameterProperty) as string;
-            if (string.IsNullOrEmpty(question)) return;
+            System.Diagnostics.Debug.WriteLine("🔍 FAQ tapped - sender type: " + sender?.GetType().Name);
+
+            string? question = null;
+
+            // Essayer de récupérer le CommandParameter depuis le TapGestureRecognizer
+            if (e is TappedEventArgs tappedArgs && tappedArgs.Parameter is string param)
+            {
+                question = param;
+                System.Diagnostics.Debug.WriteLine($"✅ Question from TappedEventArgs: {question}");
+            }
+            else if (sender is BindableObject bindable)
+            {
+                // Chercher dans les GestureRecognizers
+                if (bindable is View view && view.GestureRecognizers.Count > 0)
+                {
+                    foreach (var recognizer in view.GestureRecognizers)
+                    {
+                        if (recognizer is TapGestureRecognizer tapRecognizer)
+                        {
+                            question = tapRecognizer.CommandParameter as string;
+                            System.Diagnostics.Debug.WriteLine($"✅ Question from TapGestureRecognizer: {question}");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(question))
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Question is null or empty");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"📝 Processing FAQ: {question}");
 
             // Réponses automatiques pour chaque FAQ
             var responses = new Dictionary<string, string>
             {
-                ["Comment réinitialiser mon mot de passe ?"] = 
+                ["Comment réinitialiser mon mot de passe ?"] =
                     "Pour réinitialiser votre mot de passe :\n\n1. Allez dans Paramètres > Compte\n2. Cliquez sur 'Modifier le mot de passe'\n3. Suivez les instructions à l'écran\n\nVous recevrez un email de confirmation.",
-                
-                ["Comment mettre à jour mes informations ?"] = 
+
+                ["Comment mettre à jour mes informations ?"] =
                     "Pour mettre à jour vos informations :\n\n1. Accédez à votre Profil\n2. Cliquez sur 'Modifier'\n3. Modifiez les champs souhaités\n4. Enregistrez les modifications\n\nVos changements seront synchronisés automatiquement.",
-                
-                ["Comment contacter le support technique ?"] = 
+
+                ["Comment contacter le support technique ?"] =
                     "Vous pouvez nous contacter de plusieurs façons :\n\n📧 Email : support@weatherforecast.com\n📞 Téléphone : +33 1 23 45 67 89\n💬 Chat : Directement ici !\n\nNous répondons sous 24h maximum."
             };
 
             if (responses.TryGetValue(question, out var answer))
             {
+                System.Diagnostics.Debug.WriteLine($"✅ Found answer for: {question}");
+
                 // Créer un message automatique du support
                 var supportMessage = new Message
                 {
@@ -278,12 +310,17 @@ namespace mobile.Controls
                 // Ajouter la bulle visuellement
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
+                    System.Diagnostics.Debug.WriteLine("💬 Adding message bubble");
                     AddMessageBubble(supportMessage);
-                    
+
                     // Scroll vers le bas
                     await Task.Delay(100);
                     await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
                 });
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ No answer found for: {question}");
             }
         }
     }
