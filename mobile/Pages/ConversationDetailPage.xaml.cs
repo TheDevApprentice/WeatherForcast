@@ -74,7 +74,7 @@ namespace mobile.Pages
             if (_conversation.Type == ConversationType.Support)
             {
                 ConversationSubtitleLabel.Text = "Équipe Support";
-                PinnedBadge.IsVisible = true;
+                //PinnedBadge.IsVisible = true;
             }
             else if (_conversation.Type == ConversationType.Direct)
             {

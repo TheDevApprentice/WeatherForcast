@@ -93,8 +93,7 @@
                     </ImageButton.Source>
                 </ImageButton>
 
-                <!-- Badge épinglé si conversation support -->
-                <ImageButton Grid.Column="3"
+                <!--<ImageButton Grid.Column="3"
                                 x:Name="PinnedBadge"
                                  HeightRequest="30"
                                  WidthRequest="30"
@@ -111,7 +110,7 @@
                                              FontFamily="SegoeMDL2"
                                              Color="{DynamicResource TitleBarForeground}" />
                     </ImageButton.Source>
-                </ImageButton>
+                </ImageButton>-->
             </Grid>
         </Border>
         
