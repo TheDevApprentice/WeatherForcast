@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Controls.SupportButton"
+             HorizontalOptions="End"
+             VerticalOptions="End"
+             Margin="0,0,20,20">
+    
+    <!-- Bouton flottant pour contacter le support -->
+    <Border Background="{DynamicResource PageBackgroundColor}"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 28"
+            WidthRequest="56"
+            HeightRequest="56"
+            Padding="0"
+            Margin="0">
+        
+        <Border.Shadow>
+            <Shadow Brush="{DynamicResource ShadowColor}" 
+                    Opacity="0.3" 
+                    Radius="12" 
+                    Offset="0,4" />
+        </Border.Shadow>
+        
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnSupportButtonTapped"/>
+        </Border.GestureRecognizers>
+        
+        <!-- Grid pour centrer parfaitement l'icône -->
+        <Grid>
+            <Label FontFamily="SegoeMDL2"
+                   Text="&#xE95B;"
+                   FontSize="24"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+        </Grid>
+    </Border>
+</ContentView>
