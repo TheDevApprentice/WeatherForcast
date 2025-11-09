@@ -1,6 +1,5 @@
-using mobile.Models;
-using mobile.Controls;
 using Microsoft.Maui.Controls.Shapes;
+using mobile.Controls;
 using System.Windows.Input;
 
 namespace mobile.Pages
@@ -28,7 +27,7 @@ namespace mobile.Pages
             }
         }
 
-        public ConversationDetailPage()
+        public ConversationDetailPage ()
         {
             InitializeComponent();
 
@@ -43,7 +42,7 @@ namespace mobile.Pages
             MessageEntry.TextChanged += OnMessageTextChanged;
         }
 
-        private void LoadConversation()
+        private void LoadConversation ()
         {
             if (string.IsNullOrEmpty(_conversationId))
                 return;
@@ -65,12 +64,12 @@ namespace mobile.Pages
             _conversationStore.MarkConversationAsRead(_conversationId);
         }
 
-        private void UpdateHeader()
+        private void UpdateHeader ()
         {
             if (_conversation == null) return;
 
             ConversationTitleLabel.Text = _conversation.GetDisplayName(_currentUserId);
-            
+
             // Sous-titre selon le type
             if (_conversation.Type == ConversationType.Support)
             {
@@ -90,7 +89,7 @@ namespace mobile.Pages
             Title = _conversation.GetDisplayName(_currentUserId);
         }
 
-        private void UpdateMessages()
+        private void UpdateMessages ()
         {
             if (_conversation == null) return;
 
@@ -115,16 +114,16 @@ namespace mobile.Pages
             });
         }
 
-        private View CreateMessageView(Message message)
+        private View CreateMessageView (Message message)
         {
             // Déterminer si c'est un message de l'utilisateur ou du support
-            bool isFromCurrentUser = message.Type != MessageType.Info && 
+            bool isFromCurrentUser = message.Type != MessageType.Info &&
                                      message.Type != MessageType.Support;
 
             var border = new Border
             {
-                BackgroundColor = isFromCurrentUser 
-                    ? Color.FromArgb("#3B82F6") 
+                BackgroundColor = isFromCurrentUser
+                    ? Color.FromArgb("#3B82F6")
                     : Application.Current?.Resources["CardBackgroundColor"] as Color,
                 Padding = new Thickness(12, 8),
                 Margin = new Thickness(
@@ -135,8 +134,8 @@ namespace mobile.Pages
                 ),
                 StrokeThickness = isFromCurrentUser ? 0 : 1,
                 Stroke = isFromCurrentUser ? null : Application.Current?.Resources["BorderColor"] as Brush,
-                StrokeShape = new RoundRectangle 
-                { 
+                StrokeShape = new RoundRectangle
+                {
                     CornerRadius = new CornerRadius(
                         isFromCurrentUser ? 16 : 4,
                         isFromCurrentUser ? 4 : 16,
@@ -160,7 +159,7 @@ namespace mobile.Pages
                     Text = message.Title,
                     FontSize = 13,
                     FontAttributes = FontAttributes.Bold,
-                    TextColor = isFromCurrentUser ? Colors.White : Application.Current?.Resources["PrimaryTextColor"] as Color
+                    TextColor = Application.Current?.Resources["PrimaryTextColor"] as Color
                 });
             }
 
@@ -169,7 +168,7 @@ namespace mobile.Pages
             {
                 Text = message.Content,
                 FontSize = 14,
-                TextColor = isFromCurrentUser ? Colors.White : Application.Current?.Resources["PrimaryTextColor"] as Color,
+                TextColor = Application.Current?.Resources["PrimaryTextColor"] as Color,
                 LineBreakMode = LineBreakMode.WordWrap
             });
 
@@ -178,7 +177,7 @@ namespace mobile.Pages
             {
                 Text = FormatTimestamp(message.Timestamp),
                 FontSize = 11,
-                TextColor = isFromCurrentUser ? Color.FromArgb("#E0E7FF") : Application.Current?.Resources["TertiaryTextColor"] as Color,
+                TextColor = Application.Current?.Resources["TertiaryTextColor"] as Color,
                 Opacity = 0.8,
                 HorizontalOptions = LayoutOptions.End
             });
@@ -187,7 +186,7 @@ namespace mobile.Pages
             return border;
         }
 
-        private string FormatTimestamp(DateTime timestamp)
+        private string FormatTimestamp (DateTime timestamp)
         {
             var now = DateTime.Now;
             var diff = now - timestamp;
@@ -204,13 +203,13 @@ namespace mobile.Pages
             return timestamp.ToString("dd/MM/yyyy HH:mm");
         }
 
-        private void OnMessageTextChanged(object? sender, TextChangedEventArgs e)
+        private void OnMessageTextChanged (object? sender, TextChangedEventArgs e)
         {
             // Activer/désactiver le bouton envoyer selon si le texte est vide
             SendButton.IsEnabled = !string.IsNullOrWhiteSpace(e.NewTextValue);
         }
 
-        private void OnSendMessage()
+        private void OnSendMessage ()
         {
             var messageText = MessageEntry.Text?.Trim();
             if (string.IsNullOrWhiteSpace(messageText) || _conversation == null)
@@ -238,12 +237,12 @@ namespace mobile.Pages
             UpdateMessages();
         }
 
-        private void OnSendMessageClicked(object sender, EventArgs e)
+        private void OnSendMessageClicked (object sender, EventArgs e)
         {
             OnSendMessage();
         }
 
-        private async void OnBackClicked(object sender, EventArgs e)
+        private async void OnBackClicked (object sender, EventArgs e)
         {
             await Shell.Current.GoToAsync("..");
         }

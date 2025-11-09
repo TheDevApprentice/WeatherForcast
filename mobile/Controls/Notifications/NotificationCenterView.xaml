@@ -185,7 +185,8 @@
                     Padding="16,12"
                     StrokeShape="RoundRectangle 0,0,12,12"
                     StrokeThickness="0"
-                    Stroke="{DynamicResource BorderColor}">
+                    Stroke="{DynamicResource BorderColor}"
+                    IsVisible="{Binding HasNotifications, Source={x:Reference Root}}">
                 
                 <Button Text="Effacer tout"
                         FontSize="13"

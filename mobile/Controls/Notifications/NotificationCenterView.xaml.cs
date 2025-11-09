@@ -12,6 +12,7 @@ namespace mobile.Controls
     {
         private readonly INotificationStore _notificationStore;
         private bool _hasUnreadNotifications;
+        private bool _hasNotifications;
 
         public new event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,6 +37,22 @@ namespace mobile.Controls
             }
         }
 
+        /// <summary>
+        /// Indique s'il y a des notifications (lues ou non lues)
+        /// </summary>
+        public bool HasNotifications
+        {
+            get => _hasNotifications;
+            private set
+            {
+                if (_hasNotifications != value)
+                {
+                    _hasNotifications = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public NotificationCenterView ()
         {
             // Récupérer le store depuis le service provider
@@ -46,7 +63,9 @@ namespace mobile.Controls
 
             // S'abonner aux changements du store
             _notificationStore.PropertyChanged += OnStorePropertyChanged;
+            _notificationStore.Notifications.CollectionChanged += OnNotificationsCollectionChanged;
             UpdateHasUnreadNotifications();
+            UpdateHasNotifications();
         }
 
         private void OnStorePropertyChanged (object? sender, PropertyChangedEventArgs e)
@@ -57,9 +76,19 @@ namespace mobile.Controls
             }
         }
 
+        private void OnNotificationsCollectionChanged (object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateHasNotifications();
+        }
+
         private void UpdateHasUnreadNotifications ()
         {
             HasUnreadNotifications = _notificationStore.UnreadCount > 0;
+        }
+
+        private void UpdateHasNotifications ()
+        {
+            HasNotifications = _notificationStore.Notifications.Count > 0;
         }
 
         private void OnMarkAllAsReadClicked (object sender, EventArgs e)

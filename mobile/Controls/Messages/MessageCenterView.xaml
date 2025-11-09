@@ -103,13 +103,6 @@
                 <HorizontalStackLayout HorizontalOptions="Center" 
                                        VerticalOptions="Center"
                                        Spacing="16">
-                    <Button Text="Tout marquer comme lu"
-                            FontSize="13"
-                            TextColor="{DynamicResource AccentColor}"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="Center"
-                            Clicked="OnClearAllClicked"
-                            IsVisible="{Binding HasUnreadMessages, Source={x:Reference Root}}"/>
                     <Button Text="Voir toutes les conversations"
                             FontSize="13"
                             FontAttributes="Bold"

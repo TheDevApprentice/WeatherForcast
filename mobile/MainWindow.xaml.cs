@@ -486,6 +486,18 @@ namespace mobile
 
                 if (this.Page != null)
                 {
+                    // Vérifier si un modal ParameterCenterPage est déjà ouvert (depuis ProfilePage par exemple)
+                    var modalStack = this.Page.Navigation.ModalStack;
+                    var existingParameterPage = modalStack.FirstOrDefault(p => p is ParameterCenterPage);
+                    
+                    if (existingParameterPage != null && parameterCenterPage == null)
+                    {
+                        // Un modal est déjà ouvert depuis ailleurs (ProfilePage), le fermer
+                        _logger?.LogInformation("⚠️ ParameterCenterPage déjà ouvert depuis ailleurs, fermeture");
+                        await this.Page.Navigation.PopModalAsync(animated: true);
+                        return;
+                    }
+
                     // Fermer les autres centres s'ils sont ouverts
                     if (notificationCenterPage != null)
                     {

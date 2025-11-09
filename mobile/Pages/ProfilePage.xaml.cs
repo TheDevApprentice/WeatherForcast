@@ -223,6 +223,8 @@ namespace mobile.Pages
                 await border.ScaleTo(0.97, 100, Easing.CubicOut);
                 await border.ScaleTo(1.0, 100, Easing.CubicOut);
             }
+
+            // La commande OpenSettingsCommand du ViewModel gère l'ouverture du modal
         }
 
         async void OnButtonPressed (object sender, EventArgs e)

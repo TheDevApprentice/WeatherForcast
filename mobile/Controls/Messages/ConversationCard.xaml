@@ -45,7 +45,7 @@
             <Label x:Name="InitialsLabel"
                    FontSize="18"
                    FontAttributes="Bold"
-                   TextColor="{DynamicResource Black}"
+                   TextColor="{DynamicResource PrimaryTextColor}"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"/>
         </Border>
