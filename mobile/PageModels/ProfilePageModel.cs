@@ -147,8 +147,27 @@ namespace mobile.PageModels
         [RelayCommand]
         private async Task OpenSettings ()
         {
-            // TODO: Implémenter la page de paramètres
-            await Shell.Current.DisplayAlert("Paramètres", "Page de paramètres à venir", "OK");
+            try
+            {
+                // Vérifier si un modal ParameterCenterPage est déjà ouvert
+                var modalStack = Shell.Current.Navigation.ModalStack;
+                var existingParameterPage = modalStack.FirstOrDefault(p => p is ParameterCenterPage);
+                
+                if (existingParameterPage != null)
+                {
+                    // Le modal est déjà ouvert, ne rien faire
+                    System.Diagnostics.Debug.WriteLine("⚠️ ParameterCenterPage déjà ouvert");
+                    return;
+                }
+
+                // Ouvrir le modal
+                var parameterCenterPage = new ParameterCenterPage();
+                await Shell.Current.Navigation.PushModalAsync(parameterCenterPage, animated: true);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Erreur", $"Impossible d'ouvrir les paramètres: {ex.Message}", "OK");
+            }
         }
 
         [RelayCommand(CanExecute = nameof(CanLogout))]

@@ -150,7 +150,7 @@ namespace mobile.Controls
             var label = new Label
             {
                 Text = message.Content,
-                TextColor = isFromUser ? Colors.White : Color.FromArgb("#1F2937"),
+                TextColor = Application.Current?.Resources["PrimaryTextColor"] as Color,
                 FontSize = 14,
                 LineBreakMode = LineBreakMode.WordWrap
             };
@@ -183,17 +183,11 @@ namespace mobile.Controls
                 IsRead = true
             };
 
-            // Ajouter à la conversation
+            // Ajouter à la conversation (OnConversationsChanged va recharger automatiquement)
             _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, message);
 
-            // Ajouter la bulle visuellement
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                AddMessageBubble(message);
-            });
-
-            // Scroll vers le bas
-            await Task.Delay(100);
+            // Scroll vers le bas après un court délai pour laisser le temps au rechargement
+            await Task.Delay(150);
             await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
 
             // Simuler une réponse du support après 2 secondes
@@ -304,17 +298,14 @@ namespace mobile.Controls
                     IsRead = false
                 };
 
-                // Ajouter à la conversation
+                // Ajouter à la conversation (OnConversationsChanged va recharger automatiquement)
                 _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
 
-                // Ajouter la bulle visuellement
+                // Scroll vers le bas après un court délai
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    System.Diagnostics.Debug.WriteLine("💬 Adding message bubble");
-                    AddMessageBubble(supportMessage);
-
-                    // Scroll vers le bas
-                    await Task.Delay(100);
+                    System.Diagnostics.Debug.WriteLine("💬 FAQ answer added to conversation");
+                    await Task.Delay(150);
                     await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
                 });
             }
