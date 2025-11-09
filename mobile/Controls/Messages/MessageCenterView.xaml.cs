@@ -96,6 +96,22 @@ namespace mobile.Controls
             _conversationStore.ClearAll();
         }
 
+        private async void OnViewAllClicked(object sender, EventArgs e)
+        {
+            // Fermer le modal
+            var parentPage = GetParentPage();
+            if (parentPage?.Navigation != null)
+            {
+                await parentPage.Navigation.PopModalAsync(animated: false);
+            }
+
+            // Naviguer vers la page des conversations
+            if (Application.Current?.MainPage is Shell shell)
+            {
+                await shell.GoToAsync("///conversations");
+            }
+        }
+
         private async void OnCloseClicked (object sender, EventArgs e)
         {
             // Fermer la page modale parente

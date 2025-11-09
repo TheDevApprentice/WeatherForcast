@@ -32,37 +32,55 @@
         <!-- Avatar avec initiales -->
         <Border Grid.Column="0"
                 Grid.RowSpan="2"
-                WidthRequest="48"
-                HeightRequest="48"
-                BackgroundColor="{DynamicResource AccentColor}"
+                WidthRequest="50"
+                HeightRequest="50"
+                Background="{DynamicResource CardBackgroundColor}"
                 StrokeShape="RoundRectangle 24"
-                StrokeThickness="0"
+                StrokeThickness="1"
+                Stroke="{DynamicResource TertiaryTextColor}"
+                Padding="0"
+                Margin="0"
+                HorizontalOptions="Center"
                 VerticalOptions="Center">
             <Label x:Name="InitialsLabel"
                    FontSize="18"
                    FontAttributes="Bold"
-                   TextColor="White"
+                   TextColor="{DynamicResource Black}"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"/>
         </Border>
         
         <!-- Badge épinglé (si conversation support ou épinglée) -->
-        <Border Grid.Column="0"
+        <!--<Border Grid.Column="0"
                 WidthRequest="18"
                 HeightRequest="18"
-                BackgroundColor="{DynamicResource CardBackgroundColor}"
+                Background="Transparent"
                 StrokeShape="RoundRectangle 9"
                 StrokeThickness="2"
                 Stroke="{DynamicResource AccentColor}"
                 HorizontalOptions="End"
                 VerticalOptions="Start"
                 Margin="0,-4,-4,0"
-                IsVisible="{Binding IsPinned}">
-            <Label Text="📌"
-                   FontSize="10"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"/>
-        </Border>
+                IsVisible="{Binding IsPinned}">-->
+        <ImageButton Grid.Column="1"
+                                 HeightRequest="10"
+                                 WidthRequest="10"
+                                 Margin="0,-15,-10,0"
+                                 BorderColor="Transparent"
+                                 BorderWidth="1.5"
+                                 CornerRadius="20"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                                 IsVisible="{Binding IsPinned}"
+                                 Background="Transparent">
+                <ImageButton.Source>
+                    <FontImageSource Size="13"
+                                             Glyph="&#xE840;"
+                                             FontFamily="SegoeMDL2"
+                                             Color="{DynamicResource PrimaryTextColor}" />
+                </ImageButton.Source>
+            </ImageButton>
+        <!--</Border>-->
         
         <!-- Nom de la conversation -->
         <Label Grid.Column="1"
@@ -88,7 +106,7 @@
                Grid.Row="0"
                x:Name="TimestampLabel"
                FontSize="11"
-               TextColor="{DynamicResource TertiaryTextColor}"
+               TextColor="{DynamicResource SecondaryTextColor}"
                Opacity="0.7"
                HorizontalOptions="End"
                VerticalOptions="Start"/>
@@ -99,7 +117,7 @@
                 MinimumWidthRequest="20"
                 HeightRequest="20"
                 Padding="6,2"
-                BackgroundColor="#3B82F6"
+                Background="{DynamicResource Primary}"
                 StrokeShape="RoundRectangle 10"
                 StrokeThickness="0"
                 HorizontalOptions="End"
@@ -108,7 +126,7 @@
             <Label x:Name="UnreadCountLabel"
                    FontSize="11"
                    FontAttributes="Bold"
-                   TextColor="White"
+                   TextColor="{DynamicResource White}"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"/>
         </Border>

@@ -117,6 +117,10 @@ namespace mobile
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<ProfilePageModel>();
 
+            // Page des conversations
+            builder.Services.AddTransient<ConversationsPage>();
+            builder.Services.AddTransient<ConversationDetailPage>();
+
             return builder.Build();
         }
     }

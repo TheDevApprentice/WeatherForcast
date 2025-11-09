@@ -42,20 +42,20 @@ namespace mobile.Controls
 
             switch (type)
             {
-                case MessageType.Success:
-                    ColorBar.BackgroundColor = Color.FromArgb("#10B981"); // Vert
-                    TitleLabel.TextColor = Color.FromArgb("#059669");
-                    break;
+                //case MessageType.Success:
+                //    ColorBar.BackgroundColor = Color.FromArgb("#10B981"); // Vert
+                //    TitleLabel.TextColor = Color.FromArgb("#059669");
+                //    break;
 
-                case MessageType.Error:
-                    ColorBar.BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
-                    TitleLabel.TextColor = Color.FromArgb("#DC2626");
-                    break;
+                //case MessageType.Error:
+                //    ColorBar.BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
+                //    TitleLabel.TextColor = Color.FromArgb("#DC2626");
+                //    break;
 
-                case MessageType.Warning:
-                    ColorBar.BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
-                    TitleLabel.TextColor = Color.FromArgb("#D97706");
-                    break;
+                //case MessageType.Warning:
+                //    ColorBar.BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
+                //    TitleLabel.TextColor = Color.FromArgb("#D97706");
+                //    break;
 
                 case MessageType.Info:
                     ColorBar.BackgroundColor = Color.FromArgb("#3B82F6"); // Bleu
@@ -159,9 +159,8 @@ namespace mobile.Controls
     /// </summary>
     public enum MessageType
     {
-        Success,
-        Error,
-        Warning,
-        Info
+        Info,
+        User,      // Message envoyé par l'utilisateur
+        Support    // Message envoyé par le support
     }
 }

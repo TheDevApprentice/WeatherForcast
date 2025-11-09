@@ -31,6 +31,9 @@ namespace mobile
             // Initialiser le gestionnaire global d'exceptions
             _exceptionHandler.Initialize();
 
+            // Initialiser le ConversationStore avec la conversation Support
+            InitializeConversationStore();
+
             // Initialiser le cache SQLite en arrière-plan
             Task.Run(async () =>
             {
@@ -51,6 +54,29 @@ namespace mobile
 #if DEBUG
             _logger.LogInformation("✅ Application démarrée");
 #endif
+        }
+
+        /// <summary>
+        /// Initialise le ConversationStore avec la conversation Support
+        /// </summary>
+        private void InitializeConversationStore()
+        {
+            try
+            {
+                var conversationStore = _serviceProvider.GetRequiredService<IConversationStore>();
+                
+                // TODO: Récupérer l'utilisateur actuel pour avoir son ID et nom
+                // Pour l'instant, on utilise des valeurs par défaut
+                conversationStore.Initialize("current-user", "Utilisateur");
+
+#if DEBUG
+                _logger.LogInformation("💬 ConversationStore initialisé avec conversation Support");
+#endif
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erreur lors de l'initialisation du ConversationStore");
+            }
         }
 
         protected override void OnSleep ()

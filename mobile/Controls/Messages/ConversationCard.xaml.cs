@@ -1,6 +1,3 @@
-using mobile.Models;
-using mobile.Pages;
-
 namespace mobile.Controls
 {
     /// <summary>
@@ -11,7 +8,7 @@ namespace mobile.Controls
         private Conversation? _conversation;
         private string _currentUserId = string.Empty;
 
-        public ConversationCard()
+        public ConversationCard ()
         {
             InitializeComponent();
         }
@@ -19,7 +16,7 @@ namespace mobile.Controls
         /// <summary>
         /// Initialise la carte avec une conversation
         /// </summary>
-        public void Initialize(Conversation conversation, string currentUserId)
+        public void Initialize (Conversation conversation, string currentUserId)
         {
             _conversation = conversation;
             _currentUserId = currentUserId;
@@ -31,7 +28,7 @@ namespace mobile.Controls
         /// <summary>
         /// Met à jour l'interface utilisateur
         /// </summary>
-        private void UpdateUI()
+        private void UpdateUI ()
         {
             if (_conversation == null) return;
 
@@ -64,7 +61,7 @@ namespace mobile.Controls
         /// <summary>
         /// Formate le timestamp de manière relative
         /// </summary>
-        private string FormatTimestamp(DateTime timestamp)
+        private string FormatTimestamp (DateTime timestamp)
         {
             var now = DateTime.Now;
             var diff = now - timestamp;
@@ -77,26 +74,23 @@ namespace mobile.Controls
                 return $"{(int)diff.TotalHours}h";
             if (diff.TotalDays < 7)
                 return $"{(int)diff.TotalDays}j";
-            
+
             return timestamp.ToString("dd/MM/yyyy");
         }
 
         /// <summary>
         /// Appelé quand on clique sur la conversation
         /// </summary>
-        private async void OnConversationTapped(object? sender, EventArgs e)
+        private async void OnConversationTapped (object? sender, EventArgs e)
         {
             if (_conversation == null) return;
 
-            // Naviguer vers la page de détail de la conversation
-            var navigationParameter = new Dictionary<string, object>
-            {
-                { "ConversationId", _conversation.Id }
-            };
-
-            // Fermer le modal d'abord
+            // Détecter si on est dans un modal
             var parentPage = GetParentPage();
-            if (parentPage?.Navigation != null)
+            bool isInModal = parentPage?.Navigation?.ModalStack.Count > 0;
+
+            // Si on est dans un modal, le fermer d'abord
+            if (isInModal && parentPage?.Navigation != null)
             {
                 await parentPage.Navigation.PopModalAsync(animated: false);
             }
@@ -111,7 +105,7 @@ namespace mobile.Controls
         /// <summary>
         /// Trouve la page parente
         /// </summary>
-        private Page? GetParentPage()
+        private Page? GetParentPage ()
         {
             Element? parent = this.Parent;
             while (parent != null)

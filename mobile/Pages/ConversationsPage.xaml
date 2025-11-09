@@ -4,17 +4,36 @@
              xmlns:models="clr-namespace:mobile.Models"
              x:Class="mobile.Pages.ConversationsPage"
              Title="Messages"
+             Shell.NavBarIsVisible="False"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
     
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header -->
+        <Frame Grid.Row="0" Margin="20,20,20,10" Padding="20" CornerRadius="12" HasShadow="True">
+            <Frame.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
+                    <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
+                </LinearGradientBrush>
+            </Frame.Background>
+
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="💬 Mes Conversation" 
+                       FontSize="24" 
+                       FontAttributes="Bold"
+                       TextColor="White"/>
+
+            </VerticalStackLayout>
+        </Frame>
         
         <!-- Header avec recherche -->
-        <Border Grid.Row="0"
-                BackgroundColor="{DynamicResource CardBackgroundColor}"
-                Padding="16,12"
-                Margin="0,0,0,8"
+        <Border Grid.Row="1"
+                Background="transparent"
+                Padding="10,12"
+                Margin="10,0,10,8"
                 StrokeThickness="0">
             <Grid ColumnDefinitions="*,Auto">
+                
                 <SearchBar x:Name="SearchBar"
                            Placeholder="Rechercher une conversation..."
                            PlaceholderColor="{DynamicResource TertiaryTextColor}"
@@ -38,7 +57,7 @@
         </Border>
         
         <!-- Liste des conversations -->
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="2">
             <VerticalStackLayout x:Name="ConversationsList"
                                  Spacing="0"
                                  Padding="0">

@@ -97,7 +97,8 @@
         Title="Messages"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:ConversationsPage}"
-        Route="conversations" />
+        Route="conversations" 
+        FlyoutItemIsVisible="False" />
 
     <!-- Page de profil (jamais visible dans le menu - accessible via TitleBar) -->
     <ShellContent

@@ -1,4 +1,5 @@
 using mobile.Models;
+using mobile.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -64,6 +65,19 @@ namespace mobile
                             FirstName = "Support",
                             LastName = "Team",
                             Role = ConversationRole.Support
+                        }
+                    },
+                    Messages = new List<Message>
+                    {
+                        new Message
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Title = "Bienvenue",
+                            Content = "Bonjour ! Nous sommes là pour vous aider. N'hésitez pas à nous poser vos questions.",
+                            Type = MessageType.Info,
+                            Timestamp = DateTime.Now,
+                            IsRead = false,
+                            WasDisplayed = false
                         }
                     }
                 };
