@@ -1,5 +1,5 @@
 using mobile.PageModels;
-using mobile.Services;
+using mobile.Services.Internal.Interfaces;
 
 namespace mobile.Pages
 {

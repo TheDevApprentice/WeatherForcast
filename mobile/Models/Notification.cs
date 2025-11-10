@@ -58,7 +58,7 @@ namespace mobile.Models
         /// </summary>
         public bool WasDisplayed { get; set; } = false;
 
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected void OnPropertyChanged ([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

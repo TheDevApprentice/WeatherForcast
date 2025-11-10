@@ -1,8 +1,9 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using mobile.Models;
-using mobile.Services;
+using mobile.Services.Api.Interfaces;
+using mobile.Services.Handlers.ErrorHandling;
+using mobile.Services.Notifications.Interfaces;
+using System.Collections.ObjectModel;
 
 namespace mobile.PageModels
 {
@@ -27,7 +28,7 @@ namespace mobile.PageModels
         [ObservableProperty]
         private int forecastsCount;
 
-        public ForecastsPageModel(
+        public ForecastsPageModel (
             IApiWeatherForecastService apiWeatherForecastService,
             ISignalRService signalRService,
             INotificationService notificationService,
@@ -44,10 +45,10 @@ namespace mobile.PageModels
         /// <summary>
         /// Appelé quand la page apparaît
         /// </summary>
-        public async void OnAppearing()
+        public async void OnAppearing ()
         {
             System.Diagnostics.Debug.WriteLine("📍 ForecastsPageModel.OnAppearing() appelé");
-            
+
             if (_disposed)
             {
                 _disposed = false;
@@ -74,7 +75,7 @@ namespace mobile.PageModels
         /// <summary>
         /// Appelé quand la page disparaît
         /// </summary>
-        public void OnDisappearing()
+        public void OnDisappearing ()
         {
             // Désabonner les événements SignalR
             _signalRService.ForecastCreated -= OnForecastCreated;
@@ -82,7 +83,7 @@ namespace mobile.PageModels
             _signalRService.ForecastDeleted -= OnForecastDeleted;
         }
 
-        private async Task InitializeAsync()
+        private async Task InitializeAsync ()
         {
             try
             {
@@ -94,12 +95,12 @@ namespace mobile.PageModels
                 // Si SignalR échoue, continuer quand même (on aura juste pas le temps réel)
                 System.Diagnostics.Debug.WriteLine($"⚠️ SignalR connection failed: {ex.Message}");
             }
-            
+
             // Charger les prévisions depuis l'API (même si SignalR a échoué)
             await LoadForecastsAsync();
         }
 
-        private async Task LoadForecastsAsync()
+        private async Task LoadForecastsAsync ()
         {
             try
             {
@@ -134,15 +135,15 @@ namespace mobile.PageModels
         }
 
         [RelayCommand]
-        private async Task RefreshAsync()
+        private async Task RefreshAsync ()
         {
             await LoadForecastsAsync();
         }
 
-        private async void OnForecastCreated(object? sender, Models.WeatherForecast forecast)
+        private async void OnForecastCreated (object? sender, Models.WeatherForecast forecast)
         {
             System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastCreated appelé - ID: {forecast.Id}");
-            
+
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"created_{forecast.Id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
@@ -171,10 +172,10 @@ namespace mobile.PageModels
             await _notificationService.ShowForecastCreatedAsync(forecast);
         }
 
-        private async void OnForecastUpdated(object? sender, Models.WeatherForecast forecast)
+        private async void OnForecastUpdated (object? sender, Models.WeatherForecast forecast)
         {
             System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastUpdated appelé - ID: {forecast.Id}");
-            
+
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"updated_{forecast.Id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
@@ -202,10 +203,10 @@ namespace mobile.PageModels
             await _notificationService.ShowForecastUpdatedAsync(forecast);
         }
 
-        private async void OnForecastDeleted(object? sender, int id)
+        private async void OnForecastDeleted (object? sender, int id)
         {
             System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastDeleted appelé - ID: {id}");
-            
+
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"deleted_{id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
@@ -242,7 +243,7 @@ namespace mobile.PageModels
         /// <summary>
         /// Nettoie les anciennes notifications pour éviter une fuite mémoire
         /// </summary>
-        private void CleanupOldNotifications()
+        private void CleanupOldNotifications ()
         {
             // Garder seulement les notifications des 10 dernières secondes
             if (_processedNotifications.Count > 100)
@@ -254,7 +255,7 @@ namespace mobile.PageModels
         /// <summary>
         /// Dispose des ressources et désabonne les événements SignalR
         /// </summary>
-        public void Dispose()
+        public void Dispose ()
         {
             if (_disposed)
                 return;

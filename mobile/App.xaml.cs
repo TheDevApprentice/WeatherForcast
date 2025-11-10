@@ -1,4 +1,8 @@
 using Microsoft.Extensions.Logging;
+using mobile.Pages.Auth;
+using mobile.Services.Handlers.ErrorHandling;
+using mobile.Services.Internal.Interfaces;
+using mobile.Services.Stores;
 using mobile.Services.Theme;
 
 namespace mobile
@@ -59,12 +63,12 @@ namespace mobile
         /// <summary>
         /// Initialise le ConversationStore avec la conversation Support
         /// </summary>
-        private void InitializeConversationStore()
+        private void InitializeConversationStore ()
         {
             try
             {
                 var conversationStore = _serviceProvider.GetRequiredService<IConversationStore>();
-                
+
                 // TODO: Récupérer l'utilisateur actuel pour avoir son ID et nom
                 // Pour l'instant, on utilise des valeurs par défaut
                 conversationStore.Initialize("current-user", "Utilisateur");
@@ -105,7 +109,7 @@ namespace mobile
             var mobileShell = new AppShellMobile(bannerManager);
             shell = mobileShell;
             _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
-            
+
             // Initialiser le NetworkMonitor sur le Shell
             mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else

@@ -1,5 +1,8 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using mobile.Pages.Auth;
+using mobile.Services.Api.Interfaces;
+using mobile.Services.Internal.Interfaces;
 using mobile.Services.Theme;
 using Font = Microsoft.Maui.Font;
 

@@ -4,6 +4,35 @@ using mobile.Resources.Styles;
 namespace mobile.Services.Theme
 {
     /// <summary>
+    /// Service centralisé pour la gestion des thèmes de l'application
+    /// </summary>
+    public interface IThemeService
+    {
+        /// <summary>
+        /// Thème actuellement actif
+        /// </summary>
+        AppTheme CurrentTheme { get; }
+
+        /// <summary>
+        /// Événement déclenché lors du changement de thème
+        /// </summary>
+        event EventHandler<AppTheme>? ThemeChanged;
+
+        /// <summary>
+        /// Change le thème de l'application avec animation optionnelle
+        /// </summary>
+        /// <param name="theme">Le nouveau thème à appliquer</param>
+        /// <param name="animated">Si true, applique une transition animée</param>
+        Task SetThemeAsync (AppTheme theme, bool animated = true);
+
+        /// <summary>
+        /// Initialise le service avec l'overlay global pour les animations
+        /// </summary>
+        /// <param name="overlay">BoxView utilisé pour l'animation de transition</param>
+        void RegisterGlobalOverlay (BoxView overlay);
+    }
+
+    /// <summary>
     /// Implémentation du service de gestion des thèmes avec animations
     /// </summary>
     public class ThemeService : IThemeService
@@ -16,7 +45,7 @@ namespace mobile.Services.Theme
 
         public event EventHandler<AppTheme>? ThemeChanged;
 
-        public ThemeService(ILogger<ThemeService> logger)
+        public ThemeService (ILogger<ThemeService> logger)
         {
             _logger = logger;
         }
@@ -24,7 +53,7 @@ namespace mobile.Services.Theme
         /// <summary>
         /// Enregistre l'overlay global pour les animations de transition
         /// </summary>
-        public void RegisterGlobalOverlay(BoxView overlay)
+        public void RegisterGlobalOverlay (BoxView overlay)
         {
             _globalOverlay = overlay;
             _logger.LogInformation("✅ Overlay global enregistré pour les transitions de thème");
@@ -33,7 +62,7 @@ namespace mobile.Services.Theme
         /// <summary>
         /// Change le thème de l'application avec animation optionnelle
         /// </summary>
-        public async Task SetThemeAsync(AppTheme theme, bool animated = true)
+        public async Task SetThemeAsync (AppTheme theme, bool animated = true)
         {
             if (Application.Current == null)
             {
@@ -82,7 +111,7 @@ namespace mobile.Services.Theme
         /// <summary>
         /// Anime la transition entre les thèmes avec un overlay
         /// </summary>
-        private async Task AnimateThemeTransitionAsync(AppTheme theme)
+        private async Task AnimateThemeTransitionAsync (AppTheme theme)
         {
             // Créer l'overlay à la volée s'il n'existe pas
             if (_globalOverlay == null)
@@ -125,7 +154,7 @@ namespace mobile.Services.Theme
         /// <summary>
         /// Applique le thème en chargeant le ResourceDictionary approprié
         /// </summary>
-        private void ApplyTheme(AppTheme theme)
+        private void ApplyTheme (AppTheme theme)
         {
             if (Application.Current == null) return;
 

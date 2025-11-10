@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using domain.DTOs.Auth;
+using mobile.Services.Api.Interfaces;
+using mobile.Services.Internal.Interfaces;
+using mobile.Services.Notifications.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace mobile.PageModels.Auth
@@ -61,12 +64,12 @@ namespace mobile.PageModels.Auth
 
             // S'abonner aux changements de connectivité
             _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
-            
+
             // Initialiser l'état réseau
             IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
         }
 
-        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        private void OnConnectivityChanged (object? sender, NetworkAccess access)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -204,7 +207,7 @@ namespace mobile.PageModels.Auth
             OnPropertyChanged(nameof(CanRegister));
         }
 
-        partial void OnIsNetworkAvailableChanged(bool value)
+        partial void OnIsNetworkAvailableChanged (bool value)
         {
             OnPropertyChanged(nameof(CanRegister));
         }

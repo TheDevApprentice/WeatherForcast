@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
+using mobile.Services.Internal.Interfaces;
 using System.Net;
 using System.Net.Http.Headers;
 

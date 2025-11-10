@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using mobile.Services;
+using mobile.Services.Internal.Interfaces;
 
 namespace mobile.PageModels
 {

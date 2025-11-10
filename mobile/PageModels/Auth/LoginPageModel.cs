@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using domain.DTOs.Auth;
+using mobile.Services.Api.Interfaces;
+using mobile.Services.Internal.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace mobile.PageModels.Auth

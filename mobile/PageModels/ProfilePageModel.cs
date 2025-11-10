@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using mobile.Services.Api.Interfaces;
+using mobile.Services.Internal.Interfaces;
 
 namespace mobile.PageModels
 {

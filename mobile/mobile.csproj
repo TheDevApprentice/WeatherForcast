@@ -91,7 +91,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Controls\Messages\MessageCenterView.xaml.cs">
+	  <Compile Update="Controls\Views\MessageCenterView.xaml.cs">
 	    <DependentUpon>MessageCenterView.xaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Controls\Messages\MessageCard.xaml.cs">
@@ -100,14 +100,8 @@
 	  <Compile Update="Controls\Messages\MessageManager.xaml.cs">
 	    <DependentUpon>MessageManager.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Controls\Parameters\ParameterManager.xaml.cs">
-	    <DependentUpon>ParameterManager.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Controls\Parameters\ParameterCenterView.xaml.cs">
+	  <Compile Update="Controls\Views\ParameterCenterView.xaml.cs">
 	    <DependentUpon>ParameterCenterView.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Controls\Parameters\ParameterCard.xaml.cs">
-	    <DependentUpon>ParameterCard.xaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Pages\MessageCenterPage.xaml.cs">
 	    <DependentUpon>MessageCenterPage.xaml</DependentUpon>
@@ -118,7 +112,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Controls\Messages\MessageCenterView.xaml">
+	  <MauiXaml Update="Controls\Views\MessageCenterView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Messages\MessageCard.xaml">
@@ -127,13 +121,7 @@
 	  <MauiXaml Update="Controls\Messages\MessageManager.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Controls\Parameters\ParameterCard.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Controls\Parameters\ParameterCenterView.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Controls\Parameters\ParameterManager.xaml">
+	  <MauiXaml Update="Controls\Views\ParameterCenterView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\MessageCenterPage.xaml">

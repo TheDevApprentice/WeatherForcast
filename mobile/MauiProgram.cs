@@ -1,7 +1,16 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using mobile.PageModels.Auth;
+using mobile.Pages.Auth;
+using mobile.Services.Api;
+using mobile.Services.Api.Interfaces;
 using mobile.Services.Handlers;
+using mobile.Services.Handlers.ErrorHandling;
+using mobile.Services.Internal;
+using mobile.Services.Internal.Interfaces;
+using mobile.Services.Notifications;
+using mobile.Services.Notifications.Interfaces;
 using mobile.Services.Stores;
 using mobile.Services.Theme;
 using System.Reflection;

@@ -1,4 +1,5 @@
 using mobile.Controls;
+using mobile.Services.Stores;
 
 namespace mobile.Pages
 {

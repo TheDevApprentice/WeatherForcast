@@ -1,5 +1,6 @@
 using Microsoft.Maui.Controls.Shapes;
 using mobile.Controls;
+using mobile.Services.Stores;
 using System.Windows.Input;
 
 namespace mobile.Pages

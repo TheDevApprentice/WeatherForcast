@@ -1,3 +1,5 @@
+using mobile.Services.Internal.Interfaces;
+
 namespace mobile
 {
     public partial class AppShellMobile : Shell
