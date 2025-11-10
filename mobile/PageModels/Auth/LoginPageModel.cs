@@ -62,12 +62,12 @@ namespace mobile.PageModels.Auth
 
             // S'abonner aux changements de connectivité
             _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
-            
+
             // Initialiser l'état réseau
             IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
         }
 
-        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        private void OnConnectivityChanged (object? sender, NetworkAccess access)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -113,17 +113,17 @@ namespace mobile.PageModels.Auth
                     await _secureStorage.SaveTokenAsync(response.Token);
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
 
-                    // Récupérer l'ID utilisateur depuis l'API
-                    var currentUser = await _apiAuthService.GetCurrentUserAsync();
+                    // Extraire l'ID utilisateur du token JWT
+                    var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
 
-                    if (currentUser != null)
+                    if (userInfo.HasValue)
                     {
                         // Sauvegarder l'état d'authentification centralisé
                         var authState = Models.AuthenticationState.Authenticated(
-                            currentUser.Id,
-                            currentUser.Email,
-                            currentUser.FirstName,
-                            currentUser.LastName
+                            userInfo.Value.UserId,
+                            userInfo.Value.Email,
+                            userInfo.Value.FirstName,
+                            userInfo.Value.LastName
                         );
                         await _authState.SetStateAsync(authState);
 
@@ -132,9 +132,9 @@ namespace mobile.PageModels.Auth
                         {
                             var profile = new SavedUserProfile
                             {
-                                Email = currentUser.Email,
-                                FirstName = currentUser.FirstName,
-                                LastName = currentUser.LastName,
+                                Email = userInfo.Value.Email,
+                                FirstName = userInfo.Value.FirstName,
+                                LastName = userInfo.Value.LastName,
                                 LastLoginDate = DateTime.Now
                             };
                             await _savedProfiles.SaveProfileAsync(profile);
@@ -200,7 +200,7 @@ namespace mobile.PageModels.Auth
             OnPropertyChanged(nameof(CanLogin));
         }
 
-        partial void OnIsNetworkAvailableChanged(bool value)
+        partial void OnIsNetworkAvailableChanged (bool value)
         {
             OnPropertyChanged(nameof(CanLogin));
         }

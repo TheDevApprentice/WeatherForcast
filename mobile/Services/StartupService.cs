@@ -275,25 +275,25 @@ namespace mobile.Services
                         return StartupProcedureResult.Ok(); // Session invalide, redirection vers login
                     }
 
-                    // Session valide : récupérer les infos utilisateur depuis l'API
+                    // Session valide : extraire les infos utilisateur du token JWT
 #if DEBUG
                     _logger.LogInformation("✅ Session valide (mode online)");
 #endif
-                    var currentUser = await _apiAuthService.GetCurrentUserAsync();
+                    var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
 
-                    if (currentUser != null)
+                    if (userInfo.HasValue)
                     {
                         // Sauvegarder l'état d'authentification
                         var authState = AuthenticationState.Authenticated(
-                            currentUser.Id,
-                            currentUser.Email,
-                            currentUser.FirstName,
-                            currentUser.LastName
+                            userInfo.Value.UserId,
+                            userInfo.Value.Email,
+                            userInfo.Value.FirstName,
+                            userInfo.Value.LastName
                         );
 
                         await _authState.SetStateAsync(authState);
 #if DEBUG
-                        _logger.LogInformation("État d'authentification sauvegardé pour {Email}", currentUser.Email);
+                        _logger.LogInformation("État d'authentification sauvegardé pour {Email}", userInfo.Value.Email);
 #endif
                     }
 

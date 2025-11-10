@@ -87,6 +87,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\domain\domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="Controls\Messages\MessageCenterView.xaml.cs">
 	    <DependentUpon>MessageCenterView.xaml</DependentUpon>
 	  </Compile>
@@ -138,10 +142,6 @@
 	  <MauiXaml Update="Pages\ParameterCenterPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\domain\domain.csproj" />
 	</ItemGroup>
 	
 </Project>
