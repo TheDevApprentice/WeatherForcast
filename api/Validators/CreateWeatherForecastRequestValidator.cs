@@ -1,4 +1,4 @@
-using api.DTOs;
+using domain.DTOs.WeatherForecast;
 using FluentValidation;
 
 namespace api.Validators

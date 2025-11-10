@@ -1,5 +1,5 @@
-using api.DTOs;
 using domain.Constants;
+using domain.DTOs.WeatherForecast;
 using domain.Entities;
 using domain.Interfaces.Services;
 using domain.ValueObjects;

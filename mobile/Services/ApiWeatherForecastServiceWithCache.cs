@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
 using mobile.Models;
-using mobile.Models.DTOs;
+using domain.DTOs.WeatherForecast;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -192,7 +192,7 @@ namespace mobile.Services
         /// Crée une nouvelle prévision
         /// Stratégie: API-Only (nécessite connexion)
         /// </summary>
-        public async Task<WeatherForecast?> CreateForecastAsync(CreateForecastRequest request)
+        public async Task<WeatherForecast?> CreateForecastAsync(CreateWeatherForecastRequest request)
         {
             try
             {
@@ -245,7 +245,7 @@ namespace mobile.Services
         /// Met à jour une prévision existante
         /// Stratégie: API-Only (nécessite connexion)
         /// </summary>
-        public async Task<bool> UpdateForecastAsync(int id, UpdateForecastRequest request)
+        public async Task<bool> UpdateForecastAsync(int id, UpdateWeatherForecastRequest request)
         {
             try
             {

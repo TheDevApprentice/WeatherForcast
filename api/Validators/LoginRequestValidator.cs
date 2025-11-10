@@ -1,4 +1,4 @@
-using api.DTOs;
+using domain.DTOs.Auth;
 using FluentValidation;
 
 namespace api.Validators

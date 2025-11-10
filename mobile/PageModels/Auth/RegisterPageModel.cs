@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using mobile.Models.DTOs;
+using domain.DTOs.Auth;
 using System.Text.RegularExpressions;
 
 namespace mobile.PageModels.Auth

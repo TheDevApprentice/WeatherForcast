@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
-using mobile.Models.DTOs;
+using domain.DTOs.Auth;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -133,7 +133,7 @@ namespace mobile.Services
         /// <summary>
         /// Récupère les informations de l'utilisateur connecté
         /// </summary>
-        public async Task<CurrentUserResponse?> GetCurrentUserAsync()
+        public async Task<AuthResponse?> GetCurrentUserAsync()
         {
             try
             {
@@ -145,7 +145,7 @@ namespace mobile.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var user = await response.Content.ReadFromJsonAsync<CurrentUserResponse>(_jsonOptions);
+                    var user = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
                     
 #if DEBUG
                     _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);

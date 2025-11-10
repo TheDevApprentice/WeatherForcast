@@ -1,5 +1,5 @@
-using api.DTOs;
 using domain.Constants;
+using domain.DTOs.Auth;
 using domain.Entities;
 using domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -140,7 +140,9 @@ namespace api.Controllers
                 Email = user.Email ?? string.Empty,
                 FirstName = user.FirstName ?? string.Empty,
                 LastName = user.LastName ?? string.Empty,
-                ExpiresAt = DateTime.UtcNow.AddHours(24)
+                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                CreatedAt = user.CreatedAt
+                // Id n'est PAS renvoyé (déjà dans le token JWT)
             };
 
             _logger.LogInformation("Utilisateur mobile connecté: {Email}", user.Email);
@@ -191,13 +193,14 @@ namespace api.Controllers
 
             _logger.LogInformation("Accès autorisé à /me pour {Email}", email);
 
-            return Ok(new
+            return Ok(new AuthResponse
             {
-                user.Id,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                user.CreatedAt
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                CreatedAt = user.CreatedAt
+                // Id n'est PAS renvoyé (sécurité)
+                // Token et ExpiresAt sont null (pas renvoyés pour /me)
             });
         }
 

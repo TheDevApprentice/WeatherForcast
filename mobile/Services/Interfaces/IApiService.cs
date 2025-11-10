@@ -1,5 +1,6 @@
 using mobile.Models;
-using mobile.Models.DTOs;
+using domain.DTOs.Auth;
+using domain.DTOs.WeatherForecast;
 
 namespace mobile.Services
 {
@@ -27,7 +28,7 @@ namespace mobile.Services
         /// <summary>
         /// Récupère les informations de l'utilisateur connecté
         /// </summary>
-        Task<CurrentUserResponse?> GetCurrentUserAsync();
+        Task<AuthResponse?> GetCurrentUserAsync();
 
         /// <summary>
         /// Déconnecte l'utilisateur
@@ -61,12 +62,12 @@ namespace mobile.Services
         /// <summary>
         /// Crée une nouvelle prévision
         /// </summary>
-        Task<WeatherForecast?> CreateForecastAsync(CreateForecastRequest request);
+        Task<WeatherForecast?> CreateForecastAsync(CreateWeatherForecastRequest request);
 
         /// <summary>
         /// Met à jour une prévision existante
         /// </summary>
-        Task<bool> UpdateForecastAsync(int id, UpdateForecastRequest request);
+        Task<bool> UpdateForecastAsync(int id, UpdateWeatherForecastRequest request);
 
         /// <summary>
         /// Supprime une prévision

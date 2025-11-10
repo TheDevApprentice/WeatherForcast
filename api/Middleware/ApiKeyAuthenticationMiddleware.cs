@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using System.Text;
-using api.DTOs;
+using domain.DTOs.Common;
 using domain.Interfaces.Services;
 using domain.Constants;
 using Microsoft.AspNetCore.Authorization;
