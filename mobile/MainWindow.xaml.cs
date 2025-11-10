@@ -26,13 +26,11 @@ namespace mobile
                 _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
                 _conversationStore = Handler?.MauiContext?.Services.GetService<IConversationStore>();
 
-#if WINDOWS
                 // S'abonner aux changements de thème
                 if (_themeService != null)
                 {
                     _themeService.ThemeChanged += OnThemeChanged;
                 }
-#endif
 
                 // S'abonner aux changements du store de notifications
                 if (_notificationStore != null)
@@ -50,14 +48,11 @@ namespace mobile
             }
             catch { }
 
-#if WINDOWS
             // Appliquer le thème aux boutons système après que la fenêtre soit créée
             this.HandlerChanged += OnHandlerChanged;
-#endif
         }
 
-#if WINDOWS
-        private void OnHandlerChanged(object? sender, EventArgs e)
+        private void OnHandlerChanged (object? sender, EventArgs e)
         {
             if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
             {
@@ -73,7 +68,7 @@ namespace mobile
             }
         }
 
-        private async void OnThemeChanged(object? sender, AppTheme newTheme)
+        private async void OnThemeChanged (object? sender, AppTheme newTheme)
         {
             if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
             {
@@ -90,7 +85,6 @@ namespace mobile
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Met à jour le bouton Account avec les infos utilisateur
@@ -158,6 +152,7 @@ namespace mobile
                 var set = this.FindByName<ImageButton>("SettingsButton");
                 var msgBdg = this.FindByName<Border>("MessageBadge");
                 var notiBdg = this.FindByName<Border>("NotificationBadge");
+
                 if (msg != null) msg.IsVisible = false;
                 if (msgBdg != null) msgBdg.IsVisible = false;
                 if (noti != null) noti.IsVisible = false;
@@ -166,6 +161,7 @@ namespace mobile
 
                 // Masquer les boutons Account et People
                 AccountButton.IsVisible = false;
+
                 if (this.FindByName<ImageButton>("PeopleButton") is ImageButton people)
                 {
                     people.IsVisible = false;
@@ -489,7 +485,7 @@ namespace mobile
                     // Vérifier si un modal ParameterCenterPage est déjà ouvert (depuis ProfilePage par exemple)
                     var modalStack = this.Page.Navigation.ModalStack;
                     var existingParameterPage = modalStack.FirstOrDefault(p => p is ParameterCenterPage);
-                    
+
                     if (existingParameterPage != null && parameterCenterPage == null)
                     {
                         // Un modal est déjà ouvert depuis ailleurs (ProfilePage), le fermer
@@ -563,13 +559,11 @@ namespace mobile
         {
             base.OnHandlerChanging(args);
 
-#if WINDOWS
             // Se désabonner de l'événement ThemeChanged
             if (_themeService != null)
             {
                 _themeService.ThemeChanged -= OnThemeChanged;
             }
-#endif
         }
     }
 }

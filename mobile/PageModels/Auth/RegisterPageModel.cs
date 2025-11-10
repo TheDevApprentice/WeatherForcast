@@ -77,6 +77,25 @@ namespace mobile.PageModels.Auth
             });
         }
 
+        partial void OnIsLoadingChanged (bool value)
+        {
+            OnPropertyChanged(nameof(IsNotLoading));
+            OnPropertyChanged(nameof(CanRegister));
+        }
+
+        partial void OnIsNetworkAvailableChanged (bool value)
+        {
+            OnPropertyChanged(nameof(CanRegister));
+        }
+
+        private async void OnVerificationEmailSent (object? sender, EmailNotification notification)
+        {
+            // Afficher une notification toast à l'utilisateur
+            await _notificationService.ShowSuccessAsync(
+                notification.Message ?? "Email de vérification envoyé avec succès",
+                "Vérification Email");
+        }
+
         [RelayCommand]
         private async Task RegisterAsync ()
         {
@@ -110,10 +129,6 @@ namespace mobile.PageModels.Auth
 
                 if (success)
                 {
-                    // L'inscription a réussi, mais pas de token retourné
-                    // L'utilisateur doit maintenant se connecter
-                    ShowError("Compte créé avec succès ! Vérifiez votre email.");
-
                     // Attendre un peu pour recevoir la notification SignalR
                     await Task.Delay(3000);
 
@@ -131,7 +146,9 @@ namespace mobile.PageModels.Auth
             }
             catch (Exception ex)
             {
-                ShowError($"Erreur : {ex.Message}");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Erreur", ex.Message, "OK");
+#endif
             }
             finally
             {
@@ -199,25 +216,7 @@ namespace mobile.PageModels.Auth
         {
             ErrorMessage = message;
             HasError = true;
-        }
-
-        partial void OnIsLoadingChanged (bool value)
-        {
-            OnPropertyChanged(nameof(IsNotLoading));
-            OnPropertyChanged(nameof(CanRegister));
-        }
-
-        partial void OnIsNetworkAvailableChanged (bool value)
-        {
-            OnPropertyChanged(nameof(CanRegister));
-        }
-
-        private async void OnVerificationEmailSent (object? sender, EmailNotification notification)
-        {
-            // Afficher une notification toast à l'utilisateur
-            await _notificationService.ShowSuccessAsync(
-                notification.Message ?? "Email de vérification envoyé avec succès",
-                "Vérification Email");
+            _notificationService.ShowErrorAsync(ErrorMessage);
         }
     }
 }

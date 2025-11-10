@@ -6,7 +6,6 @@ using mobile.Pages.Auth;
 using mobile.Services.Api;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Handlers;
-using mobile.Services.Handlers.ErrorHandling;
 using mobile.Services.Internal;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Notifications;
@@ -76,10 +75,6 @@ namespace mobile
             builder.Services.AddSingleton<INotificationStore, NotificationStore>();
             builder.Services.AddSingleton<IConversationStore, ConversationStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
-
-            // Gestion des erreurs
-            builder.Services.AddSingleton<IErrorHandler, ModalErrorHandler>();
-            builder.Services.AddSingleton<GlobalExceptionHandler>();
 
             // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();

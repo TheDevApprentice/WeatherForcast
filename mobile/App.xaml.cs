@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using mobile.Pages.Auth;
-using mobile.Services.Handlers.ErrorHandling;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
 using mobile.Services.Theme;
@@ -9,20 +8,16 @@ namespace mobile
 {
     public partial class App : Application
     {
-        private readonly GlobalExceptionHandler _exceptionHandler;
         private readonly ILogger<App> _logger;
         private readonly IServiceProvider _serviceProvider;
 
         public App (
-            GlobalExceptionHandler exceptionHandler,
             ILogger<App> logger,
             IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _exceptionHandler = exceptionHandler;
             _logger = logger;
             _serviceProvider = serviceProvider;
-
             // L'overlay sera créé et enregistré dans CreateWindow
 
             // Démarrer la surveillance du réseau
@@ -31,9 +26,6 @@ namespace mobile
 #if DEBUG
             _logger.LogInformation("📡 NetworkMonitor démarré");
 #endif
-
-            // Initialiser le gestionnaire global d'exceptions
-            _exceptionHandler.Initialize();
 
             // Initialiser le ConversationStore avec la conversation Support
             InitializeConversationStore();
@@ -51,7 +43,9 @@ namespace mobile
                 }
                 catch (Exception ex)
                 {
+#if DEBUG
                     _logger.LogError(ex, "❌ Erreur lors de l'initialisation du cache");
+#endif
                 }
             });
 
@@ -79,21 +73,27 @@ namespace mobile
             }
             catch (Exception ex)
             {
+#if DEBUG
                 _logger.LogError(ex, "❌ Erreur lors de l'initialisation du ConversationStore");
+#endif
             }
         }
 
         protected override void OnSleep ()
         {
             base.OnSleep();
+#if DEBUG
             _logger.LogInformation("💤 Application en arrière-plan");
+#endif
             // Les animations seront automatiquement arrêtées via OnDisappearing des pages
         }
 
         protected override void OnResume ()
         {
             base.OnResume();
+#if DEBUG
             _logger.LogInformation("▶️ Application reprise");
+#endif
             // Les animations seront automatiquement redémarrées via OnAppearing des pages
         }
 
@@ -106,26 +106,27 @@ namespace mobile
 
 #if ANDROID || IOS
             // Sur mobile : utiliser AppShellMobile avec TabBar
-            var mobileShell = new AppShellMobile(bannerManager);
+            var mobileShell = new AppShellMobile(bannerManager, networkMonitor);
             shell = mobileShell;
+#if DEBUG
             _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
-
+#endif
             // Initialiser le NetworkMonitor sur le Shell
-            mobileShell.InitializeNetworkMonitor(networkMonitor);
+            //mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else
             // Sur desktop : utiliser AppShell avec Flyout
-            var desktopShell = new AppShell(bannerManager, themeService);
+            var desktopShell = new AppShell(bannerManager, themeService, networkMonitor);
             shell = desktopShell;
             
             // Désactiver le flyout pendant le splash
             shell.FlyoutBehavior = FlyoutBehavior.Disabled;
             Shell.SetFlyoutBehavior(shell, FlyoutBehavior.Disabled);
             shell.FlyoutIsPresented = false;
-            
+#if DEBUG
             _logger.LogInformation("🖥️ AppShell chargé (Flyout pour desktop)");
-            
+#endif
             // Initialiser le NetworkMonitor sur le Shell
-            desktopShell.InitializeNetworkMonitor(networkMonitor);
+            //desktopShell.InitializeNetworkMonitor(networkMonitor);
 #endif
 
 #if WINDOWS || MACCATALYST
@@ -137,7 +138,9 @@ namespace mobile
 
             // Masquer les éléments de la title bar AVANT la navigation vers le splash
             window.HideTitleBarElements();
+#if DEBUG
             _logger.LogInformation("🔒 Éléments de la title bar masqués avant le splash");
+#endif
 #else
             // Utiliser Window standard (Android, iOS)
             var window = new Window(shell);
@@ -146,8 +149,9 @@ namespace mobile
             // Créer et enregistrer l'overlay global pour les transitions de thème
             // L'overlay sera créé dans ThemeService lors de la première transition
             // Pour l'instant, on enregistre null et ThemeService créera l'overlay à la volée
+#if DEBUG
             _logger.LogInformation("✅ ThemeService prêt pour les transitions de thème");
-
+#endif
             // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -167,7 +171,9 @@ namespace mobile
                 }
                 catch (Exception ex)
                 {
+#if DEBUG
                     _logger.LogError(ex, "Erreur lors de la navigation vers SplashPage");
+#endif
                     // En cas d'erreur, rediriger vers login par sécurité
 #if ANDROID || IOS
                     var loginPage = _serviceProvider.GetRequiredService<LoginPage>();

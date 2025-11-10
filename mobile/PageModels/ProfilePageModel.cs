@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
+using mobile.Services.Notifications.Interfaces;
 
 namespace mobile.PageModels
 {
@@ -11,6 +12,7 @@ namespace mobile.PageModels
         private readonly IAuthenticationStateService _authStateService;
         private readonly ILogger<ProfilePageModel> _logger;
         private readonly INetworkMonitorService _networkMonitor;
+        INotificationService _notificationService;
 
         [ObservableProperty]
         private string userName = "Utilisateur";
@@ -55,22 +57,24 @@ namespace mobile.PageModels
         public ProfilePageModel (
             IAuthenticationStateService authStateService,
             ILogger<ProfilePageModel> logger,
-            INetworkMonitorService networkMonitor)
+            INetworkMonitorService networkMonitor,
+            INotificationService notificationService)
         {
             _authStateService = authStateService;
             _logger = logger;
             _networkMonitor = networkMonitor;
+            _notificationService = notificationService;
 
             // S'abonner aux changements de connectivité
             _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
-            
+
             // Initialiser l'état réseau
             IsNetworkAvailable = _networkMonitor.IsNetworkAvailable;
 
             LoadUserInfo();
         }
 
-        private void OnConnectivityChanged(object? sender, NetworkAccess access)
+        private void OnConnectivityChanged (object? sender, NetworkAccess access)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -78,10 +82,10 @@ namespace mobile.PageModels
             });
         }
 
-        partial void OnIsNetworkAvailableChanged(bool value)
+        partial void OnIsNetworkAvailableChanged (bool value)
         {
             OnPropertyChanged(nameof(CanLogout));
-            
+
             // Notifier la commande pour qu'elle se réévalue
             LogoutCommand.NotifyCanExecuteChanged();
         }
@@ -105,6 +109,7 @@ namespace mobile.PageModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur lors du chargement des informations utilisateur");
+                await _notificationService.ShowErrorAsync("Erreur lors du chargement des informations utilisateur");
             }
         }
 
@@ -154,7 +159,7 @@ namespace mobile.PageModels
                 // Vérifier si un modal ParameterCenterPage est déjà ouvert
                 var modalStack = Shell.Current.Navigation.ModalStack;
                 var existingParameterPage = modalStack.FirstOrDefault(p => p is ParameterCenterPage);
-                
+
                 if (existingParameterPage != null)
                 {
                     // Le modal est déjà ouvert, ne rien faire
@@ -168,7 +173,7 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Erreur", $"Impossible d'ouvrir les paramètres: {ex.Message}", "OK");
+                await _notificationService.ShowErrorAsync($"Impossible d'ouvrir les paramètres: {ex.Message}");
             }
         }
 
@@ -210,6 +215,7 @@ namespace mobile.PageModels
             catch (Exception profileEx)
             {
                 _logger.LogWarning(profileEx, "⚠️ Erreur lors de la sauvegarde du profil avant logout");
+                await _notificationService.ShowErrorAsync("⚠️ Erreur lors de la sauvegarde du profil avant logout");
             }
 
             _logger.LogInformation("✅ Déconnexion réussie");

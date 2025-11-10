@@ -1,6 +1,5 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
-using mobile.Pages.Auth;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Theme;
@@ -12,9 +11,9 @@ namespace mobile
     {
         private readonly IOfflineBannerManager _bannerManager;
         private readonly IThemeService _themeService;
-        private INetworkMonitorService? _networkMonitor;
+        private readonly INetworkMonitorService? _networkMonitor;
 
-        public AppShell (IOfflineBannerManager bannerManager, IThemeService themeService)
+        public AppShell (IOfflineBannerManager bannerManager, IThemeService themeService, INetworkMonitorService networkMonitor)
         {
             _bannerManager = bannerManager;
             _themeService = themeService;
@@ -28,21 +27,15 @@ namespace mobile
             ThemeSwitch.IsToggled = _themeService.CurrentTheme == AppTheme.Dark;
 
             // Enregistrer les routes pour la navigation
-            Routing.RegisterRoute("register", typeof(RegisterPage));
-            Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
+            //Routing.RegisterRoute("register", typeof(RegisterPage));
+            //Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
 
             // Écouter l'ouverture/fermeture du flyout pour animer
             this.PropertyChanged += OnShellPropertyChanged;
 
             // Ré-appliquer le bandeau à chaque navigation
             this.Navigated += (_, __) => _bannerManager.ApplyToCurrentPage();
-        }
 
-        /// <summary>
-        /// Initialise le NetworkMonitor (appelé depuis App.xaml.cs après que le Shell soit prêt)
-        /// </summary>
-        public void InitializeNetworkMonitor (INetworkMonitorService networkMonitor)
-        {
             _networkMonitor = networkMonitor;
             _networkMonitor.ConnectivityChanged += OnNetworkConnectivityChanged;
 
@@ -177,13 +170,11 @@ namespace mobile
                             UserEmailLabel.Text = authState.Email;
                             //UserInitialsLabel.Text = authState.GetInitials();
 
-#if WINDOWS || MACCATALYST
                             // Synchroniser avec la titlebar (sauf si on est dans le splash)
                             if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
                             {
                                 mw.UpdateAccountButton(authState.FirstName, authState.LastName);
                             }
-#endif
                         }
                     });
                 }
@@ -194,13 +185,11 @@ namespace mobile
                 UserEmailLabel.Text = string.Empty;
                 //UserInitialsLabel.Text = string.Empty;
 
-#if WINDOWS || MACCATALYST
                 // Masquer le bouton Account et afficher l'icône People dans la titlebar (sauf si on est dans le splash)
                 if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
                 {
                     mw.ClearAccountButton();
                 }
-#endif
             }
         }
 
@@ -221,12 +210,14 @@ namespace mobile
                 // Vérifier la connexion réseau
                 if (_networkMonitor != null && !_networkMonitor.IsNetworkAvailable)
                 {
-                    await DisplayAlert("Hors ligne", "Vous devez être connecté à Internet pour vous déconnecter.", "OK");
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Hors ligne", "Vous devez être connecté à Internet pour vous déconnecter.", "OK");
+#endif
                     return;
                 }
 
                 // Afficher une confirmation
-                bool confirm = await DisplayAlert(
+                bool confirm = await Shell.Current.DisplayAlert(
                     "Déconnexion",
                     "Êtes-vous sûr de vouloir vous déconnecter ?",
                     "Oui",
@@ -343,6 +334,5 @@ namespace mobile
                 ThemeSwitch.IsToggled = theme == AppTheme.Dark;
             });
         }
-
     }
 }

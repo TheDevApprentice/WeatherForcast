@@ -5,9 +5,11 @@ namespace mobile
     public partial class AppShellMobile : Shell
     {
         private readonly IOfflineBannerManager _bannerManager;
+        private readonly INetworkMonitorService _networkMonitor;
 
-        public AppShellMobile (IOfflineBannerManager bannerManager)
+        public AppShellMobile (IOfflineBannerManager bannerManager, INetworkMonitorService networkMonitor)
         {
+            _networkMonitor = networkMonitor;
             _bannerManager = bannerManager;
 
             InitializeComponent();
@@ -17,13 +19,7 @@ namespace mobile
 
             // Ré-appliquer le bandeau à chaque navigation
             this.Navigated += (_, __) => _bannerManager.ApplyToCurrentPage();
-        }
 
-        /// <summary>
-        /// Initialise le NetworkMonitor (appelé depuis App.xaml.cs après que le Shell soit prêt)
-        /// </summary>
-        public void InitializeNetworkMonitor (INetworkMonitorService networkMonitor)
-        {
             _bannerManager.Initialize(networkMonitor);
             _bannerManager.ApplyToCurrentPage();
         }

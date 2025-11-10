@@ -80,7 +80,7 @@ namespace mobile.Pages
         private async void OnNewConversationClicked (object sender, EventArgs e)
         {
             // TODO: Implémenter la création d'une nouvelle conversation
-            await DisplayAlert("Nouvelle conversation", "Fonctionnalité à venir", "OK");
+            await Shell.Current.DisplayAlert("Nouvelle conversation", "Fonctionnalité à venir", "OK");
         }
     }
 }

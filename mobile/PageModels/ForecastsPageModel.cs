@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using mobile.Services.Api.Interfaces;
-using mobile.Services.Handlers.ErrorHandling;
 using mobile.Services.Notifications.Interfaces;
 using System.Collections.ObjectModel;
 
@@ -12,7 +11,6 @@ namespace mobile.PageModels
         private readonly IApiWeatherForecastService _apiWeatherForecastService;
         private readonly ISignalRService _signalRService;
         private readonly INotificationService _notificationService;
-        private readonly IErrorHandler _errorHandler;
 
         // Déduplication des notifications (éviter les doublons)
         private readonly HashSet<string> _processedNotifications = new();
@@ -31,13 +29,11 @@ namespace mobile.PageModels
         public ForecastsPageModel (
             IApiWeatherForecastService apiWeatherForecastService,
             ISignalRService signalRService,
-            INotificationService notificationService,
-            IErrorHandler errorHandler)
+            INotificationService notificationService)
         {
             _apiWeatherForecastService = apiWeatherForecastService;
             _signalRService = signalRService;
             _notificationService = notificationService;
-            _errorHandler = errorHandler;
 
             // Ne pas initialiser ici, le faire dans OnAppearing
         }
@@ -94,6 +90,7 @@ namespace mobile.PageModels
             {
                 // Si SignalR échoue, continuer quand même (on aura juste pas le temps réel)
                 System.Diagnostics.Debug.WriteLine($"⚠️ SignalR connection failed: {ex.Message}");
+                await _notificationService.ShowErrorAsync("SignalR", $"⚠️ SignalR connection failed: {ex.Message}");
             }
 
             // Charger les prévisions depuis l'API (même si SignalR a échoué)
@@ -123,10 +120,7 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                // Utiliser le gestionnaire d'erreurs au lieu de DisplayAlert
-                await _errorHandler.HandleErrorWithMessageAsync(
-                    ex,
-                    "Impossible de charger les prévisions. Vérifiez votre connexion Internet.");
+                await _notificationService.ShowErrorAsync(ex.Message, "Impossible de charger les prévisions.");
             }
             finally
             {

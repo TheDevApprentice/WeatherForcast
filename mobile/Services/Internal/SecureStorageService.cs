@@ -35,7 +35,9 @@ namespace mobile.Services.Internal
             {
                 _logger.LogError(ex, "Error saving token to SecureStorage");
                 // Alerte active même en Release pour debug publish
+#if DEBUG
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -53,8 +55,10 @@ namespace mobile.Services.Internal
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving token from SecureStorage");
+#if DEBUG
                 // Alerte active même en Release pour debug publish
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return null;
             }
         }
@@ -145,8 +149,10 @@ namespace mobile.Services.Internal
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving user info to Preferences");
+#if DEBUG
                 // Alerte active même en Release pour debug publish
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveUserInfoAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -233,8 +239,10 @@ namespace mobile.Services.Internal
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error clearing all secure storage and preferences");
+#if DEBUG
                 // Alerte active même en Release pour debug publish
                 await Shell.Current.DisplayAlert("Debug ClearAll", $"Erreur: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
     }

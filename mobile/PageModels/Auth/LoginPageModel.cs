@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using domain.DTOs.Auth;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
+using mobile.Services.Notifications.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace mobile.PageModels.Auth
@@ -14,6 +15,7 @@ namespace mobile.PageModels.Auth
         private readonly IAuthenticationStateService _authState;
         private readonly ISavedProfilesService _savedProfiles;
         private readonly INetworkMonitorService _networkMonitor;
+        private readonly INotificationService _notificationService;
 
         [ObservableProperty]
         private string email = string.Empty;
@@ -54,13 +56,15 @@ namespace mobile.PageModels.Auth
             ISecureStorageService secureStorage,
             IAuthenticationStateService authState,
             ISavedProfilesService savedProfilesService,
-            INetworkMonitorService networkMonitor)
+            INetworkMonitorService networkMonitor,
+            INotificationService notificationService)
         {
             _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
             _authState = authState;
             _savedProfiles = savedProfilesService;
             _networkMonitor = networkMonitor;
+            _notificationService = notificationService;
 
             // S'abonner aux changements de connectivité
             _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
@@ -121,7 +125,7 @@ namespace mobile.PageModels.Auth
                     if (userInfo.HasValue)
                     {
                         // Sauvegarder l'état d'authentification centralisé
-                        var authState = Models.AuthenticationState.Authenticated(
+                        var authState = AuthenticationState.Authenticated(
                             userInfo.Value.UserId,
                             userInfo.Value.Email,
                             userInfo.Value.FirstName,
@@ -194,6 +198,7 @@ namespace mobile.PageModels.Auth
         {
             ErrorMessage = message;
             HasError = true;
+            _notificationService.ShowErrorAsync(ErrorMessage);
         }
 
         partial void OnIsLoadingChanged (bool value)
@@ -237,7 +242,9 @@ namespace mobile.PageModels.Auth
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Erreur chargement profils: {ex.Message}");
                 // Alerte active même en Release pour debug publish
+#if DEBUG
                 await Shell.Current.DisplayAlert("Debug Login", $"Erreur chargement profils: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 SavedProfiles = new ObservableCollection<SavedUserProfile>();
                 HasSavedProfiles = false;
                 ShowProfileSelection = false;
@@ -301,6 +308,7 @@ namespace mobile.PageModels.Auth
                 System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
                 await _savedProfiles.RemoveProfileAsync(profile.Email);
                 SavedProfiles.Remove(profile);
+                await _notificationService.ShowSuccessAsync("Le profil à bien été supprimé");
                 HasSavedProfiles = SavedProfiles.Count > 0;
 
                 if (!HasSavedProfiles)

@@ -52,7 +52,7 @@ namespace mobile.Pages
 
             if (_conversation == null)
             {
-                DisplayAlert("Erreur", "Conversation introuvable", "OK");
+                Shell.Current.DisplayAlert("Erreur", "Conversation introuvable", "OK");
                 Shell.Current.GoToAsync("..");
                 return;
             }
