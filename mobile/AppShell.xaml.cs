@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using mobile.Pages.Auth;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Theme;
@@ -27,8 +28,8 @@ namespace mobile
             ThemeSwitch.IsToggled = _themeService.CurrentTheme == AppTheme.Dark;
 
             // Enregistrer les routes pour la navigation
-            //Routing.RegisterRoute("register", typeof(RegisterPage));
-            //Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
+            Routing.RegisterRoute("register", typeof(RegisterPage));
+            Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
 
             // Écouter l'ouverture/fermeture du flyout pour animer
             this.PropertyChanged += OnShellPropertyChanged;

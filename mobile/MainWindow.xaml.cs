@@ -54,6 +54,7 @@ namespace mobile
 
         private void OnHandlerChanged (object? sender, EventArgs e)
         {
+#if WINDOWS
             if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
             {
                 try
@@ -66,10 +67,12 @@ namespace mobile
                     _logger?.LogError(ex, "❌ Erreur application thème titlebar");
                 }
             }
+#endif
         }
 
         private async void OnThemeChanged (object? sender, AppTheme newTheme)
         {
+#if WINDOWS
             if (Handler?.PlatformView is Microsoft.UI.Xaml.Window winUIWindow)
             {
                 try
@@ -84,6 +87,7 @@ namespace mobile
                     _logger?.LogError(ex, "❌ Erreur mise à jour thème titlebar");
                 }
             }
+#endif
         }
 
         /// <summary>
