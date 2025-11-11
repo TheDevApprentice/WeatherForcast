@@ -15,7 +15,7 @@
       {
         "Path": "mobile\\mobile.csproj",
         "Action": "Start",
-        "DebugTarget": "Windows Machine"
+        "DebugTarget": "Xiaomi 23117RA68G (Android 15.0 - API 35)"
       }
     ]
   }

@@ -4,22 +4,53 @@
              xmlns:buttons="clr-namespace:mobile.Controls"
              x:Class="mobile.Controls.SupportChatPopup"
              x:Name="Root"
-             HorizontalOptions="End"
-             VerticalOptions="End"
-             Margin="0,0,20,20"
-             IsVisible="False"
              Opacity="0">
-    
+    <ContentView.Margin>
+        <OnPlatform x:TypeArguments="Thickness">
+            <On Platform="WinUI, MacCatalyst" Value="0,0,20,20"/>
+            <On Platform="Android, iOS" Value="0"/>
+        </OnPlatform>
+    </ContentView.Margin>
+    <ContentView.HorizontalOptions>
+        <OnPlatform x:TypeArguments="LayoutOptions">
+            <On Platform="WinUI, MacCatalyst" Value="End"/>
+            <On Platform="Android, iOS" Value="Fill"/>
+        </OnPlatform>
+    </ContentView.HorizontalOptions>
+    <ContentView.VerticalOptions>
+        <OnPlatform x:TypeArguments="LayoutOptions">
+            <On Platform="WinUI, MacCatalyst" Value="End"/>
+            <On Platform="Android, iOS" Value="Fill"/>
+        </OnPlatform>
+    </ContentView.VerticalOptions>
+
     <!-- Fenêtre de chat style Messenger (sans overlay) -->
     <Border x:Name="ChatWindow"
-            WidthRequest="360"
-            HeightRequest="500"
             BackgroundColor="{DynamicResource CardBackgroundColor}"
-            StrokeThickness="0"
-            StrokeShape="RoundRectangle 16"
-            TranslationY="600">
-            
-            <Border.Shadow>
+            StrokeThickness="0">
+        <Border.StrokeShape>
+            <OnPlatform x:TypeArguments="Shape">
+                <On Platform="WinUI, MacCatalyst">
+                    <RoundRectangle CornerRadius="16"/>
+                </On>
+                <On Platform="Android, iOS">
+                    <RoundRectangle CornerRadius="0"/>
+                </On>
+            </OnPlatform>
+        </Border.StrokeShape>
+        <Border.MaximumWidthRequest>
+            <OnPlatform x:TypeArguments="x:Double">
+                <On Platform="WinUI, MacCatalyst" Value="360"/>
+                <On Platform="Android, iOS" Value="{x:Static x:Double.PositiveInfinity}"/>
+            </OnPlatform>
+        </Border.MaximumWidthRequest>
+        <Border.MaximumHeightRequest>
+            <OnPlatform x:TypeArguments="x:Double">
+                <On Platform="WinUI, MacCatalyst" Value="500"/>
+                <On Platform="Android, iOS" Value="{x:Static x:Double.PositiveInfinity}"/>
+            </OnPlatform>
+        </Border.MaximumHeightRequest>
+        <Border.Shadow>
                 <Shadow Brush="{DynamicResource ShadowColor}" 
                         Opacity="0.4" 
                         Radius="20" 
@@ -57,17 +88,20 @@
                         <!-- Bouton Video Call -->
                         <buttons:CircularBorderedIconButton Grid.Column="1"
                                                             Glyph="&#xE714;"
+                                                            IconColor="{DynamicResource PrimaryTextColor}"
                                                             MarginValue="0,0,5,0"
                                                           />
                         
                         <!-- Bouton Phone Call -->
                         <buttons:CircularBorderedIconButton Grid.Column="2"
                                                             Glyph="&#xE717;"
+                                                            IconColor="{DynamicResource PrimaryTextColor}"
                                                             MarginValue="0,0,5,0"/>
                         
                         <!-- Bouton fermer -->
                         <buttons:CircularBorderedIconButton Grid.Column="3"
                                                             Glyph="&#xE711;"
+                                                            IconColor="{DynamicResource PrimaryTextColor}"
                                                             Clicked="OnCloseClicked"
                                                             MarginValue="0,0,5,0"
                                                             />
