@@ -3,10 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:mobile.Models"
              x:Class="mobile.Controls.NotificationCenterView"
-             x:Name="Root"
-             WidthRequest="400"
-             MaximumHeightRequest="900">
-    
+             x:Name="Root">
+    <ContentView.MaximumWidthRequest>
+        <OnPlatform x:TypeArguments="x:Double">
+            <On Platform="WinUI, MacCatalyst" Value="400"/>
+            <On Platform="Android, iOS" Value="{x:Static x:Double.PositiveInfinity}"/>
+        </OnPlatform>
+    </ContentView.MaximumWidthRequest>
+    <ContentView.MaximumHeightRequest>
+        <OnPlatform x:TypeArguments="x:Double">
+            <On Platform="WinUI, MacCatalyst" Value="900"/>
+            <On Platform="Android, iOS" Value="{x:Static x:Double.PositiveInfinity}"/>
+        </OnPlatform>
+    </ContentView.MaximumHeightRequest>
     <Border BackgroundColor="{DynamicResource CardBackgroundColor}"
             StrokeThickness="3"
             Stroke="{DynamicResource BorderColor}"

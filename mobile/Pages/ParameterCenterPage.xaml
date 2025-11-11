@@ -4,13 +4,14 @@
              xmlns:controls="clr-namespace:mobile.Controls"
              x:Class="mobile.Pages.ParameterCenterPage"
              Title="Centre de paramètres"
-             BackgroundColor="Transparent">
+             Background="Transparent">
     
     <!-- Overlay semi-transparent pour fermer au clic -->
     <Grid>
         <BoxView Color="Black" 
-                 Opacity="0.3"
-                 InputTransparent="False">
+                 Opacity="0"
+                 InputTransparent="True"
+                 Background="Transparent">
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnBackgroundTapped"/>
             </BoxView.GestureRecognizers>
@@ -20,6 +21,6 @@
         <controls:ParameterCenterView x:Name="ParameterCenter"
                                          HorizontalOptions="End"
                                          VerticalOptions="Fill"
-                                         Margin="0,8,16,8"/>
+                                         Margin="16,8,16,8"/>
     </Grid>
 </ContentPage>
