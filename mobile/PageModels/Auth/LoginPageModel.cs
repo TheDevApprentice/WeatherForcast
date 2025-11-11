@@ -115,8 +115,11 @@ namespace mobile.PageModels.Auth
 
                 if (response != null)
                 {
-                    // Sauvegarder le token et les infos utilisateur
-                    await _secureStorage.SaveTokenAsync(response.Token);
+                    if(response.Token != null)
+                    {
+                        await _secureStorage.SaveTokenAsync(response.Token);
+                    }
+
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
 
                     // Extraire l'ID utilisateur du token JWT

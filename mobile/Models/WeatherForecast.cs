@@ -22,13 +22,13 @@ namespace mobile.Models
         public string? Summary { get; set; }
 
         /// <summary>
-        /// Indique si la température est chaude (>= 20°C)
+        /// Indique si la température est chaude (superior or equal 20°C)
         /// Propriété calculée côté client
         /// </summary>
         public bool IsHot => TemperatureC >= 20;
 
         /// <summary>
-        /// Indique si la température est froide (<= 0°C)
+        /// Indique si la température est froide (inferior or equal 0°C)
         /// Propriété calculée côté client
         /// </summary>
         public bool IsCold => TemperatureC <= 0;

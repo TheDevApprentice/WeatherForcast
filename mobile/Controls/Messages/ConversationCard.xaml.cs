@@ -96,9 +96,9 @@ namespace mobile.Controls
             }
 
             // Naviguer vers la page de conversation
-            if (Application.Current?.MainPage is Shell shell)
+            if (Shell.Current != null)
             {
-                await shell.GoToAsync($"///conversations/detail?conversationId={_conversation.Id}");
+                await Shell.Current.GoToAsync($"///conversations/detail?conversationId={_conversation.Id}");
             }
         }
 

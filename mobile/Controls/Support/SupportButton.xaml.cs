@@ -41,11 +41,13 @@ namespace mobile.Controls
 
         private Page? GetCurrentPage()
         {
-            if (Application.Current?.MainPage is Shell shell)
+            if (Shell.Current != null)
             {
-                return shell.CurrentPage;
+                return Shell.Current.CurrentPage;
             }
-            return Application.Current?.MainPage as Page;
+
+            // Fallback: current window's root page
+            return this.Window?.Page as Page;
         }
 
         private SupportChatPopup? FindSupportChatPopup(Element element)

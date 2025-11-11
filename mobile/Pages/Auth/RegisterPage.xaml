@@ -15,12 +15,12 @@
                 <Border.Shadow>
                     <Shadow Brush="{DynamicResource ShadowColor}" Opacity="0.15" Radius="10" Offset="0,4" />
                 </Border.Shadow>
-                <Frame.Background>
+                <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
                         <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
                     </LinearGradientBrush>
-                </Frame.Background>
+                </Border.Background>
                 
                 <VerticalStackLayout Padding="30" Spacing="10">
                     <Label Text="☁️" FontSize="48" HorizontalOptions="Center" />

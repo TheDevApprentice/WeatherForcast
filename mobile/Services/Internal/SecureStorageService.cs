@@ -214,6 +214,42 @@ namespace mobile.Services.Internal
                 return null;
             }
         }
+        /// <summary>
+        /// Extrait les informations utilisateur du token JWT (pour authentification offline)
+        /// </summary>
+        public async Task<string?> GetUserIdFromTokenAsync ()
+        {
+            try
+            {
+                var token = await GetTokenAsync();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return null;
+                }
+
+                var handler = new JwtSecurityTokenHandler();
+
+                if (!handler.CanReadToken(token))
+                {
+                    return null;
+                }
+
+                var jwtToken = handler.ReadJwtToken(token);
+
+                // Extraire les claims
+                var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "nameid")?.Value ?? string.Empty;
+
+                _logger.LogDebug("Extracted user info from token: UserId={UserId}", userId);
+
+                return (userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting user info from JWT token");
+                return null;
+            }
+        }
 
         public async Task ClearAllAsync ()
         {

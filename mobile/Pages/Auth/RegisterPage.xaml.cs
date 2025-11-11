@@ -179,7 +179,7 @@ namespace mobile.Pages.Auth
 
         async Task ShakeForm()
         {            
-            var form = this.FindByName<Frame>("RegisterForm");
+            var form = this.FindByName<Border>("RegisterForm");
             if (form != null)
             {
                 await form.TranslateTo(-15, 0, 50);

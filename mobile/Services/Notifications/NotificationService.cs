@@ -14,7 +14,6 @@ namespace mobile.Services.Notifications
         private readonly ILogger<NotificationService> _logger;
         private readonly INotificationStore _notificationStore;
         private NotificationManager? _notificationManager;
-        private bool _isInitialized = false;
 
         public NotificationService (ILogger<NotificationService> logger, INotificationStore notificationStore)
         {
@@ -39,7 +38,6 @@ namespace mobile.Services.Notifications
                 if (currentPage == null)
                 {
                     _logger.LogWarning("⚠️ Impossible d'initialiser le gestionnaire de notifications: Pas de page active");
-                    _isInitialized = false;
                     _notificationManager = null;
                     return;
                 }
@@ -91,7 +89,6 @@ namespace mobile.Services.Notifications
                     wrapper.Children.Add(overlayControl);
                 }
 
-                _isInitialized = true;
                 _logger.LogInformation("✅ NotificationManager initialisé sur la page: {PageType}", currentPage?.GetType().Name);
             });
         }
@@ -188,26 +185,19 @@ namespace mobile.Services.Notifications
         public void Reset ()
         {
             _logger.LogInformation("🔄 Réinitialisation du gestionnaire de notifications");
-            _isInitialized = false;
             _notificationManager = null;
         }
 
         private ContentPage? GetCurrentPage ()
         {
-            if (Application.Current?.MainPage is Shell shell)
-            {
-                return shell.CurrentPage as ContentPage;
-            }
-            else if (Application.Current?.MainPage is NavigationPage navPage)
-            {
-                return navPage.CurrentPage as ContentPage;
-            }
-            else if (Application.Current?.MainPage is ContentPage page)
-            {
-                return page;
-            }
+            if (Shell.Current?.CurrentPage is ContentPage shellPage)
+                return shellPage;
 
-            return null;
+            var window = (Application.Current?.Windows?.Count ?? 0) > 0
+                ? Application.Current!.Windows[0]
+                : null;
+
+            return window?.Page as ContentPage;
         }
     }
 }

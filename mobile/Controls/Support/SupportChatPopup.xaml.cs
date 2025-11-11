@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
+using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
 
 namespace mobile.Controls
@@ -19,12 +20,6 @@ namespace mobile.Controls
 
             // Récupérer le ConversationStore
             _conversationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>();
-
-            if (_conversationStore != null)
-            {
-                // S'abonner aux changements
-                _conversationStore.Conversations.CollectionChanged += OnConversationsChanged;
-            }
         }
 
         /// <summary>
@@ -32,6 +27,16 @@ namespace mobile.Controls
         /// </summary>
         public async Task ShowAsync ()
         {
+            var secureStore = Application.Current?.Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
+            if (_conversationStore != null)
+            {
+                if (secureStore != null) {
+                    var userInfo = await secureStore.GetUserInfoFromTokenAsync();
+                    _currentUserId = userInfo.Value.UserId;
+                }
+                // S'abonner aux changements
+                _conversationStore.Conversations.CollectionChanged += OnConversationsChanged;
+            }
             // Charger les infos de la conversation Support
             LoadConversationInfo();
 

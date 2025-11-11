@@ -31,13 +31,13 @@ namespace mobile.Models.Cache
         public int TemperatureF { get; set; }
 
         /// <summary>
-        /// Indique si la température est chaude (>= 20°C)
+        /// Indique si la température est chaude (superior or equal 20°C)
         /// Propriété calculée côté client
         /// </summary>
         public bool IsHot { get; set; }
 
         /// <summary>
-        /// Indique si la température est froide (<= 0°C)
+        /// Indique si la température est froide (inferior or equal 0°C)
         /// Propriété calculée côté client
         /// </summary>
         public bool IsCold { get; set; }
@@ -49,7 +49,6 @@ namespace mobile.Models.Cache
 
         // Note: IsHot et IsCold sont des propriétés calculées dans WeatherForecast
         // On ne les stocke pas en cache car elles sont dérivées de TemperatureC
-
         /// <summary>
         /// Date de mise en cache
         /// </summary>

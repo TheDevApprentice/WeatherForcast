@@ -77,7 +77,7 @@ namespace mobile.Services.Api
                     {
                         if (!string.IsNullOrEmpty(token))
                         {
-                            options.AccessTokenProvider = () => Task.FromResult(token);
+                            options.AccessTokenProvider = () => Task.FromResult<string?>(token);
                         }
                     })
                     .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10) })
@@ -212,7 +212,7 @@ namespace mobile.Services.Api
                 _forecastHubConnection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, options =>
                     {
-                        options.AccessTokenProvider = () => Task.FromResult(token);
+                        options.AccessTokenProvider = () => Task.FromResult<string?>(token);
                     })
                     .WithAutomaticReconnect(new[] { TimeSpan.Zero, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10) })
                     .Build();

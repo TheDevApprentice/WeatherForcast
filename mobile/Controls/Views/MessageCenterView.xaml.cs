@@ -113,9 +113,9 @@ namespace mobile.Controls
             }
 
             // Naviguer vers la page des conversations
-            if (Application.Current?.MainPage is Shell shell)
+            if (Shell.Current != null)
             {
-                await shell.GoToAsync("///conversations");
+                await Shell.Current.GoToAsync("///conversations");
             }
         }
 

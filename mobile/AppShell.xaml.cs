@@ -242,7 +242,8 @@ namespace mobile
                     // Rediriger vers la page de connexion
                     await Shell.Current.GoToAsync("///login");
 
-                    await notificationService.ShowSuccessAsync("Déconnexion réussie");
+                    if (notificationService != null)
+                        await notificationService.ShowSuccessAsync("Déconnexion réussie");
                 }
             }
             catch (Exception ex)

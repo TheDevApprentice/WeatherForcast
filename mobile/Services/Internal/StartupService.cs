@@ -203,7 +203,7 @@ namespace mobile.Services.Internal
                         canContinue: true);
 
             }
-            catch (ApiUnavailableException ex)
+            catch (ApiUnavailableException)
             {
                 return StartupProcedureResult.Fail(
                         "L'API n'est pas joignable. Veuillez vérifier que le serveur est démarré.",
