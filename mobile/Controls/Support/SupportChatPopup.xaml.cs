@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
+using mobile.Helpers;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
 
@@ -20,6 +21,55 @@ namespace mobile.Controls
 
             // Récupérer le ConversationStore
             _conversationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>();
+            
+            // Adapter le layout selon l'appareil et l'orientation
+            ApplyResponsiveLayout();
+            
+            // S'abonner aux changements d'orientation
+            DeviceDisplay.MainDisplayInfoChanged += OnDisplayInfoChanged;
+        }
+        
+        private void OnDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
+        {
+            // Réappliquer le layout lors d'un changement d'orientation
+            MainThread.BeginInvokeOnMainThread(() => ApplyResponsiveLayout());
+        }
+        
+        private void ApplyResponsiveLayout()
+        {
+#if ANDROID || IOS
+            // Sur mobile : utiliser le helper pour déterminer le layout selon le type d'appareil et l'orientation
+            bool useDesktopLayout = DeviceHelper.ShouldUseDesktopLayout();
+            
+            if (useDesktopLayout)
+            {
+                // Tablette en mode paysage : layout compact en bas à droite (comme desktop)
+                this.HorizontalOptions = LayoutOptions.End;
+                this.VerticalOptions = LayoutOptions.End;
+                this.Margin = new Thickness(0, 0, 20, 20);
+                
+                ChatWindow.MaximumWidthRequest = 360;
+                ChatWindow.MaximumHeightRequest = 500;
+                ChatWindow.StrokeShape = new RoundRectangle { CornerRadius = 16 };
+            }
+            else
+            {
+                // Téléphone ou tablette portrait : plein écran
+                this.HorizontalOptions = LayoutOptions.Fill;
+                this.VerticalOptions = LayoutOptions.Fill;
+                this.Margin = new Thickness(0);
+                
+                ChatWindow.MaximumWidthRequest = double.PositiveInfinity;
+                ChatWindow.MaximumHeightRequest = double.PositiveInfinity;
+                ChatWindow.StrokeShape = new RoundRectangle { CornerRadius = 0 };
+            }
+            
+            // Log pour debug
+            System.Diagnostics.Debug.WriteLine($"📱 {DeviceHelper.GetDeviceInfo()} - Layout: {(useDesktopLayout ? "Desktop-like" : "Mobile")}");
+#else
+            // Sur Desktop (Windows/MacCatalyst) : ne rien faire, le XAML gère tout avec OnPlatform
+            System.Diagnostics.Debug.WriteLine($"🖥️ Desktop platform - Layout handled by XAML OnPlatform");
+#endif
         }
 
         /// <summary>
