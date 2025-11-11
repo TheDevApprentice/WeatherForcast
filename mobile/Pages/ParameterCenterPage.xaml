@@ -21,6 +21,6 @@
         <controls:ParameterCenterView x:Name="ParameterCenter"
                                          HorizontalOptions="End"
                                          VerticalOptions="Fill"
-                                         Margin="16,8,16,8"/>
+                                         Margin="6,4,6,4"/>
     </Grid>
 </ContentPage>

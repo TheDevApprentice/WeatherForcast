@@ -38,10 +38,12 @@
                 <buttons:CircularBorderedIconButton Grid.Column="1"
                                                     x:Name="VideoCall"
                                                     Glyph="&#xE714;"
+                                                    IconColor="{DynamicResource PrimaryTextColor}"
                                                     MarginValue="0,0,5,0"
                                                     />
                 <buttons:CircularBorderedIconButton Grid.Column="2"
                                                     x:Name="PhoneCall"
+                                                    IconColor="{DynamicResource PrimaryTextColor}"
                                                     Glyph="&#xE717;"
                                                     MarginValue="0,0,5,0"
                                                     />
