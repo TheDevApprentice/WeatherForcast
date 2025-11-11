@@ -1,4 +1,3 @@
-using mobile.Models;
 using domain.DTOs.Auth;
 using domain.DTOs.WeatherForecast;
 

@@ -1,6 +1,5 @@
 using mobile.PageModels.Auth;
 using Microsoft.Maui.Layouts;
-using Microsoft.Maui.Controls;
 
 namespace mobile.Pages.Auth
 {

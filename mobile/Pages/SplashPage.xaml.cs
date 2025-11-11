@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using mobile.Models;
 using mobile.Services.Internal.Interfaces;
 
 namespace mobile.Pages

@@ -1,4 +1,3 @@
-using mobile.PageModels;
 using mobile.Services.Internal.Interfaces;
 
 namespace mobile.Pages

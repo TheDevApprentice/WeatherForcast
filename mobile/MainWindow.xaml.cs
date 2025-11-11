@@ -263,12 +263,12 @@ namespace mobile
                     set.IsEnabled = isAuthenticated;
                 }
 
-                if (search != null)
-                {
-                    search.IsVisible = isAuthenticated;
-                    search.IsEnabled = isAuthenticated;
-                    search.IsReadOnly = !isAuthenticated;
-                }
+                //if (search != null)
+                //{
+                //    search.IsVisible = isAuthenticated;
+                //    search.IsEnabled = isAuthenticated;
+                //    search.IsReadOnly = !isAuthenticated;
+                //}
 
                 // Boutons de gauche gérés par UpdateAccountButton/ClearAccountButton
             }

@@ -1,5 +1,3 @@
-using mobile.Models;
-
 namespace mobile.Services.Internal.Interfaces
 {
     /// <summary>
