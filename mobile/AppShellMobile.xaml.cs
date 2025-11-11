@@ -1,3 +1,4 @@
+using mobile.Pages.Auth;
 using mobile.Services.Internal.Interfaces;
 
 namespace mobile
@@ -16,6 +17,9 @@ namespace mobile
 
             // Les routes sont gérées par navigation directe avec Shell.Current.Navigation.PushAsync
             // au lieu de Routing.RegisterRoute car les pages utilisent l'injection de dépendances
+            // Enregistrer les routes pour la navigation
+            Routing.RegisterRoute("register", typeof(RegisterPage));
+            Routing.RegisterRoute("conversations/detail", typeof(ConversationDetailPage));
 
             // Ré-appliquer le bandeau à chaque navigation
             this.Navigated += (_, __) => _bannerManager.ApplyToCurrentPage();

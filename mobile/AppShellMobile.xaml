@@ -34,6 +34,16 @@
                 Route="forecasts" />
         </Tab>
 
+        <!-- Tab Messages -->
+        <Tab Title="Messages">
+            <Tab.Icon>
+                <FontImageSource FontFamily="SegoeMDL2" Glyph="&#xE8BD;" />
+            </Tab.Icon>
+            <ShellContent
+                ContentTemplate="{DataTemplate pages:ConversationsPage}"
+                Route="conversations" />
+        </Tab>
+
         <!-- Tab Profil -->
         <Tab Title="Profil">
             <Tab.Icon>
