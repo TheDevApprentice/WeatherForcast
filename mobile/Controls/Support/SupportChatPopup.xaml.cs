@@ -198,6 +198,12 @@ namespace mobile.Controls
             MainThread.BeginInvokeOnMainThread(() => LoadMessages());
         }
 
+        private void OnMessageTextChanged(object? sender, TextChangedEventArgs e)
+        {
+            // Activer/désactiver le bouton d'envoi selon si le champ contient du texte
+            SendButton.IsEnabled = !string.IsNullOrWhiteSpace(e.NewTextValue);
+        }
+
         private async void OnSendMessage (object? sender, EventArgs e)
         {
             var messageText = MessageEntry.Text?.Trim();

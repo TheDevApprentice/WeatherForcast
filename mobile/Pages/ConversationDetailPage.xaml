@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:mobile.Models"
+             xmlns:buttons="clr-namespace:mobile.Controls"
              x:Class="mobile.Pages.ConversationDetailPage"
              x:Name="Root"
              Shell.NavBarIsVisible="False"
@@ -34,45 +35,16 @@
                            MaxLines="1"/>
                 </VerticalStackLayout>
                 
-
-                <!-- Badge épinglé si conversation support -->
-                <ImageButton Grid.Column="1"
-                                x:Name="VideoCall"
-                                 HeightRequest="30"
-                                 WidthRequest="30"
-                                 Padding="0"
-                                 Margin="10,0,5,0"
-                                 BorderColor="{DynamicResource BorderColor}"
-                                 BorderWidth="1.5"
-                                 CornerRadius="20"
-                                 IsVisible="True"
-                                 Background="{DynamicResource PeopleButtonBackground}">
-                    <ImageButton.Source>
-                        <FontImageSource Size="18"
-                                             Glyph="&#xE714;"
-                                             FontFamily="SegoeMDL2"
-                                             Color="{DynamicResource TitleBarForeground}" />
-                    </ImageButton.Source>
-                </ImageButton>
-
-                <ImageButton Grid.Column="2"
-                                x:Name="PhoneCall"
-                                 HeightRequest="30"
-                                 WidthRequest="30"
-                                 Padding="0"
-                                 Margin="10,0,5,0"
-                                 BorderColor="{DynamicResource BorderColor}"
-                                 BorderWidth="1.5"
-                                 CornerRadius="20"
-                                 IsVisible="True"
-                                 Background="{DynamicResource PeopleButtonBackground}">
-                    <ImageButton.Source>
-                        <FontImageSource Size="18"
-                                             Glyph="&#xE717;"
-                                             FontFamily="SegoeMDL2"
-                                             Color="{DynamicResource TitleBarForeground}" />
-                    </ImageButton.Source>
-                </ImageButton>
+                <buttons:CircularBorderedIconButton Grid.Column="1"
+                                                    x:Name="VideoCall"
+                                                    Glyph="&#xE714;"
+                                                    MarginValue="0,0,5,0"
+                                                    />
+                <buttons:CircularBorderedIconButton Grid.Column="2"
+                                                    x:Name="PhoneCall"
+                                                    Glyph="&#xE717;"
+                                                    MarginValue="0,0,5,0"
+                                                    />
             </Grid>
         </Border>
         

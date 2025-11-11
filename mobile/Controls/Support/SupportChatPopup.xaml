@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:buttons="clr-namespace:mobile.Controls"
              x:Class="mobile.Controls.SupportChatPopup"
              x:Name="Root"
              HorizontalOptions="End"
@@ -54,59 +55,22 @@
                         </VerticalStackLayout>
                         
                         <!-- Bouton Video Call -->
-                        <ImageButton Grid.Column="1"
-                                     HeightRequest="30"
-                                     WidthRequest="30"
-                                     Padding="0"
-                                     Margin="10,0,5,0"
-                                     BorderColor="{DynamicResource BorderColor}"
-                                     BorderWidth="1.5"
-                                     CornerRadius="20"
-                                     Background="{DynamicResource PageBackgroundColor}">
-                            <ImageButton.Source>
-                                <FontImageSource Size="18"
-                                                 Glyph="&#xE714;"
-                                                 FontFamily="SegoeMDL2"
-                                                 Color="{DynamicResource TitleBarForeground}" />
-                            </ImageButton.Source>
-                        </ImageButton>
+                        <buttons:CircularBorderedIconButton Grid.Column="1"
+                                                            Glyph="&#xE714;"
+                                                            MarginValue="0,0,5,0"
+                                                          />
                         
                         <!-- Bouton Phone Call -->
-                        <ImageButton Grid.Column="2"
-                                     HeightRequest="30"
-                                     WidthRequest="30"
-                                     Padding="0"
-                                     Margin="0,0,5,0"
-                                     BorderColor="{DynamicResource BorderColor}"
-                                     BorderWidth="1.5"
-                                     CornerRadius="20"
-                                     Background="{DynamicResource PageBackgroundColor}">
-                            <ImageButton.Source>
-                                <FontImageSource Size="18"
-                                                 Glyph="&#xE717;"
-                                                 FontFamily="SegoeMDL2"
-                                                 Color="{DynamicResource TitleBarForeground}" />
-                            </ImageButton.Source>
-                        </ImageButton>
+                        <buttons:CircularBorderedIconButton Grid.Column="2"
+                                                            Glyph="&#xE717;"
+                                                            MarginValue="0,0,5,0"/>
                         
                         <!-- Bouton fermer -->
-                        <ImageButton Grid.Column="3"
-                                     HeightRequest="30"
-                                     WidthRequest="30"
-                                     Padding="0"
-                                     Margin="0,0,0,0"
-                                     BorderColor="{DynamicResource BorderColor}"
-                                     BorderWidth="1.5"
-                                     CornerRadius="20"
-                                     Background="{DynamicResource PageBackgroundColor}"
-                                     Clicked="OnCloseClicked">
-                            <ImageButton.Source>
-                                <FontImageSource Size="18"
-                                                 Glyph="&#xE711;"
-                                                 FontFamily="SegoeMDL2"
-                                                 Color="{DynamicResource TitleBarForeground}" />
-                            </ImageButton.Source>
-                        </ImageButton>
+                        <buttons:CircularBorderedIconButton Grid.Column="3"
+                                                            Glyph="&#xE711;"
+                                                            Clicked="OnCloseClicked"
+                                                            MarginValue="0,0,5,0"
+                                                            />
                     </Grid>
                 </Border>
                 
@@ -230,6 +194,7 @@
                                    TextColor="{DynamicResource PrimaryTextColor}"
                                    Background="Transparent"
                                    MaxLength="500"
+                                   TextChanged="OnMessageTextChanged"
                                    Completed="OnSendMessage"
                                    VerticalOptions="Center"/>
                         </Border>
@@ -242,11 +207,11 @@
                                 WidthRequest="48"
                                 HeightRequest="48"
                                 CornerRadius="24"
-                                BackgroundColor="{DynamicResource AccentColor}"
                                 TextColor="White"
                                 Margin="8,0,0,0"
+                                IsEnabled="False"
                                 Clicked="OnSendMessage"/>
-                    </Grid>
+                </Grid>
                 </Border>
             </Grid>
     </Border>

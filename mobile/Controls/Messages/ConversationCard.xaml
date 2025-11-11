@@ -54,6 +54,8 @@
                                  HeightRequest="10"
                                  WidthRequest="10"
                                  Margin="0,-15,-10,0"
+                                 Padding="7"
+                     Scale="0.6"
                                  BorderColor="Transparent"
                                  BorderWidth="1.5"
                                  CornerRadius="20"
@@ -62,7 +64,7 @@
                                  IsVisible="{Binding IsPinned}"
                                  Background="Transparent">
                 <ImageButton.Source>
-                    <FontImageSource Size="13"
+                    <FontImageSource 
                                              Glyph="&#xE840;"
                                              FontFamily="SegoeMDL2"
                                              Color="{DynamicResource PrimaryTextColor}" />

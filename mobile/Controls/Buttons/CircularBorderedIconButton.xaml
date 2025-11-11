@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mobile.Controls.CircularBorderedIconButton"
+             x:Name="Root">
+    <ImageButton x:Name="IconButton"
+                 HeightRequest="{Binding HeightRequest, Source={x:Reference Root}}"
+                 WidthRequest="{Binding WidthRequest, Source={x:Reference Root}}"
+                 Padding="{Binding PaddingValue, Source={x:Reference Root}}"
+                 Margin="{Binding MarginValue, Source={x:Reference Root}}"
+                 BorderColor="{DynamicResource BorderColor}"
+                 BorderWidth="1.5"
+                 CornerRadius="{Binding CornerRadius, Source={x:Reference Root}}"
+                 Background="{Binding BackgroundColor, Source={x:Reference Root}, TargetNullValue={DynamicResource PeopleButtonBackground}}"/>
+</ContentView>

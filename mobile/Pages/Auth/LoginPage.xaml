@@ -75,11 +75,11 @@
                                                 VerticalOptions="Center"
                                                 Padding="0"
                                                 BackgroundColor="Transparent"
+                                                Scale="0.5"
                                                 Clicked="OnDeleteProfileClicked">
                                         <ImageButton.Source>
                                             <FontImageSource FontFamily="SegoeMDL2" 
                                                            Glyph="&#xECC9;" 
-                                                           Size="18"
                                                            Color="{DynamicResource SecondaryTextColor}" />
                                         </ImageButton.Source>
                                     </ImageButton>
@@ -131,11 +131,11 @@
                 <ImageButton 
                               BackgroundColor="Transparent"
                               HorizontalOptions="Start"
+                              Scale="0.5"
                               Padding="0">
                               <ImageButton.Source>
                                   <FontImageSource FontFamily="SegoeMDL2" 
-                                                  Glyph="&#xEC52;" 
-                                                  Size="14"
+                                                  Glyph="&#xE760;"
                                                   Color="{DynamicResource Primary}" />
                               </ImageButton.Source>
                 </ImageButton>
