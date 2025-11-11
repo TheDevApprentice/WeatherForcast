@@ -21,47 +21,12 @@ namespace mobile.Controls
         /// </summary>
         public async Task ShowAsync (string title, string content, MessageType type, int durationMs = 5000)
         {
-            // Configurer l'apparence
-            ConfigureAppearance(title, content, type);
-
             // Animation d'entrée
             await AnimateInAsync();
 
             // Démarrer le timer avec barre de progression
             _cancellationTokenSource = new CancellationTokenSource();
             _ = StartTimerAsync(durationMs, _cancellationTokenSource.Token);
-        }
-
-        /// <summary>
-        /// Configure l'apparence selon le type
-        /// </summary>
-        private void ConfigureAppearance (string title, string content, MessageType type)
-        {
-            TitleLabel.Text = title;
-            MessageLabel.Text = content;
-
-            switch (type)
-            {
-                //case MessageType.Success:
-                //    ColorBar.BackgroundColor = Color.FromArgb("#10B981"); // Vert
-                //    TitleLabel.TextColor = Color.FromArgb("#059669");
-                //    break;
-
-                //case MessageType.Error:
-                //    ColorBar.BackgroundColor = Color.FromArgb("#EF4444"); // Rouge
-                //    TitleLabel.TextColor = Color.FromArgb("#DC2626");
-                //    break;
-
-                //case MessageType.Warning:
-                //    ColorBar.BackgroundColor = Color.FromArgb("#F59E0B"); // Orange
-                //    TitleLabel.TextColor = Color.FromArgb("#D97706");
-                //    break;
-
-                case MessageType.Info:
-                    ColorBar.BackgroundColor = Color.FromArgb("#3B82F6"); // Bleu
-                    TitleLabel.TextColor = Color.FromArgb("#2563EB");
-                    break;
-            }
         }
 
         /// <summary>

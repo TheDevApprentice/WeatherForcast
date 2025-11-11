@@ -8,11 +8,6 @@
              x:DataType="viewmodels:ForecastsPageModel"
              Shell.NavBarIsVisible="False">
     
-    <!-- TitleView vide pour masquer le titre mais garder le burger menu -->
-    <!--<Shell.TitleView>
-        <Grid />
-    </Shell.TitleView>-->
-
     <Grid RowDefinitions="Auto,*">
         <!-- Header -->
         <Frame Grid.Row="0" Margin="20,20,20,10" Padding="20" CornerRadius="12" HasShadow="True">

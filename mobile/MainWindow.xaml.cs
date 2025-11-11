@@ -144,11 +144,11 @@ namespace mobile
             try
             {
                 // Masquer la SearchBar
-                var search = this.FindByName<SearchBar>("TitleSearchBar");
-                if (search != null)
-                {
-                    search.IsVisible = false;
-                }
+                // var search = this.FindByName<SearchBar>("TitleSearchBar");
+                // if (search != null)
+                // {
+                //     search.IsVisible = false;
+                // }
 
                 // Masquer les boutons de droite
                 var msg = this.FindByName<ImageButton>("MessagesButton");
@@ -187,11 +187,11 @@ namespace mobile
             try
             {
                 // Afficher la SearchBar
-                var search = this.FindByName<SearchBar>("TitleSearchBar");
-                if (search != null)
-                {
-                    search.IsVisible = true;
-                }
+                // var search = this.FindByName<SearchBar>("TitleSearchBar");
+                // if (search != null)
+                // {
+                //     search.IsVisible = true;
+                // }
 
                 // Afficher les boutons selon l'état d'authentification
                 SetTitleBarAuthState(isAuthenticated);
@@ -235,7 +235,7 @@ namespace mobile
                 var noti = this.FindByName<ImageButton>("NotificationsButton");
                 var notiBdg = this.FindByName<Border>("NotificationBadge");
                 var set = this.FindByName<ImageButton>("SettingsButton");
-                var search = this.FindByName<SearchBar>("TitleSearchBar");
+                // var search = this.FindByName<SearchBar>("TitleSearchBar");
 
                 if (msg != null)
                 {

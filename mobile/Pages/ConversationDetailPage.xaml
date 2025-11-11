@@ -16,25 +16,6 @@
                 StrokeThickness="0"
                 Margin="5,4,5,0">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                <!-- Bouton retour -->
-
-                <!--<ImageButton 
-                    Grid.Column="0"
-                        Padding="8"
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        Clicked="OnBackClicked"
-                              BackgroundColor="Transparent"
-                              HorizontalOptions="Start"
-                              >
-                    <ImageButton.Source>
-                        <FontImageSource FontFamily="SegoeMDL2" 
-                                                  Glyph="&#xEC52;" 
-                                                  Size="14"
-                                                  Color="{DynamicResource Primary}" />
-                    </ImageButton.Source>
-                </ImageButton>-->
-
                 <!-- Infos conversation -->
                 <VerticalStackLayout Grid.Column="0"
                                      Spacing="2"
@@ -92,25 +73,6 @@
                                              Color="{DynamicResource TitleBarForeground}" />
                     </ImageButton.Source>
                 </ImageButton>
-
-                <!--<ImageButton Grid.Column="3"
-                                x:Name="PinnedBadge"
-                                 HeightRequest="30"
-                                 WidthRequest="30"
-                                 Padding="0"
-                                 Margin="10,0,5,0"
-                                 BorderColor="{DynamicResource BorderColor}"
-                                 BorderWidth="1.5"
-                                 CornerRadius="20"
-                                 IsVisible="True"
-                                 Background="{DynamicResource PeopleButtonBackground}">
-                    <ImageButton.Source>
-                        <FontImageSource Size="18"
-                                             Glyph="&#xE840;"
-                                             FontFamily="SegoeMDL2"
-                                             Color="{DynamicResource TitleBarForeground}" />
-                    </ImageButton.Source>
-                </ImageButton>-->
             </Grid>
         </Border>
         

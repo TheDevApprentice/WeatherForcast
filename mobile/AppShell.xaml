@@ -138,12 +138,6 @@
     <!-- Footer moderne -->
     <Shell.FlyoutFooter>
         <Grid Padding="0,0,0,10" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
-            <!--<BoxView Grid.Row="0" 
-                     HeightRequest="1" 
-                     BackgroundColor="{DynamicResource SeparatorColor}" 
-                     Opacity="0.6"
-                     Margin="0,0,0,8"/>-->
-            
             <!-- Theme toggle row: switch centered with icons -->
             <Grid Grid.Row="1"
                   ColumnDefinitions="*,*,*"

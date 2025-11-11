@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using mobile.Pages.Auth;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
+using mobile.Services.Notifications.Interfaces;
 using mobile.Services.Theme;
 using Font = Microsoft.Maui.Font;
 
@@ -90,12 +91,6 @@ namespace mobile
                 // Petit délai pour s'assurer que le flyout est bien visible
                 await Task.Delay(50);
 
-                // Animation 1 : Avatar apparait avec scale + fade (effet pop)
-                //await Task.WhenAll(
-                //    UserInitialsLabel.FadeTo(1, 400, Easing.CubicOut),
-                //    UserInitialsLabel.ScaleTo(1, 400, Easing.SpringOut)
-                //);
-
                 // Animation 2 : Nom glisse de gauche + fade
                 await Task.WhenAll(
                     UserFullNameLabel.FadeTo(1, 300, Easing.CubicOut),
@@ -111,8 +106,6 @@ namespace mobile
             catch
             {
                 // Si erreur, remettre tout visible
-                //UserInitialsLabel.Opacity = 1;
-                //UserInitialsLabel.Scale = 1;
                 UserFullNameLabel.Opacity = 1;
                 UserFullNameLabel.TranslationX = 0;
                 UserEmailLabel.Opacity = 1;
@@ -184,7 +177,6 @@ namespace mobile
             {
                 UserFullNameLabel.Text = string.Empty;
                 UserEmailLabel.Text = string.Empty;
-                //UserInitialsLabel.Text = string.Empty;
 
                 // Masquer le bouton Account et afficher l'icône People dans la titlebar (sauf si on est dans le splash)
                 if (updateTitleBar && Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
@@ -231,6 +223,7 @@ namespace mobile
                 var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
                 var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
                 var apiAuthService = Handler?.MauiContext?.Services.GetService<IApiAuthService>();
+                var notificationService = Handler?.MauiContext?.Services.GetService<INotificationService>();
 
                 if (secureStorage != null && authStateService != null && apiAuthService != null)
                 {
@@ -249,7 +242,7 @@ namespace mobile
                     // Rediriger vers la page de connexion
                     await Shell.Current.GoToAsync("///login");
 
-                    //await DisplayToastAsync("Déconnexion réussie");
+                    await notificationService.ShowSuccessAsync("Déconnexion réussie");
                 }
             }
             catch (Exception ex)
@@ -294,18 +287,6 @@ namespace mobile
             var snackbar = Snackbar.Make(message, visualOptions: snackbarOptions);
 
             await snackbar.Show(cancellationTokenSource.Token);
-        }
-
-        public static async Task DisplayToastAsync (string message)
-        {
-            // Toast is currently not working in MCT on Windows
-            if (OperatingSystem.IsWindows())
-                return;
-
-            var toast = Toast.Make(message, textSize: 18);
-
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await toast.Show(cts.Token);
         }
 
         private async void ThemeSwitch_Toggled (object sender, ToggledEventArgs e)

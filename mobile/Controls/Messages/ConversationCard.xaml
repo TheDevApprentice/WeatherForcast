@@ -49,19 +49,7 @@
                    HorizontalOptions="Center"
                    VerticalOptions="Center"/>
         </Border>
-        
-        <!-- Badge épinglé (si conversation support ou épinglée) -->
-        <!--<Border Grid.Column="0"
-                WidthRequest="18"
-                HeightRequest="18"
-                Background="Transparent"
-                StrokeShape="RoundRectangle 9"
-                StrokeThickness="2"
-                Stroke="{DynamicResource AccentColor}"
-                HorizontalOptions="End"
-                VerticalOptions="Start"
-                Margin="0,-4,-4,0"
-                IsVisible="{Binding IsPinned}">-->
+
         <ImageButton Grid.Column="1"
                                  HeightRequest="10"
                                  WidthRequest="10"
@@ -80,7 +68,6 @@
                                              Color="{DynamicResource PrimaryTextColor}" />
                 </ImageButton.Source>
             </ImageButton>
-        <!--</Border>-->
         
         <!-- Nom de la conversation -->
         <Label Grid.Column="1"

@@ -111,8 +111,6 @@ namespace mobile
 #if DEBUG
             _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
 #endif
-            // Initialiser le NetworkMonitor sur le Shell
-            //mobileShell.InitializeNetworkMonitor(networkMonitor);
 #else
             // Sur desktop : utiliser AppShell avec Flyout
             var desktopShell = new AppShell(bannerManager, themeService, networkMonitor);
@@ -125,8 +123,6 @@ namespace mobile
 #if DEBUG
             _logger.LogInformation("🖥️ AppShell chargé (Flyout pour desktop)");
 #endif
-            // Initialiser le NetworkMonitor sur le Shell
-            //desktopShell.InitializeNetworkMonitor(networkMonitor);
 #endif
 
 #if WINDOWS || MACCATALYST

@@ -149,7 +149,7 @@ namespace mobile.Pages
         }
 
         /// <summary>
-        /// Démarre les animations continues (ring et gradient)
+        /// Démarre les animations continues (ring)
         /// </summary>
         private void StartAnimations ()
         {
@@ -158,7 +158,6 @@ namespace mobile.Pages
             _animCts?.Cancel();
             _animCts = new CancellationTokenSource();
             _ = StartRingRotationAsync(_animCts.Token);
-            // Animation du gradient désactivée
         }
 
         /// <summary>
@@ -171,8 +170,6 @@ namespace mobile.Pages
                 _animCts?.Cancel();
             }
             catch { /* Ignore cancellation errors */ }
-
-            // this.AbortAnimation("HeaderGradientAnim");
         }
 
         /// <summary>
@@ -185,7 +182,7 @@ namespace mobile.Pages
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    // Animation du gradient désactivée
+                    ThemeSwitch.IsToggled = theme == AppTheme.Dark;
                 });
             }
         }
@@ -203,12 +200,6 @@ namespace mobile.Pages
                 }
             }
             catch { /* ignore on cancel */ }
-        }
-
-        // Animation du gradient désactivée complètement
-        private Task StartHeaderGradientAnimationAsync (CancellationToken token)
-        {
-            return Task.CompletedTask;
         }
 
         // Animations UX pour les interactions
