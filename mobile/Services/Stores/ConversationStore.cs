@@ -1,4 +1,6 @@
 using mobile.Controls;
+using mobile.Services.External.Interfaces;
+using mobile.Services.Internal.Interfaces;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -76,6 +78,21 @@ namespace mobile.Services.Stores
         /// (conversations épinglées + conversations avec messages non lus)
         /// </summary>
         List<Conversation> GetNotificationConversations ();
+
+        /// <summary>
+        /// Envoie un message dans une conversation (via MessengerService)
+        /// </summary>
+        Task<bool> SendMessageAsync(string conversationId, Message message);
+
+        /// <summary>
+        /// Marque une conversation comme lue (localement et sur le serveur via MessengerService)
+        /// </summary>
+        Task MarkConversationAsReadAsync(string conversationId);
+
+        /// <summary>
+        /// Récupère l'ID de l'utilisateur actuel
+        /// </summary>
+        string GetCurrentUserId();
     }
 
     /// <summary>
@@ -84,10 +101,23 @@ namespace mobile.Services.Stores
     public class ConversationStore : IConversationStore
     {
         private readonly ObservableCollection<Conversation> _conversations = new();
+        private readonly IMessengerService _messengerService;
+        private readonly ISecureStorageService _secureStorage;
         private Conversation? _supportConversation;
         private string _currentUserId = string.Empty;
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ConversationStore(
+            IMessengerService messengerService,
+            ISecureStorageService secureStorage)
+        {
+            _messengerService = messengerService;
+            _secureStorage = secureStorage;
+
+            // S'abonner aux événements du MessengerService
+            _messengerService.MessageReceived += OnMessageReceivedFromServer;
+        }
 
         /// <summary>
         /// Collection observable de toutes les conversations triées
@@ -104,6 +134,15 @@ namespace mobile.Services.Stores
         /// </summary>
         public Conversation SupportConversation => _supportConversation
             ?? throw new InvalidOperationException("Support conversation not initialized");
+
+        /// <summary>
+        /// Gestionnaire pour les messages reçus du serveur
+        /// </summary>
+        private void OnMessageReceivedFromServer(object? sender, MessageReceivedEventArgs e)
+        {
+            // Ajouter le message à la conversation locale
+            AddMessageToConversation(e.ConversationId, e.Message);
+        }
 
         /// <summary>
         /// Initialise le store avec la conversation de support
@@ -303,10 +342,38 @@ namespace mobile.Services.Stores
         public List<Conversation> GetNotificationConversations ()
         {
             return _conversations
-                .Where(c => c.IsPinned || c.HasUnreadMessages)
+                .Where(c => c.IsPinned || c.UnreadCount > 0)
                 .OrderByDescending(c => c.IsPinned)
                 .ThenByDescending(c => c.LastActivity)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Envoie un message dans une conversation (via MessengerService)
+        /// </summary>
+        public async Task<bool> SendMessageAsync(string conversationId, Message message)
+        {
+            return await _messengerService.SendMessageAsync(conversationId, message);
+        }
+
+        /// <summary>
+        /// Marque une conversation comme lue (localement et sur le serveur via MessengerService)
+        /// </summary>
+        public async Task MarkConversationAsReadAsync(string conversationId)
+        {
+            // Marquer localement d'abord
+            MarkConversationAsRead(conversationId);
+
+            // Puis notifier le serveur
+            await _messengerService.MarkConversationAsReadAsync(conversationId);
+        }
+
+        /// <summary>
+        /// Récupère l'ID de l'utilisateur actuel
+        /// </summary>
+        public string GetCurrentUserId()
+        {
+            return _currentUserId;
         }
 
         /// <summary>
