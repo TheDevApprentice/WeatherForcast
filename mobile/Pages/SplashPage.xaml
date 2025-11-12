@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:mobile.PageModels"
              x:Class="mobile.Pages.SplashPage"
+             x:DataType="viewmodels:SplashPageModel"
              Shell.NavBarIsVisible="False"
              Shell.FlyoutBehavior="Disabled">
     
@@ -31,7 +33,7 @@
                 
                 <!-- Indicateur de chargement -->
                 <ActivityIndicator x:Name="LoadingIndicator"
-                                 IsRunning="True"
+                                 IsRunning="{Binding IsLoading}"
                                  Color="{DynamicResource Primary}"
                                  HeightRequest="48"
                                  WidthRequest="48"
@@ -44,7 +46,7 @@
                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                     <!-- Icône avec Fluent Icons (cross-platform) -->
                     <Label x:Name="StatusIcon"
-                           Text=""
+                           Text="{Binding StatusIcon}"
                            FontSize="18"
                            FontFamily="SegoeMDL2"
                            TextColor="{DynamicResource Primary}"
@@ -52,7 +54,7 @@
                     
                     <!-- Texte de l'étape -->
                     <Label x:Name="CurrentStepLabel"
-                           Text="Démarrage..."
+                           Text="{Binding CurrentStepDescription}"
                            FontSize="16"
                            FontAttributes="None"
                            TextColor="{DynamicResource SplashStatusText}"
@@ -63,30 +65,16 @@
                            Opacity="0.9"/>
                 </HorizontalStackLayout>
                 
-                <!-- Points de progression des étapes -->
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Ellipse x:Name="Dot1" 
-                             Fill="{DynamicResource Primary}"
-                             WidthRequest="8" 
-                             HeightRequest="8"
-                             Opacity="0.3"/>
-                    <Ellipse x:Name="Dot2" 
-                             Fill="{DynamicResource Primary}"
-                             WidthRequest="8" 
-                             HeightRequest="8"
-                             Opacity="0.3"/>
-                    <Ellipse x:Name="Dot3" 
-                             Fill="{DynamicResource Primary}"
-                             WidthRequest="8" 
-                             HeightRequest="8"
-                             Opacity="0.3"/>
-                </HorizontalStackLayout>
+                <!-- Points de progression des étapes (générés dynamiquement) -->
+                <HorizontalStackLayout x:Name="DotsContainer" 
+                                      Spacing="10" 
+                                      HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
 
         <!-- Message d'erreur minimaliste (en bas) -->
         <VerticalStackLayout x:Name="ErrorContainer"
-                            IsVisible="False"
+                            IsVisible="{Binding HasError}"
                             Spacing="20"
                             Padding="32"
                             Margin="40,0,40,60"
@@ -115,6 +103,7 @@
             
             <!-- Message d'erreur -->
             <Label x:Name="ErrorMessage" 
+                   Text="{Binding ErrorMessage}"
                    TextColor="{DynamicResource SplashStatusText}"
                    FontSize="14"
                    HorizontalOptions="Center"
@@ -133,7 +122,7 @@
                     <RoundRectangle CornerRadius="12"/>
                 </Border.StrokeShape>
                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnRetryClicked"/>
+                    <TapGestureRecognizer Command="{Binding RetryCommand}"/>
                 </Border.GestureRecognizers>
                 
                 <Label Text="Réessayer"

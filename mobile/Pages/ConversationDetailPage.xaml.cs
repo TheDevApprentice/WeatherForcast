@@ -1,7 +1,7 @@
 using Microsoft.Maui.Controls.Shapes;
 using mobile.Controls;
+using mobile.PageModels;
 using mobile.Services.Stores;
-using System.Windows.Input;
 
 namespace mobile.Pages
 {
@@ -11,97 +11,67 @@ namespace mobile.Pages
     [QueryProperty(nameof(ConversationId), "conversationId")]
     public partial class ConversationDetailPage : ContentPage
     {
-        private readonly IConversationStore _conversationStore;
-        private string _conversationId = string.Empty;
-        private Conversation? _conversation;
-        private string _currentUserId = "current-user"; // TODO: Récupérer l'ID utilisateur réel
-
-        public ICommand SendMessageCommand { get; }
+        private readonly ConversationDetailPageModel _viewModel;
 
         public string ConversationId
         {
-            get => _conversationId;
-            set
-            {
-                _conversationId = value;
-                LoadConversation();
-            }
+            get => _viewModel.ConversationId;
+            set => _viewModel.ConversationId = value;
         }
 
-        public ConversationDetailPage ()
+        public ConversationDetailPage(ConversationDetailPageModel viewModel)
         {
             InitializeComponent();
+            BindingContext = _viewModel = viewModel;
 
-            // Récupérer le store
-            _conversationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>()
-                ?? throw new InvalidOperationException("IConversationStore not found");
+            // S'abonner aux changements du ViewModel pour mettre à jour le header
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
 
-            // Commande pour envoyer un message
-            SendMessageCommand = new Command(OnSendMessage);
-
-            // S'abonner aux changements du texte
-            MessageEntry.TextChanged += OnMessageTextChanged;
+            // S'abonner aux changements de la collection Messages
+            _viewModel.Messages.CollectionChanged += OnMessagesCollectionChanged;
         }
 
-        private void LoadConversation ()
+        private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_conversationId))
-                return;
-
-            _conversation = _conversationStore.GetConversation(_conversationId);
-
-            if (_conversation == null)
+            if (e.PropertyName == nameof(_viewModel.ConversationTitle) ||
+                e.PropertyName == nameof(_viewModel.ConversationSubtitle))
             {
-                Shell.Current.DisplayAlert("Erreur", "Conversation introuvable", "OK");
-                Shell.Current.GoToAsync("..");
-                return;
+                UpdateHeader();
             }
+        }
 
-            // Mettre à jour l'interface
+        private void OnMessagesCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                UpdateMessagesDisplay();
+            });
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await _viewModel.InitializeAsync();
             UpdateHeader();
-            UpdateMessages();
-
-            // Marquer la conversation comme lue
-            _conversationStore.MarkConversationAsRead(_conversationId);
+            UpdateMessagesDisplay();
         }
 
-        private void UpdateHeader ()
+        private void UpdateHeader()
         {
-            if (_conversation == null) return;
-
-            ConversationTitleLabel.Text = _conversation.GetDisplayName(_currentUserId);
-
-            // Sous-titre selon le type
-            if (_conversation.Type == ConversationType.Support)
-            {
-                ConversationSubtitleLabel.Text = "Équipe Support";
-                //PinnedBadge.IsVisible = true;
-            }
-            else if (_conversation.Type == ConversationType.Direct)
-            {
-                var otherMember = _conversation.Members.FirstOrDefault(m => m.UserId != _currentUserId);
-                ConversationSubtitleLabel.Text = otherMember?.DisplayName ?? "";
-            }
-            else
-            {
-                ConversationSubtitleLabel.Text = $"{_conversation.Members.Count} membres";
-            }
-
-            Title = _conversation.GetDisplayName(_currentUserId);
+            ConversationTitleLabel.Text = _viewModel.ConversationTitle;
+            ConversationSubtitleLabel.Text = _viewModel.ConversationSubtitle;
         }
 
-        private void UpdateMessages ()
+        private void UpdateMessagesDisplay()
         {
-            if (_conversation == null) return;
-
             // Vider la liste
             MessagesList.Children.Clear();
 
-            // Afficher l'empty view si aucun message
-            EmptyView.IsVisible = _conversation.Messages.Count == 0;
+            // Afficher l'empty view
+            EmptyView.IsVisible = _viewModel.IsEmpty;
 
             // Ajouter les messages
-            foreach (var message in _conversation.Messages.OrderBy(m => m.Timestamp))
+            foreach (var message in _viewModel.Messages)
             {
                 var messageView = CreateMessageView(message);
                 MessagesList.Children.Add(messageView);
@@ -176,7 +146,7 @@ namespace mobile.Pages
             // Timestamp
             stackLayout.Children.Add(new Label
             {
-                Text = FormatTimestamp(message.Timestamp),
+                Text = ConversationDetailPageModel.FormatTimestamp(message.Timestamp),
                 FontSize = 11,
                 TextColor = Application.Current?.Resources["TertiaryTextColor"] as Color,
                 Opacity = 0.8,
@@ -187,60 +157,5 @@ namespace mobile.Pages
             return border;
         }
 
-        private string FormatTimestamp (DateTime timestamp)
-        {
-            var now = DateTime.Now;
-            var diff = now - timestamp;
-
-            if (diff.TotalMinutes < 1)
-                return "À l'instant";
-            if (diff.TotalMinutes < 60)
-                return $"Il y a {(int)diff.TotalMinutes} min";
-            if (diff.TotalHours < 24)
-                return timestamp.ToString("HH:mm");
-            if (diff.TotalDays < 7)
-                return timestamp.ToString("ddd HH:mm");
-
-            return timestamp.ToString("dd/MM/yyyy HH:mm");
-        }
-
-        private void OnMessageTextChanged (object? sender, TextChangedEventArgs e)
-        {
-            // Activer/désactiver le bouton envoyer selon si le texte est vide
-            SendButton.IsEnabled = !string.IsNullOrWhiteSpace(e.NewTextValue);
-        }
-
-        private void OnSendMessage ()
-        {
-            var messageText = MessageEntry.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(messageText) || _conversation == null)
-                return;
-
-            // Créer le nouveau message
-            var newMessage = new Message
-            {
-                Id = Guid.NewGuid().ToString(),
-                Title = "Message",
-                Content = messageText,
-                Type = MessageType.User,
-                Timestamp = DateTime.Now,
-                IsRead = true,
-                WasDisplayed = true
-            };
-
-            // Ajouter le message à la conversation
-            _conversationStore.AddMessageToConversation(_conversationId, newMessage);
-
-            // Vider le champ de saisie
-            MessageEntry.Text = string.Empty;
-
-            // Mettre à jour l'affichage
-            UpdateMessages();
-        }
-
-        private void OnSendMessageClicked (object sender, EventArgs e)
-        {
-            OnSendMessage();
-        }
     }
 }

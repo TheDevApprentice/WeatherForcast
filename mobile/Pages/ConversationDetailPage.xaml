@@ -102,7 +102,8 @@
                            TextColor="{DynamicResource PrimaryTextColor}"
                            Background="Transparent"
                            MaxLength="500"
-                           ReturnCommand="{Binding Source={x:Reference Root}, Path=SendMessageCommand}"
+                           Text="{Binding MessageText}"
+                           ReturnCommand="{Binding SendMessageCommand}"
                            VerticalOptions="Center"/>
                 </Border>
                 
@@ -117,8 +118,8 @@
                         BackgroundColor="{DynamicResource AccentColor}"
                         TextColor="White"
                         Margin="8,0,0,0"
-                        Clicked="OnSendMessageClicked"
-                        IsEnabled="False"/>
+                        Command="{Binding SendMessageCommand}"
+                        IsEnabled="{Binding CanSend}"/>
             </Grid>
         </Border>
     </Grid>

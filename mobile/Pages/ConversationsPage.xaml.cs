@@ -1,4 +1,5 @@
 using mobile.Controls;
+using mobile.PageModels;
 using mobile.Services.Stores;
 
 namespace mobile.Pages
@@ -8,79 +9,59 @@ namespace mobile.Pages
     /// </summary>
     public partial class ConversationsPage : ContentPage
     {
-        private readonly IConversationStore _conversationStore;
-        private string _currentUserId = "current-user"; // TODO: Récupérer l'ID utilisateur réel
-        private List<Conversation> _allConversations = new();
+        private readonly ConversationsPageModel _viewModel;
 
-        public ConversationsPage ()
+        public ConversationsPage(ConversationsPageModel viewModel)
         {
             InitializeComponent();
-
-            // Récupérer le store
-            _conversationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>()
-                ?? throw new InvalidOperationException("IConversationStore not found");
-
-            // S'abonner aux changements
-            _conversationStore.Conversations.CollectionChanged += OnConversationsChanged;
-
-            // Charger les conversations
-            LoadConversations();
+            BindingContext = _viewModel = viewModel;
+            
+            // S'abonner aux changements du ViewModel
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
         }
 
-        private void OnConversationsChanged (object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            LoadConversations();
-        }
-
-        private void LoadConversations ()
-        {
-            MainThread.InvokeOnMainThreadAsync(() =>
+            if (e.PropertyName == nameof(ConversationsPageModel.FilteredConversations) ||
+                e.PropertyName == nameof(ConversationsPageModel.IsEmpty))
             {
-                _allConversations = _conversationStore.Conversations.ToList();
-                UpdateConversationsDisplay(_allConversations);
-            });
+                UpdateConversationsDisplay();
+            }
         }
 
-        private void UpdateConversationsDisplay (List<Conversation> conversations)
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await _viewModel.InitializeAsync();
+            UpdateConversationsDisplay();
+        }
+
+        private void UpdateConversationsDisplay()
         {
             // Vider la liste
             ConversationsList.Children.Clear();
 
-            // Afficher l'empty view si aucune conversation
-            EmptyView.IsVisible = conversations.Count == 0;
+            // Afficher l'empty view
+            EmptyView.IsVisible = _viewModel.IsEmpty;
 
             // Ajouter les cartes de conversation
-            foreach (var conversation in conversations)
+            foreach (var conversation in _viewModel.FilteredConversations)
             {
                 var card = new ConversationCard();
-                card.Initialize(conversation, _currentUserId);
+                card.Initialize(conversation, "current-user"); // TODO: Utiliser l'ID utilisateur du ViewModel
                 ConversationsList.Children.Add(card);
             }
         }
 
-
-        private void OnSearchTextChanged (object sender, TextChangedEventArgs e)
+        private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
         {
-            var searchText = e.NewTextValue?.ToLower() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                UpdateConversationsDisplay(_allConversations);
-                return;
-            }
-
-            var filtered = _allConversations.Where(c =>
-                c.GetDisplayName(_currentUserId).ToLower().Contains(searchText) ||
-                (c.LastMessage?.Content.ToLower().Contains(searchText) ?? false)
-            ).ToList();
-
-            UpdateConversationsDisplay(filtered);
+            _viewModel.SearchText = e.NewTextValue ?? string.Empty;
+            UpdateConversationsDisplay();
         }
 
-        private async void OnNewConversationClicked (object sender, EventArgs e)
+        private async void OnNewConversationClicked(object sender, EventArgs e)
         {
-            // TODO: Implémenter la création d'une nouvelle conversation
-            await Shell.Current.DisplayAlert("Nouvelle conversation", "Fonctionnalité à venir", "OK");
+            await _viewModel.CreateNewConversationCommand.ExecuteAsync(null);
         }
     }
 }
