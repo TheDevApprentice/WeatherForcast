@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using mobile.Services.Internal.Interfaces;
 using System.Collections.ObjectModel;
 
@@ -15,7 +14,6 @@ namespace mobile.PageModels
         private readonly IStartupService _startupService;
         private readonly ISecureStorageService _secureStorage;
         private readonly IAuthenticationStateService _authState;
-        private readonly ILogger<SplashPageModel> _logger;
 
         [ObservableProperty]
         private string _currentStepDescription = "Démarrage...";
@@ -46,13 +44,11 @@ namespace mobile.PageModels
         public SplashPageModel(
             IStartupService startupService,
             ISecureStorageService secureStorage,
-            IAuthenticationStateService authState,
-            ILogger<SplashPageModel> logger)
+            IAuthenticationStateService authState)
         {
             _startupService = startupService;
             _secureStorage = secureStorage;
             _authState = authState;
-            _logger = logger;
         }
 
         /// <summary>
@@ -83,7 +79,9 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de l'exécution des procédures de démarrage");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SplashPageModel", $"❌ Erreur lors de l'exécution des procédures de démarrage: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 ShowError($"Erreur inattendue: {ex.Message}");
             }
         }
@@ -139,7 +137,7 @@ namespace mobile.PageModels
         public async Task<(bool isAuthenticated, bool shouldShowTitleBar)> GetNavigationInfoAsync()
         {
             var authState = await _authState.GetStateAsync();
-            _logger.LogInformation("Navigation vers {Page}", authState.IsAuthenticated ? "MainPage" : "LoginPage");
+            // Navigation vers MainPage ou LoginPage selon l'état d'authentification
             return (authState.IsAuthenticated, authState.IsAuthenticated);
         }
     }

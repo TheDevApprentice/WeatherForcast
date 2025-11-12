@@ -30,12 +30,14 @@ namespace mobile.Controls
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("⚠️ SupportChatPopup non trouvé dans la page");
+                    // SupportChatPopup non trouvé dans la page
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Erreur lors de l'ouverture du chat support: {ex.Message}");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SupportButton", $"❌ Erreur lors de l'ouverture du chat support: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 

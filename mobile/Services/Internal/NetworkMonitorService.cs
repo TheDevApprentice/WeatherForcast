@@ -9,7 +9,6 @@ namespace mobile.Services.Internal
     /// </summary>
     public class NetworkMonitorService : INetworkMonitorService
     {
-        private readonly ILogger<NetworkMonitorService> _logger;
         private NetworkAccess _currentAccess;
         private bool _isMonitoring;
 
@@ -18,9 +17,8 @@ namespace mobile.Services.Internal
         /// </summary>
         public event EventHandler<NetworkAccess>? ConnectivityChanged;
 
-        public NetworkMonitorService(ILogger<NetworkMonitorService> logger)
+        public NetworkMonitorService()
         {
-            _logger = logger;
             _currentAccess = Connectivity.NetworkAccess;
         }
 
@@ -38,10 +36,6 @@ namespace mobile.Services.Internal
             // S'abonner aux changements de connectivité
             Connectivity.ConnectivityChanged += OnConnectivityChanged;
 
-#if DEBUG
-            _logger.LogInformation("📡 NetworkMonitor démarré - État initial: {Status}", 
-                IsNetworkAvailable ? "En ligne" : "Hors ligne");
-#endif
         }
 
         /// <summary>
@@ -54,10 +48,6 @@ namespace mobile.Services.Internal
 
             _isMonitoring = false;
             Connectivity.ConnectivityChanged -= OnConnectivityChanged;
-
-#if DEBUG
-            _logger.LogInformation("📡 NetworkMonitor arrêté");
-#endif
         }
 
         /// <summary>
@@ -84,11 +74,6 @@ namespace mobile.Services.Internal
 
             if (wasAvailable != isAvailable)
             {
-#if DEBUG
-                _logger.LogInformation("📡 Connectivité changée: {Previous} → {Current}", 
-                    wasAvailable ? "En ligne" : "Hors ligne",
-                    isAvailable ? "En ligne" : "Hors ligne");
-#endif
 
                 // Notifier les abonnés
                 ConnectivityChanged?.Invoke(this, _currentAccess);
@@ -111,11 +96,6 @@ namespace mobile.Services.Internal
 
                 if (wasAvailable != isAvailable)
                 {
-#if DEBUG
-                    _logger.LogInformation("📡 Refresh connectivité: {Status}", 
-                        isAvailable ? "En ligne" : "Hors ligne");
-#endif
-
                     ConnectivityChanged?.Invoke(this, _currentAccess);
                 }
             }

@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Notifications.Interfaces;
@@ -10,7 +9,6 @@ namespace mobile.PageModels
     public partial class ProfilePageModel : ObservableObject
     {
         private readonly IAuthenticationStateService _authStateService;
-        private readonly ILogger<ProfilePageModel> _logger;
         private readonly INetworkMonitorService _networkMonitor;
         INotificationService _notificationService;
 
@@ -56,12 +54,10 @@ namespace mobile.PageModels
 
         public ProfilePageModel (
             IAuthenticationStateService authStateService,
-            ILogger<ProfilePageModel> logger,
             INetworkMonitorService networkMonitor,
             INotificationService notificationService)
         {
             _authStateService = authStateService;
-            _logger = logger;
             _networkMonitor = networkMonitor;
             _notificationService = notificationService;
 
@@ -108,7 +104,9 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du chargement des informations utilisateur");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ProfilePageModel", $"❌ Erreur lors du chargement des informations utilisateur: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 await _notificationService.ShowErrorAsync("Erreur lors du chargement des informations utilisateur");
             }
         }
@@ -163,7 +161,6 @@ namespace mobile.PageModels
                 if (existingParameterPage != null)
                 {
                     // Le modal est déjà ouvert, ne rien faire
-                    System.Diagnostics.Debug.WriteLine("⚠️ ParameterCenterPage déjà ouvert");
                     return;
                 }
 
@@ -214,11 +211,13 @@ namespace mobile.PageModels
             }
             catch (Exception profileEx)
             {
-                _logger.LogWarning(profileEx, "⚠️ Erreur lors de la sauvegarde du profil avant logout");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ProfilePageModel", $"❌ Erreur lors de la sauvegarde du profil avant logout: {profileEx.Message}\n{profileEx.GetType().Name}", "OK");
+#endif
                 await _notificationService.ShowErrorAsync("⚠️ Erreur lors de la sauvegarde du profil avant logout");
             }
 
-            _logger.LogInformation("✅ Déconnexion réussie");
+            // Déconnexion réussie
         }
     }
 }

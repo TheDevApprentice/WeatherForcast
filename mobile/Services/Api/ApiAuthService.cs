@@ -1,5 +1,4 @@
 using domain.DTOs.Auth;
-using Microsoft.Extensions.Logging;
 using mobile.Services.Api.Interfaces;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -13,13 +12,11 @@ namespace mobile.Services.Api
     public class ApiAuthService : IApiAuthService
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<ApiAuthService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public ApiAuthService (HttpClient httpClient, ILogger<ApiAuthService> logger)
+        public ApiAuthService (HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _logger = logger;
 
             _jsonOptions = new JsonSerializerOptions
             {
@@ -34,32 +31,21 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("🔐 Tentative de connexion pour {Email}", request.Email);
-#endif
-
                 var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
-
-#if DEBUG
-                    _logger.LogDebug("✅ Connexion réussie pour {Email}", request.Email);
-#endif
-
                     return authResponse;
                 }
 
-#if DEBUG
-                _logger.LogWarning("❌ Échec de connexion pour {Email}: {StatusCode}",
-                    request.Email, response.StatusCode);
-#endif
                 return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la connexion pour {Email}", request.Email);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiAuthService", $"❌ Erreur lors de la connexion: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -71,29 +57,20 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("📝 Tentative d'inscription pour {Email}", request.Email);
-#endif
-
                 var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
 
                 if (response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogDebug("✅ Inscription réussie pour {Email}", request.Email);
-#endif
                     return true;
                 }
 
-#if DEBUG
-                _logger.LogWarning("❌ Échec d'inscription pour {Email}: {StatusCode}",
-                    request.Email, response.StatusCode);
-#endif
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de l'inscription pour {Email}", request.Email);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiAuthService", $"❌ Erreur lors de l'inscription: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -105,27 +82,19 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("🔍 Validation du token JWT");
-#endif
-
                 var response = await _httpClient.GetAsync("/api/auth/validate");
                 if (response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogDebug("✅ Token valide");
-#endif
                     return true;
                 }
 
-#if DEBUG
-                _logger.LogWarning("❌ Token invalide: {StatusCode}", response.StatusCode);
-#endif
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la validation du token");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiAuthService", $"❌ Erreur lors de la validation du token: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -137,31 +106,20 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("👤 Récupération des informations utilisateur");
-#endif
-
                 var response = await _httpClient.GetAsync("/api/auth/me");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var user = await response.Content.ReadFromJsonAsync<AuthResponse>(_jsonOptions);
-
-#if DEBUG
-                    _logger.LogDebug("✅ Utilisateur récupéré: {Email}", user?.Email);
-#endif
-
                     return user;
                 }
-
-#if DEBUG
-                _logger.LogWarning("❌ Échec récupération utilisateur: {StatusCode}", response.StatusCode);
-#endif
                 return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la récupération de l'utilisateur");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiAuthService", $"❌ Erreur lors de la récupération de l'utilisateur: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -173,28 +131,19 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("🚺 Déconnexion utilisateur");
-#endif
-
                 var response = await _httpClient.PostAsync("/api/auth/logout", null);
 
                 if (response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogDebug("✅ Déconnexion réussie");
-#endif
                     return true;
                 }
-
-#if DEBUG
-                _logger.LogWarning("❌ Échec déconnexion: {StatusCode}", response.StatusCode);
-#endif
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la déconnexion");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiAuthService", $"❌ Erreur lors de la déconnexion: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -207,18 +156,11 @@ namespace mobile.Services.Api
         /// </summary>
         public async Task<bool> CheckApiAvailabilityAsync ()
         {
-#if DEBUG
-            _logger.LogDebug("🔍 Vérification disponibilité API...");
-#endif
-
             // Faire un appel simple - AuthenticatedHttpClientHandler gère les retries
             // et lève ApiUnavailableException si l'API est inaccessible
             var response = await _httpClient.GetAsync("/api/auth/me");
 
             // Si on arrive ici, l'API est joignable (même si 401)
-#if DEBUG
-            _logger.LogDebug("✅ API joignable (Status: {StatusCode})", response.StatusCode);
-#endif
             return true;
         }
     }

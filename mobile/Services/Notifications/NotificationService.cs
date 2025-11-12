@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using mobile.Controls;
 using mobile.Services.Notifications.Interfaces;
 using mobile.Services.Stores;
@@ -11,13 +10,11 @@ namespace mobile.Services.Notifications
     /// </summary>
     public class NotificationService : INotificationService
     {
-        private readonly ILogger<NotificationService> _logger;
         private readonly INotificationStore _notificationStore;
         private NotificationManager? _notificationManager;
 
-        public NotificationService (ILogger<NotificationService> logger, INotificationStore notificationStore)
+        public NotificationService (INotificationStore notificationStore)
         {
-            _logger = logger;
             _notificationStore = notificationStore;
         }
 
@@ -37,7 +34,7 @@ namespace mobile.Services.Notifications
                 var currentPage = GetCurrentPage();
                 if (currentPage == null)
                 {
-                    _logger.LogWarning("⚠️ Impossible d'initialiser le gestionnaire de notifications: Pas de page active");
+                    // Impossible d'initialiser le gestionnaire de notifications: Pas de page active
                     _notificationManager = null;
                     return;
                 }
@@ -89,7 +86,7 @@ namespace mobile.Services.Notifications
                     wrapper.Children.Add(overlayControl);
                 }
 
-                _logger.LogInformation("✅ NotificationManager initialisé sur la page: {PageType}", currentPage?.GetType().Name);
+                // NotificationManager initialisé sur la page
             });
         }
 
@@ -138,8 +135,7 @@ namespace mobile.Services.Notifications
         {
             try
             {
-                _logger.LogInformation("🔔 Tentative d'affichage notification: {Title} - {Message}", title, message);
-
+                // Tentative d'affichage notification
                 // Créer la notification et l'ajouter au store
                 var notification = new Notification
                 {
@@ -152,30 +148,31 @@ namespace mobile.Services.Notifications
                 };
 
                 _notificationStore.AddNotification(notification);
-                _logger.LogInformation("📝 Notification ajoutée au store: {Id}", notification.Id);
+                // Notification ajoutée au store
 
                 // Afficher la notification à l'écran (desktop uniquement)
                 await EnsureInitializedAsync();
 
                 if (_notificationManager != null)
                 {
-                    _logger.LogInformation("✅ NotificationManager disponible, affichage en cours...");
+                    // NotificationManager disponible, affichage en cours
                     await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
 
                     // Marquer comme affichée et lue
                     notification.WasDisplayed = true;
                     _notificationStore.MarkAsRead(notification.Id);
-
-                    _logger.LogInformation("📢 Notification affichée avec succès et marquée comme lue: {Title} - {Message}", title, message);
+                    // Notification affichée avec succès et marquée comme lue
                 }
                 else
                 {
-                    _logger.LogWarning("❌ Gestionnaire de notifications non disponible (null) - notification stockée mais non affichée");
+                    // Gestionnaire de notifications non disponible - notification stockée mais non affichée
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de l'affichage de la notification: {Title} - {Message}", title, message);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug NotificationService", $"❌ Erreur lors de l'affichage de la notification: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -184,7 +181,7 @@ namespace mobile.Services.Notifications
         /// </summary>
         public void Reset ()
         {
-            _logger.LogInformation("🔄 Réinitialisation du gestionnaire de notifications");
+            // Réinitialisation du gestionnaire de notifications
             _notificationManager = null;
         }
 

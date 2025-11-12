@@ -1,5 +1,4 @@
 using domain.DTOs.WeatherForecast;
-using Microsoft.Extensions.Logging;
 using mobile.Exceptions;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
@@ -17,7 +16,6 @@ namespace mobile.Services.Api
     {
         private readonly HttpClient _httpClient;
         private readonly ICacheService _cacheService;
-        private readonly ILogger<ApiWeatherForecastServiceWithCache> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
 
         // Durée de validité du cache (1 heure)
@@ -25,12 +23,10 @@ namespace mobile.Services.Api
 
         public ApiWeatherForecastServiceWithCache (
             HttpClient httpClient,
-            ICacheService cacheService,
-            ILogger<ApiWeatherForecastServiceWithCache> logger)
+            ICacheService cacheService)
         {
             _httpClient = httpClient;
             _cacheService = cacheService;
-            _logger = logger;
 
             _jsonOptions = new JsonSerializerOptions
             {
@@ -46,18 +42,13 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("☁️ Récupération des prévisions depuis l'API");
-#endif
-
+                // Récupération des prévisions depuis l'API
                 // Essayer d'abord l'API
                 var response = await _httpClient.GetAsync("/api/weatherforecast");
 
                 if (!response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogWarning("⚠️ API a retourné {StatusCode}, tentative de récupération du cache", response.StatusCode);
-#endif
+                    // API a retourné un code d'erreur, tentative de récupération du cache
                     return await GetFromCacheAsync();
                 }
 
@@ -65,43 +56,35 @@ namespace mobile.Services.Api
 
                 if (forecasts != null && forecasts.Any())
                 {
-#if DEBUG
-                    _logger.LogDebug("✅ {Count} prévisions récupérées de l'API", forecasts.Count);
-#endif
-
+                    // Prévisions récupérées de l'API avec succès
                     // Sauvegarder dans le cache pour utilisation offline
                     try
                     {
                         await _cacheService.SaveForecastsAsync(forecasts);
-#if DEBUG
-                        _logger.LogDebug("💾 Prévisions sauvegardées dans le cache");
-#endif
+                        // Prévisions sauvegardées dans le cache
                     }
                     catch (Exception cacheEx)
                     {
-                        _logger.LogWarning(cacheEx, "⚠️ Impossible de sauvegarder dans le cache");
+                        // Impossible de sauvegarder dans le cache (non bloquant)
                     }
 
                     return forecasts;
                 }
 
-#if DEBUG
-                _logger.LogWarning("⚠️ API n'a retourné aucune prévision, tentative de récupération du cache");
-#endif
-
+                // API n'a retourné aucune prévision, tentative de récupération du cache
                 // Si l'API ne retourne rien, essayer le cache
                 return await GetFromCacheAsync();
             }
             catch (HttpRequestException ex)
             {
-                // Erreur réseau - Mode offline
-                _logger.LogWarning(ex, "📡 Pas de connexion réseau - Mode offline activé");
+                // Pas de connexion réseau - Mode offline activé
                 return await GetFromCacheAsync();
             }
             catch (Exception ex)
             {
-                // Autre erreur - Essayer le cache
-                _logger.LogError(ex, "❌ Erreur lors de la récupération des prévisions de l'API");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiWeatherForecastService", $"❌ Erreur lors de la récupération des prévisions de l'API: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return await GetFromCacheAsync();
             }
         }
@@ -122,28 +105,24 @@ namespace mobile.Services.Api
 
                     if (isCacheValid)
                     {
-#if DEBUG
-                        _logger.LogDebug("✅ {Count} prévisions récupérées du cache (valide)", cachedForecasts.Count);
-#endif
+                        // Prévisions récupérées du cache (valide)
                     }
                     else
                     {
-#if DEBUG
-                        _logger.LogWarning("⚠️ {Count} prévisions récupérées du cache (expiré)", cachedForecasts.Count);
-#endif
+                        // Prévisions récupérées du cache (expiré)
                     }
 
                     return cachedForecasts;
                 }
 
-#if DEBUG
-                _logger.LogWarning("⚠️ Aucune prévision en cache");
-#endif
+                // Aucune prévision en cache
                 return new List<WeatherForecast>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la récupération du cache");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiWeatherForecastService", $"❌ Erreur lors de la récupération du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return new List<WeatherForecast>();
             }
         }
@@ -156,35 +135,29 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("🔍 Récupération de la prévision {Id}", id);
-#endif
-
+                // Récupération de la prévision par ID depuis l'API
                 var response = await _httpClient.GetAsync($"/api/weatherforecast/{id}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     var forecast = await response.Content.ReadFromJsonAsync<WeatherForecast>(_jsonOptions);
-#if DEBUG
-                    _logger.LogDebug("✅ Prévision {Id} récupérée", id);
-#endif
+                    // Prévision récupérée avec succès
                     return forecast;
                 }
 
-#if DEBUG
-                _logger.LogWarning("❌ Échec récupération prévision {Id}: {StatusCode}", id, response.StatusCode);
-#endif
-                // Fallback sur le cache
+                // Échec récupération prévision, fallback sur le cache
                 return await _cacheService.GetCachedForecastByIdAsync(id);
             }
             catch (ApiUnavailableException ex)
             {
-                _logger.LogWarning(ex, "📡 API non joignable pour GetForecastByIdAsync({Id})", id);
+                // API non joignable, fallback sur le cache
                 return await _cacheService.GetCachedForecastByIdAsync(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de GetForecastByIdAsync({Id})", id);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ApiWeatherForecastService", $"❌ Erreur lors de GetForecastByIdAsync({id}): {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return null;
             }
         }
@@ -197,25 +170,17 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("➕ Création d'une nouvelle prévision pour {Date}", request.Date);
-#endif
-
+                // Création d'une nouvelle prévision
                 var response = await _httpClient.PostAsJsonAsync("/api/weatherforecast", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogWarning("❌ Échec création prévision: {StatusCode}", response.StatusCode);
-#endif
+                    // Échec création prévision
                     return null;
                 }
 
                 var forecast = await response.Content.ReadFromJsonAsync<WeatherForecast>(_jsonOptions);
-
-#if DEBUG
-                _logger.LogDebug("✅ Prévision créée avec ID {Id}", forecast?.Id);
-#endif
+                // Prévision créée avec succès
 
                 if (forecast != null)
                 {
@@ -223,13 +188,11 @@ namespace mobile.Services.Api
                     try
                     {
                         await _cacheService.ClearForecastsCacheAsync();
-#if DEBUG
-                        _logger.LogDebug("🗑️ Cache invalidé après création");
-#endif
+                        // Cache invalidé après création
                     }
                     catch (Exception cacheEx)
                     {
-                        _logger.LogWarning(cacheEx, "⚠️ Impossible d'invalider le cache");
+                        // Impossible d'invalider le cache (non bloquant)
                     }
                 }
 
@@ -237,7 +200,7 @@ namespace mobile.Services.Api
             }
             catch (ApiUnavailableException ex)
             {
-                _logger.LogWarning(ex, "📡 Impossible de créer une prévision en mode offline");
+                // Impossible de créer une prévision en mode offline
                 throw new InvalidOperationException("La création de prévisions nécessite une connexion internet", ex);
             }
         }
@@ -250,23 +213,16 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("✏️ Mise à jour de la prévision {Id}", id);
-#endif
-
+                // Mise à jour de la prévision
                 var response = await _httpClient.PutAsJsonAsync($"/api/weatherforecast/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogWarning("❌ Échec mise à jour prévision {Id}: {StatusCode}", id, response.StatusCode);
-#endif
+                    // Échec mise à jour prévision
                     return false;
                 }
 
-#if DEBUG
-                _logger.LogDebug("✅ Prévision {Id} mise à jour", id);
-#endif
+                // Prévision mise à jour avec succès
                 var success = true;
 
                 if (success)
@@ -275,13 +231,11 @@ namespace mobile.Services.Api
                     try
                     {
                         await _cacheService.ClearForecastsCacheAsync();
-#if DEBUG
-                        _logger.LogDebug("🗑️ Cache invalidé après mise à jour");
-#endif
+                        // Cache invalidé après mise à jour
                     }
                     catch (Exception cacheEx)
                     {
-                        _logger.LogWarning(cacheEx, "⚠️ Impossible d'invalider le cache");
+                        // Impossible d'invalider le cache (non bloquant)
                     }
                 }
 
@@ -289,7 +243,7 @@ namespace mobile.Services.Api
             }
             catch (ApiUnavailableException ex)
             {
-                _logger.LogWarning(ex, "📡 Impossible de mettre à jour une prévision en mode offline");
+                // Impossible de mettre à jour une prévision en mode offline
                 throw new InvalidOperationException("La mise à jour de prévisions nécessite une connexion internet", ex);
             }
         }
@@ -302,23 +256,16 @@ namespace mobile.Services.Api
         {
             try
             {
-#if DEBUG
-                _logger.LogDebug("🗑️ Suppression de la prévision {Id}", id);
-#endif
-
+                // Suppression de la prévision
                 var response = await _httpClient.DeleteAsync($"/api/weatherforecast/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-#if DEBUG
-                    _logger.LogWarning("❌ Échec suppression prévision {Id}: {StatusCode}", id, response.StatusCode);
-#endif
+                    // Échec suppression prévision
                     return false;
                 }
 
-#if DEBUG
-                _logger.LogDebug("✅ Prévision {Id} supprimée", id);
-#endif
+                // Prévision supprimée avec succès
                 var success = true;
 
                 if (success)
@@ -327,13 +274,11 @@ namespace mobile.Services.Api
                     try
                     {
                         await _cacheService.DeleteCachedForecastAsync(id);
-#if DEBUG
-                        _logger.LogDebug("🗑️ Prévision {Id} supprimée du cache", id);
-#endif
+                        // Prévision supprimée du cache
                     }
                     catch (Exception cacheEx)
                     {
-                        _logger.LogWarning(cacheEx, "⚠️ Impossible de supprimer du cache");
+                        // Impossible de supprimer du cache (non bloquant)
                     }
                 }
 
@@ -341,7 +286,7 @@ namespace mobile.Services.Api
             }
             catch (ApiUnavailableException ex)
             {
-                _logger.LogWarning(ex, "📡 Impossible de supprimer une prévision en mode offline");
+                // Impossible de supprimer une prévision en mode offline
                 throw new InvalidOperationException("La suppression de prévisions nécessite une connexion internet", ex);
             }
         }

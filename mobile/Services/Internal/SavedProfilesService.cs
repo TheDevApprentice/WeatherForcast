@@ -37,13 +37,8 @@ namespace mobile.Services.Internal
             catch (Exception ex)
             {
                 // En cas d'erreur de désérialisation, retourner une liste vide
-                System.Diagnostics.Debug.WriteLine($"❌ Erreur GetSavedProfilesAsync: {ex.Message}");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug Profils", $"Erreur lecture: {ex.Message}\n{ex.GetType().Name}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug SavedProfilesService", $"❌ Erreur GetSavedProfilesAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                 return new List<SavedUserProfile>();
             }
@@ -85,14 +80,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                // Log l'erreur mais ne pas crasher l'application
-                System.Diagnostics.Debug.WriteLine($"Error saving profile: {ex.Message}");
+                // Erreur lors de la sauvegarde du profil (non bloquant)
 #if DEBUG
-                // Alerte active même en Release pour debug publish
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug Profils", $"Erreur sauvegarde: {ex.Message}\n{ex.GetType().Name}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug SavedProfilesService", $"❌ Erreur SaveProfileAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
             }
         }
@@ -123,13 +113,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                // Log l'erreur mais ne pas crasher l'application
-                System.Diagnostics.Debug.WriteLine($"Error removing profile: {ex.Message}");
+                // Erreur lors de la suppression du profil (non bloquant)
 #if DEBUG
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug", $"Erreur suppression profil: {ex.Message}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug SavedProfilesService", $"❌ Erreur RemoveProfileAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
             }
         }
@@ -142,8 +128,10 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                // Log l'erreur mais ne pas crasher l'application
-                System.Diagnostics.Debug.WriteLine($"Error clearing profiles: {ex.Message}");
+                // Erreur lors du nettoyage des profils (non bloquant)
+#if DEBUG
+                Shell.Current.DisplayAlert("Debug SavedProfilesService", $"❌ Erreur Clearing profiles: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
             return Task.CompletedTask;
         }

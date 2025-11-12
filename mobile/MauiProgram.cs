@@ -3,8 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using mobile.PageModels.Auth;
 using mobile.Pages.Auth;
+using mobile.PageModels;
 using mobile.Services.Api;
 using mobile.Services.Api.Interfaces;
+using mobile.Services.External;
+using mobile.Services.External.Interfaces;
 using mobile.Services.Handlers;
 using mobile.Services.Internal;
 using mobile.Services.Internal.Interfaces;
@@ -75,6 +78,9 @@ namespace mobile
             builder.Services.AddSingleton<INotificationStore, NotificationStore>();
             builder.Services.AddSingleton<IConversationStore, ConversationStore>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();
+            
+            // Service de messagerie instantanée
+            builder.Services.AddSingleton<IMessengerService, MessengerService>();
 
             // HttpClient avec authentification
             builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
@@ -102,6 +108,7 @@ namespace mobile
 
             // Page de démarrage (Splash)
             builder.Services.AddTransient<SplashPage>();
+            builder.Services.AddTransient<SplashPageModel>();
 
             // Pages et ViewModels d'authentification
             builder.Services.AddTransient<LoginPage>();
@@ -121,9 +128,11 @@ namespace mobile
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<ProfilePageModel>();
 
-            // Page des conversations
+            // Pages des conversations
             builder.Services.AddTransient<ConversationsPage>();
+            builder.Services.AddTransient<ConversationsPageModel>();
             builder.Services.AddTransient<ConversationDetailPage>();
+            builder.Services.AddTransient<ConversationDetailPageModel>();
 
             return builder.Build();
         }

@@ -15,11 +15,8 @@ namespace mobile.Services.Internal
         private const string FIRSTNAME_KEY = "user_firstname";
         private const string LASTNAME_KEY = "user_lastname";
 
-        private readonly ILogger<SecureStorageService> _logger;
-
-        public SecureStorageService (ILogger<SecureStorageService> logger)
+        public SecureStorageService ()
         {
-            _logger = logger;
         }
 
         public async Task SaveTokenAsync (string token)
@@ -27,14 +24,9 @@ namespace mobile.Services.Internal
             try
             {
                 await SecureStorage.SetAsync(TOKEN_KEY, token);
-#if DEBUG
-                _logger.LogDebug("Token saved successfully");
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving token to SecureStorage");
-                // Alerte active même en Release pour debug publish
 #if DEBUG
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
@@ -47,16 +39,11 @@ namespace mobile.Services.Internal
             try
             {
                 var token = await SecureStorage.GetAsync(TOKEN_KEY);
-#if DEBUG
-                _logger.LogDebug("Token retrieved: {Status}", string.IsNullOrEmpty(token) ? "NULL/EMPTY" : "OK");
-#endif
                 return token;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving token from SecureStorage");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                 return null;
@@ -72,7 +59,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing token from SecureStorage");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur RemoveTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -85,7 +74,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking authentication status");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur IsAuthenticatedAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -101,7 +92,6 @@ namespace mobile.Services.Internal
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.LogDebug("Token is null or empty");
                     return false;
                 }
 
@@ -111,7 +101,6 @@ namespace mobile.Services.Internal
                 // Vérifier que c'est un token JWT valide
                 if (!handler.CanReadToken(token))
                 {
-                    _logger.LogWarning("Token format is invalid");
                     return false;
                 }
 
@@ -123,16 +112,16 @@ namespace mobile.Services.Internal
 
                 if (isExpired)
                 {
-                    _logger.LogInformation("Token expired at {ExpirationTime}", expirationTime);
                     return false;
                 }
 
-                _logger.LogDebug("Token is valid, expires at {ExpirationTime}", expirationTime);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error validating JWT token");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur IsTokenValidAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -148,9 +137,7 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving user info to Preferences");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
                 await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur SaveUserInfoAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                 throw;
@@ -170,7 +157,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user info from Preferences");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetUserInfoAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return (string.Empty, string.Empty, string.Empty);
             }
         }
@@ -204,13 +193,13 @@ namespace mobile.Services.Internal
                 var firstName = jwtToken.Claims.FirstOrDefault(c => c.Type == "given_name")?.Value ?? string.Empty;
                 var lastName = jwtToken.Claims.FirstOrDefault(c => c.Type == "family_name")?.Value ?? string.Empty;
 
-                _logger.LogDebug("Extracted user info from token: UserId={UserId}, Email={Email}", userId, email);
-
                 return (userId, email, firstName, lastName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error extracting user info from JWT token");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetUserInfoFromTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return null;
             }
         }
@@ -240,13 +229,13 @@ namespace mobile.Services.Internal
                 // Extraire les claims
                 var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "nameid")?.Value ?? string.Empty;
 
-                _logger.LogDebug("Extracted user info from token: UserId={UserId}", userId);
-
                 return (userId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error extracting user info from JWT token");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur GetUserIdFromTokenAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return null;
             }
         }
@@ -255,29 +244,40 @@ namespace mobile.Services.Internal
         {
             try
             {
-                _logger.LogDebug("🧹 Début nettoyage SecureStorage...");
-
                 try { SecureStorage.Remove(TOKEN_KEY); }
-                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression TOKEN_KEY"); }
+                catch (Exception ex) {  
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur suppression TOKEN_KEY: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
+                }
 
                 try { Preferences.Remove(EMAIL_KEY); }
-                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression EMAIL_KEY"); }
+                catch (Exception ex) { 
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur suppression EMAIL_KEY: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
+                }
 
                 try { Preferences.Remove(FIRSTNAME_KEY); }
-                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression FIRSTNAME_KEY"); }
+                catch (Exception ex) { 
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur suppression FIRSTNAME_KEY: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
+                }
 
                 try { Preferences.Remove(LASTNAME_KEY); }
-                catch (Exception ex) { _logger.LogWarning(ex, "Erreur suppression LASTNAME_KEY"); }
+                catch (Exception ex) { 
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur suppression LASTNAME_KEY: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
+                }
 
                 await Task.CompletedTask;
-                _logger.LogDebug("✅ SecureStorage et Preferences nettoyés");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error clearing all secure storage and preferences");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
-                await Shell.Current.DisplayAlert("Debug ClearAll", $"Erreur: {ex.Message}\n{ex.GetType().Name}", "OK");
+                await Shell.Current.DisplayAlert("Debug SecureStorage", $"Erreur ClearAllAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
             }
         }

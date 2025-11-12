@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
 using System.Text.Json;
@@ -13,8 +12,6 @@ namespace mobile.Services.Api
     {
         private readonly IApiConfigurationService _apiConfig;
         private readonly ISecureStorageService _secureStorage;
-        private readonly ILogger<SignalRService> _logger;
-
         private HubConnection? _usersHubConnection;
         private HubConnection? _forecastHubConnection;
         private string? _currentEmail;
@@ -32,12 +29,10 @@ namespace mobile.Services.Api
 
         public SignalRService (
             IApiConfigurationService apiConfig,
-            ISecureStorageService secureStorage,
-            ILogger<SignalRService> logger)
+            ISecureStorageService secureStorage)
         {
             _apiConfig = apiConfig;
             _secureStorage = secureStorage;
-            _logger = logger;
         }
 
         /// <summary>
@@ -49,28 +44,18 @@ namespace mobile.Services.Api
             {
                 if (_usersHubConnection?.State == HubConnectionState.Connected)
                 {
-#if DEBUG
-                    _logger.LogDebug("UsersHub déjà connecté");
-#endif
                     return;
                 }
 
                 // Nettoyer l'ancienne connexion si elle existe (évite les doubles abonnements)
                 if (_usersHubConnection != null)
                 {
-#if DEBUG
-                    _logger.LogDebug("Nettoyage de l'ancienne connexion UsersHub");
-#endif
                     await _usersHubConnection.DisposeAsync();
                     _usersHubConnection = null;
                 }
 
                 var hubUrl = GetHubUrl("/hubs/users");
                 var token = await _secureStorage.GetTokenAsync();
-
-#if DEBUG
-                _logger.LogDebug("Connexion au UsersHub: {HubUrl}", hubUrl);
-#endif
 
                 _usersHubConnection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, options =>
@@ -86,16 +71,11 @@ namespace mobile.Services.Api
                 // Gestion de la reconnexion
                 _usersHubConnection.Reconnecting += error =>
                 {
-                    _logger.LogWarning("UsersHub reconnexion en cours...");
                     return Task.CompletedTask;
                 };
 
                 _usersHubConnection.Reconnected += async connectionId =>
                 {
-#if DEBUG
-                    _logger.LogDebug("UsersHub reconnecté: {ConnectionId}", connectionId);
-#endif
-
                     // Rejoindre à nouveau le canal email si nécessaire
                     if (!string.IsNullOrEmpty(_currentEmail))
                     {
@@ -105,7 +85,6 @@ namespace mobile.Services.Api
 
                 _usersHubConnection.Closed += error =>
                 {
-                    _logger.LogWarning("UsersHub déconnecté: {Error}", error?.Message);
                     return Task.CompletedTask;
                 };
 
@@ -120,14 +99,13 @@ namespace mobile.Services.Api
                             CorrelationId = data.TryGetProperty("CorrelationId", out var corrId) ? corrId.GetString() : null
                         };
 
-#if DEBUG
-                        _logger.LogDebug("📧 MOBILE - Email envoyé: {Subject}", notification.Subject);
-#endif
                         EmailSent?.Invoke(this, notification);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Erreur lors du traitement de EmailSentToUser");
+#if DEBUG
+                        Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors du traitement de EmailSentToUser: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                     }
                 });
 
@@ -141,22 +119,17 @@ namespace mobile.Services.Api
                             CorrelationId = data.TryGetProperty("CorrelationId", out var corrId) ? corrId.GetString() : null
                         };
 
-#if DEBUG
-                        _logger.LogDebug("✅ MOBILE - Email de vérification envoyé: {Message}", notification.Message);
-#endif
                         VerificationEmailSent?.Invoke(this, notification);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Erreur lors du traitement de VerificationEmailSentToUser");
+#if DEBUG
+                        Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors du traitement de VerificationEmailSentToUser: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                     }
                 });
 
                 await _usersHubConnection.StartAsync();
-
-#if DEBUG
-                _logger.LogDebug("✅ MOBILE - UsersHub connecté");
-#endif
 
                 // Rejoindre le canal email si fourni
                 if (!string.IsNullOrEmpty(email))
@@ -166,7 +139,9 @@ namespace mobile.Services.Api
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la connexion au UsersHub");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors de la connexion au UsersHub: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -180,18 +155,12 @@ namespace mobile.Services.Api
             {
                 if (_forecastHubConnection?.State == HubConnectionState.Connected)
                 {
-#if DEBUG
-                    _logger.LogDebug("ForecastHub déjà connecté");
-#endif
                     return;
                 }
 
                 // Nettoyer l'ancienne connexion si elle existe (évite les doubles abonnements)
                 if (_forecastHubConnection != null)
                 {
-#if DEBUG
-                    _logger.LogDebug("Nettoyage de l'ancienne connexion ForecastHub");
-#endif
                     await _forecastHubConnection.DisposeAsync();
                     _forecastHubConnection = null;
                 }
@@ -201,14 +170,8 @@ namespace mobile.Services.Api
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.LogWarning("Pas de token JWT, connexion au ForecastHub impossible");
                     return;
                 }
-
-#if DEBUG
-                _logger.LogDebug("Connexion au ForecastHub: {HubUrl}", hubUrl);
-#endif
-
                 _forecastHubConnection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, options =>
                     {
@@ -220,58 +183,40 @@ namespace mobile.Services.Api
                 // Gestion de la reconnexion
                 _forecastHubConnection.Reconnecting += error =>
                 {
-                    _logger.LogWarning("ForecastHub reconnexion en cours...");
                     return Task.CompletedTask;
                 };
 
                 _forecastHubConnection.Reconnected += connectionId =>
                 {
-#if DEBUG
-                    _logger.LogDebug("ForecastHub reconnecté: {ConnectionId}", connectionId);
-#endif
                     return Task.CompletedTask;
                 };
 
                 _forecastHubConnection.Closed += error =>
                 {
-                    _logger.LogWarning("ForecastHub déconnecté: {Error}", error?.Message);
                     return Task.CompletedTask;
                 };
 
                 // Écouter les événements de forecast
                 _forecastHubConnection.On<WeatherForecast>("ForecastCreated", (forecast) =>
                 {
-#if DEBUG
-                    _logger.LogDebug("📢 MOBILE - Forecast créé: ID={Id}", forecast.Id);
-#endif
                     ForecastCreated?.Invoke(this, forecast);
                 });
 
                 _forecastHubConnection.On<WeatherForecast>("ForecastUpdated", (forecast) =>
                 {
-#if DEBUG
-                    _logger.LogDebug("📢 MOBILE - Forecast mis à jour: ID={Id}", forecast.Id);
-#endif
                     ForecastUpdated?.Invoke(this, forecast);
                 });
 
                 _forecastHubConnection.On<int>("ForecastDeleted", (id) =>
                 {
-#if DEBUG
-                    _logger.LogDebug("📢 MOBILE - Forecast supprimé: ID={Id}", id);
-#endif
                     ForecastDeleted?.Invoke(this, id);
                 });
 
                 await _forecastHubConnection.StartAsync();
 
-#if DEBUG
-                _logger.LogDebug("✅ MOBILE - ForecastHub connecté");
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la connexion au ForecastHub");
                 throw;
             }
         }
@@ -288,15 +233,13 @@ namespace mobile.Services.Api
                     await _forecastHubConnection.StopAsync();
                     await _forecastHubConnection.DisposeAsync();
                     _forecastHubConnection = null;
-
-#if DEBUG
-                    _logger.LogDebug("ForecastHub déconnecté");
-#endif
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la déconnexion du ForecastHub");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors de la déconnexion du ForecastHub: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -318,17 +261,15 @@ namespace mobile.Services.Api
                     await _usersHubConnection.StopAsync();
                     await _usersHubConnection.DisposeAsync();
                     _usersHubConnection = null;
-
-#if DEBUG
-                    _logger.LogDebug("UsersHub déconnecté");
-#endif
                 }
 
                 await StopForecastHubAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la déconnexion de tous les hubs");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors de la déconnexion de tous les hubs: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -343,15 +284,13 @@ namespace mobile.Services.Api
                 {
                     await _usersHubConnection.InvokeAsync("JoinEmailChannel", email);
                     _currentEmail = email;
-
-#if DEBUG
-                    _logger.LogDebug("Rejoint le canal email: {Email}", email);
-#endif
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la jonction au canal email");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors de la jonction au canal email: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -366,15 +305,13 @@ namespace mobile.Services.Api
                 {
                     await _usersHubConnection.InvokeAsync("LeaveEmailChannel", email);
                     _currentEmail = null;
-
-#if DEBUG
-                    _logger.LogDebug("Quitté le canal email: {Email}", email);
-#endif
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la sortie du canal email");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SignalRService", $"Erreur lors de la sortie du canal email: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 

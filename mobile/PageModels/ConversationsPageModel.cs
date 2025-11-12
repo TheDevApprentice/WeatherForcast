@@ -62,7 +62,9 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ConversationsPageModel] Error loading conversations: {ex.Message}");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ConversationsPageModel", $"❌ Error loading conversations: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
             finally
             {

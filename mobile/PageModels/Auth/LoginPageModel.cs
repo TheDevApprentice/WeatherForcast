@@ -85,8 +85,7 @@ namespace mobile.PageModels.Auth
         private async Task LoginAsync ()
         {
             // Réinitialiser l'erreur
-            HasError = false;
-            ErrorMessage = string.Empty;
+            ResetError();
 
             // Validation
             if (string.IsNullOrWhiteSpace(Email))
@@ -150,7 +149,6 @@ namespace mobile.PageModels.Auth
                         }
                         catch (Exception profileEx)
                         {
-                            System.Diagnostics.Debug.WriteLine($"⚠️ Erreur sauvegarde profil: {profileEx.Message}");
 #if DEBUG
                             await Shell.Current.DisplayAlert("Debug", $"Erreur sauvegarde profil login: {profileEx.Message}", "OK");
 #endif
@@ -203,7 +201,11 @@ namespace mobile.PageModels.Auth
             HasError = true;
             _notificationService.ShowErrorAsync(ErrorMessage);
         }
-
+        private void ResetError ()
+        {
+            ErrorMessage = string.Empty;
+            HasError = false;
+        }
         partial void OnIsLoadingChanged (bool value)
         {
             OnPropertyChanged(nameof(IsNotLoading));
@@ -237,13 +239,10 @@ namespace mobile.PageModels.Auth
                 HasSavedProfiles = profiles.Count > 0;
                 ShowProfileSelection = HasSavedProfiles;
 
-                System.Diagnostics.Debug.WriteLine($"🟢 Profils chargés : {profiles.Count}");
-                System.Diagnostics.Debug.WriteLine($"🟢 ShowProfileSelection = {ShowProfileSelection}");
-                System.Diagnostics.Debug.WriteLine($"🟢 HasSavedProfiles = {HasSavedProfiles}");
+                // Profils chargés avec succès
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Erreur chargement profils: {ex.Message}");
                 // Alerte active même en Release pour debug publish
 #if DEBUG
                 await Shell.Current.DisplayAlert("Debug Login", $"Erreur chargement profils: {ex.Message}\n{ex.GetType().Name}", "OK");
@@ -260,14 +259,12 @@ namespace mobile.PageModels.Auth
         [RelayCommand]
         private void SelectProfile (SavedUserProfile profile)
         {
-            System.Diagnostics.Debug.WriteLine($"🔵 SelectProfile appelé pour : {profile.Email}");
             SelectedProfile = profile;
             Email = profile.Email;
             Password = string.Empty;
             ShowProfileSelection = false;
-            HasError = false;
-            ErrorMessage = string.Empty;
-            System.Diagnostics.Debug.WriteLine($"🔵 ShowProfileSelection = {ShowProfileSelection}, SelectedProfile = {SelectedProfile?.Email}");
+            // Réinitialiser l'erreur
+            ResetError();
         }
 
         /// <summary>
@@ -280,8 +277,8 @@ namespace mobile.PageModels.Auth
             Email = string.Empty;
             Password = string.Empty;
             ShowProfileSelection = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
+            // Réinitialiser l'erreur
+            ResetError();
         }
 
         /// <summary>
@@ -290,14 +287,12 @@ namespace mobile.PageModels.Auth
         [RelayCommand]
         private void UseAnotherAccount ()
         {
-            System.Diagnostics.Debug.WriteLine($"🟡 UseAnotherAccount appelé");
             SelectedProfile = null;
             Email = string.Empty;
             Password = string.Empty;
             ShowProfileSelection = false;
-            HasError = false;
-            ErrorMessage = string.Empty;
-            System.Diagnostics.Debug.WriteLine($"🟡 ShowProfileSelection = {ShowProfileSelection}");
+            // Réinitialiser l'erreur
+            ResetError();
         }
 
         /// <summary>
@@ -308,7 +303,6 @@ namespace mobile.PageModels.Auth
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"🔴 RemoveProfile appelé pour : {profile.Email}");
                 await _savedProfiles.RemoveProfileAsync(profile.Email);
                 SavedProfiles.Remove(profile);
                 await _notificationService.ShowSuccessAsync("Le profil à bien été supprimé");
@@ -318,11 +312,10 @@ namespace mobile.PageModels.Auth
                 {
                     ShowProfileSelection = false;
                 }
-                System.Diagnostics.Debug.WriteLine($"🔴 Profil supprimé. Reste : {SavedProfiles.Count}");
+                // Profil supprimé
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Erreur suppression profil: {ex.Message}");
 #if DEBUG
                 await Shell.Current.DisplayAlert("Debug", $"Erreur suppression profil: {ex.Message}", "OK");
 #endif

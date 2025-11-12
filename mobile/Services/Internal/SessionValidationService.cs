@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using mobile.Services.Api.Interfaces;
 using mobile.Services.Internal.Interfaces;
 
@@ -11,16 +10,13 @@ namespace mobile.Services.Internal
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ISecureStorageService _secureStorage;
-        private readonly ILogger<SessionValidationService> _logger;
 
         public SessionValidationService (
             IServiceProvider serviceProvider,
-            ISecureStorageService secureStorage,
-            ILogger<SessionValidationService> logger)
+            ISecureStorageService secureStorage)
         {
             _serviceProvider = serviceProvider;
             _secureStorage = secureStorage;
-            _logger = logger;
         }
 
         /// <summary>
@@ -35,7 +31,7 @@ namespace mobile.Services.Internal
                 var token = await _secureStorage.GetTokenAsync();
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.LogInformation("Aucun token trouvé");
+                    // Aucun token trouvé
                     return false;
                 }
 
@@ -43,12 +39,12 @@ namespace mobile.Services.Internal
                 var isTokenValid = await _secureStorage.IsTokenValidAsync();
                 if (!isTokenValid)
                 {
-                    _logger.LogWarning("❌ Token expiré, nettoyage de la session");
+                    // Token expiré, nettoyage de la session
                     await _secureStorage.ClearAllAsync();
                     return false;
                 }
 
-                _logger.LogInformation("Token trouvé et valide, validation via API /me...");
+                // Token trouvé et valide, validation via API /me
 
                 // Résoudre IApiAuthService via le ServiceProvider (évite le lifetime mismatch)
                 using var scope = _serviceProvider.CreateScope();
@@ -59,22 +55,23 @@ namespace mobile.Services.Internal
 
                 if (currentUser != null)
                 {
-                    _logger.LogInformation("✅ Session valide pour: {Email}", currentUser.Email);
+                    // Session valide
                     return true;
                 }
 
-                _logger.LogWarning("❌ Session invalide: API /me n'a pas retourné d'utilisateur (401 Unauthorized)");
+                // Session invalide: API /me n'a pas retourné d'utilisateur (401 Unauthorized)
                 return false;
             }
             catch (HttpRequestException ex)
             {
                 // Erreur réseau : impossible de valider, on déconnecte par sécurité
-                _logger.LogError(ex, "❌ Erreur réseau lors de la validation");
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la validation de session");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SessionValidationService", $"❌ Erreur lors de la validation de session: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -86,13 +83,14 @@ namespace mobile.Services.Internal
         {
             try
             {
-                _logger.LogInformation("Nettoyage de la session...");
+                // Nettoyage de la session
                 await _secureStorage.ClearAllAsync();
-                _logger.LogInformation("Session nettoyée");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors du nettoyage de la session");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug SessionValidationService", $"❌ Erreur lors du nettoyage de la session: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
     }

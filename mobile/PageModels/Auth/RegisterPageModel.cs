@@ -100,8 +100,7 @@ namespace mobile.PageModels.Auth
         private async Task RegisterAsync ()
         {
             // Réinitialiser l'erreur
-            HasError = false;
-            ErrorMessage = string.Empty;
+            ResetError();
 
             // Validation
             if (!ValidateInputs())
@@ -217,6 +216,12 @@ namespace mobile.PageModels.Auth
             ErrorMessage = message;
             HasError = true;
             _notificationService.ShowErrorAsync(ErrorMessage);
+        }
+
+        private void ResetError ()
+        {
+            ErrorMessage = string.Empty;
+            HasError = false;
         }
     }
 }

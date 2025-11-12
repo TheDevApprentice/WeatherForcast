@@ -198,10 +198,10 @@
                         </VerticalStackLayout>
                         
                         <!-- Message d'erreur -->
-                        <Label Text="{Binding ErrorMessage}"
+                        <!-- <Label Text="{Binding ErrorMessage}"
                                TextColor="{StaticResource Danger}"
                                IsVisible="{Binding HasError}"
-                               FontSize="12" />
+                               FontSize="12" /> -->
                         
                         <!-- Bouton de connexion -->
                         <Button Text="Se connecter"
@@ -260,12 +260,6 @@
                            IsPassword="True"
                            ReturnType="Done"
                            ReturnCommand="{Binding LoginCommand}" />
-
-                    <!-- Message d'erreur -->
-                    <Label Text="{Binding ErrorMessage}"
-                           TextColor="{StaticResource Danger}"
-                           IsVisible="{Binding HasError}"
-                           FontSize="12" />
 
                     <!-- Bouton de connexion -->
                     <Button Text="Se connecter"

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using mobile.Pages.Auth;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
@@ -8,121 +7,89 @@ namespace mobile
 {
     public partial class App : Application
     {
-        private readonly ILogger<App> _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly INetworkMonitorService _networkMonitor;
+        private readonly ICacheService _cacheService;
+        private readonly IConversationStore _conversationStore;
+        private readonly IThemeService _themeService;
+        private readonly IOfflineBannerManager _bannerManager;
 
-        public App (
-            ILogger<App> logger,
-            IServiceProvider serviceProvider)
+
+        public App (IServiceProvider serviceProvider, 
+        INetworkMonitorService networkMonitor, 
+        ICacheService cacheService, 
+        IConversationStore conversationStore,
+        IThemeService themeService,
+        IOfflineBannerManager bannerManager)
         {
             InitializeComponent();
-            _logger = logger;
+
             _serviceProvider = serviceProvider;
-            // L'overlay sera créé et enregistré dans CreateWindow
+            _cacheService = cacheService;
+            _networkMonitor = networkMonitor;
+            _conversationStore = conversationStore;
+            _themeService = themeService;
+            _bannerManager = bannerManager;
 
             // Démarrer la surveillance du réseau
-            var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
             networkMonitor.StartMonitoring();
-#if DEBUG
-            _logger.LogInformation("📡 NetworkMonitor démarré");
-#endif
+            // NetworkMonitor démarré
 
             // Initialiser le ConversationStore avec la conversation Support
-            InitializeConversationStore();
+            _conversationStore.Initialize("current-user", "Utilisateur");
 
             // Initialiser le cache SQLite en arrière-plan
             Task.Run(async () =>
             {
                 try
                 {
-                    var cacheService = _serviceProvider.GetRequiredService<ICacheService>();
-                    await cacheService.InitializeAsync();
-#if DEBUG
-                    _logger.LogInformation("💾 Cache SQLite initialisé");
-#endif
+                    await _cacheService.InitializeAsync();
+                    // Cache SQLite initialisé
                 }
                 catch (Exception ex)
                 {
 #if DEBUG
-                    _logger.LogError(ex, "❌ Erreur lors de l'initialisation du cache");
+                    await Shell.Current.DisplayAlert("Debug App", $"❌ Erreur lors de l'initialisation du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                 }
             });
 
-#if DEBUG
-            _logger.LogInformation("✅ Application démarrée");
-#endif
-        }
-
-        /// <summary>
-        /// Initialise le ConversationStore avec la conversation Support
-        /// </summary>
-        private void InitializeConversationStore ()
-        {
-            try
-            {
-                var conversationStore = _serviceProvider.GetRequiredService<IConversationStore>();
-
-                // TODO: Récupérer l'utilisateur actuel pour avoir son ID et nom
-                // Pour l'instant, on utilise des valeurs par défaut
-                conversationStore.Initialize("current-user", "Utilisateur");
-
-#if DEBUG
-                _logger.LogInformation("💬 ConversationStore initialisé avec conversation Support");
-#endif
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                _logger.LogError(ex, "❌ Erreur lors de l'initialisation du ConversationStore");
-#endif
-            }
+            // Application démarrée
         }
 
         protected override void OnSleep ()
         {
             base.OnSleep();
-#if DEBUG
-            _logger.LogInformation("💤 Application en arrière-plan");
-#endif
+            // Application en arrière-plan
             // Les animations seront automatiquement arrêtées via OnDisappearing des pages
         }
 
         protected override void OnResume ()
         {
             base.OnResume();
-#if DEBUG
-            _logger.LogInformation("▶️ Application reprise");
-#endif
+            // Application reprise
             // Les animations seront automatiquement redémarrées via OnAppearing des pages
         }
 
         protected override Window CreateWindow (IActivationState? activationState)
         {
             Shell shell;
-            var networkMonitor = _serviceProvider.GetRequiredService<INetworkMonitorService>();
-            var bannerManager = _serviceProvider.GetRequiredService<IOfflineBannerManager>();
-            var themeService = _serviceProvider.GetRequiredService<IThemeService>();
 
 #if ANDROID || IOS
             // Sur mobile : utiliser AppShellMobile avec TabBar
-            var mobileShell = new AppShellMobile(bannerManager, networkMonitor);
+            var mobileShell = new AppShellMobile(_bannerManager, _networkMonitor);
             shell = mobileShell;
-#if DEBUG
-            _logger.LogInformation("📱 AppShellMobile chargé (TabBar pour mobile)");
-#endif
+            // AppShellMobile chargé (TabBar pour mobile)
 #else
             // Sur desktop : utiliser AppShell avec Flyout
-            var desktopShell = new AppShell(bannerManager, themeService, networkMonitor);
+            var desktopShell = new AppShell(_bannerManager, _themeService, _networkMonitor);
             shell = desktopShell;
             
             // Désactiver le flyout pendant le splash
             shell.FlyoutBehavior = FlyoutBehavior.Disabled;
             Shell.SetFlyoutBehavior(shell, FlyoutBehavior.Disabled);
             shell.FlyoutIsPresented = false;
-#if DEBUG
-            _logger.LogInformation("🖥️ AppShell chargé (Flyout pour desktop)");
-#endif
+            // AppShell chargé (Flyout pour desktop)
 #endif
 
 #if WINDOWS || MACCATALYST
@@ -134,9 +101,7 @@ namespace mobile
 
             // Masquer les éléments de la title bar AVANT la navigation vers le splash
             window.HideTitleBarElements();
-#if DEBUG
-            _logger.LogInformation("🔒 Éléments de la title bar masqués avant le splash");
-#endif
+            // Éléments de la title bar masqués avant le splash
 #else
             // Utiliser Window standard (Android, iOS)
             var window = new Window(shell);
@@ -145,15 +110,13 @@ namespace mobile
             // Créer et enregistrer l'overlay global pour les transitions de thème
             // L'overlay sera créé dans ThemeService lors de la première transition
             // Pour l'instant, on enregistre null et ThemeService créera l'overlay à la volée
-#if DEBUG
-            _logger.LogInformation("✅ ThemeService prêt pour les transitions de thème");
-#endif
+            // ThemeService prêt pour les transitions de thème
             // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 try
                 {
-                    _logger.LogInformation("🚀 Démarrage de l'application");
+                    // Démarrage de l'application
 
 #if ANDROID || IOS
                     // Sur mobile avec TabBar : masquer le TabBar et afficher Splash en modal
@@ -168,7 +131,7 @@ namespace mobile
                 catch (Exception ex)
                 {
 #if DEBUG
-                    _logger.LogError(ex, "Erreur lors de la navigation vers SplashPage");
+                    await Shell.Current.DisplayAlert("Debug App", $"❌ Erreur lors de la navigation vers SplashPage: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                     // En cas d'erreur, rediriger vers login par sécurité
 #if ANDROID || IOS

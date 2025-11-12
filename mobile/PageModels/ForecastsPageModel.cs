@@ -43,7 +43,7 @@ namespace mobile.PageModels
         /// </summary>
         public async void OnAppearing ()
         {
-            System.Diagnostics.Debug.WriteLine("📍 ForecastsPageModel.OnAppearing() appelé");
+            // ForecastsPageModel.OnAppearing() appelé
 
             if (_disposed)
             {
@@ -62,7 +62,7 @@ namespace mobile.PageModels
             _signalRService.ForecastUpdated += OnForecastUpdated;
             _signalRService.ForecastDeleted += OnForecastDeleted;
 
-            System.Diagnostics.Debug.WriteLine("✅ Événements SignalR abonnés");
+            // Événements SignalR abonnés
 
             // Initialiser la connexion SignalR et charger les données
             await InitializeAsync();
@@ -89,7 +89,9 @@ namespace mobile.PageModels
             catch (Exception ex)
             {
                 // Si SignalR échoue, continuer quand même (on aura juste pas le temps réel)
-                System.Diagnostics.Debug.WriteLine($"⚠️ SignalR connection failed: {ex.Message}");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug ForecastsPageModel", $"❌ SignalR connection failed: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 await _notificationService.ShowErrorAsync("SignalR", $"⚠️ SignalR connection failed: {ex.Message}");
             }
 
@@ -106,7 +108,7 @@ namespace mobile.PageModels
                 // Récupérer les prévisions depuis l'API
                 var forecastsList = await _apiWeatherForecastService.GetForecastsAsync();
 
-                // ✅ Mettre à jour la collection sur le thread UI
+                // Mettre à jour la collection sur le thread UI
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Forecasts.Clear();
@@ -120,7 +122,7 @@ namespace mobile.PageModels
             }
             catch (Exception ex)
             {
-                await _notificationService.ShowErrorAsync(ex.Message, "Impossible de charger les prévisions.");
+                // await _notificationService.ShowErrorAsync(ex.Message, "Impossible de charger les prévisions.");
             }
             finally
             {
@@ -136,13 +138,13 @@ namespace mobile.PageModels
 
         private async void OnForecastCreated (object? sender, Models.WeatherForecast forecast)
         {
-            System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastCreated appelé - ID: {forecast.Id}");
+            // SignalR: OnForecastCreated appelé
 
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"created_{forecast.Id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Notification dupliquée ignorée: {notificationKey}");
+                // Notification dupliquée ignorée
                 return; // Notification déjà traitée
             }
 
@@ -157,24 +159,23 @@ namespace mobile.PageModels
                 {
                     Forecasts.Add(forecast);
                     ForecastsCount = Forecasts.Count;
-                    System.Diagnostics.Debug.WriteLine($"✅ Forecast ajouté à la liste: {forecast.Id}");
+                    // Forecast ajouté à la liste
                 }
             });
 
             // Afficher une notification toast
-            System.Diagnostics.Debug.WriteLine($"📢 Appel ShowForecastCreatedAsync pour: {forecast.Id}");
             await _notificationService.ShowForecastCreatedAsync(forecast);
         }
 
         private async void OnForecastUpdated (object? sender, Models.WeatherForecast forecast)
         {
-            System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastUpdated appelé - ID: {forecast.Id}");
+            // SignalR: OnForecastUpdated appelé
 
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"updated_{forecast.Id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Notification dupliquée ignorée: {notificationKey}");
+                // Notification dupliquée ignorée
                 return; // Notification déjà traitée
             }
 
@@ -193,19 +194,18 @@ namespace mobile.PageModels
             });
 
             // Afficher une notification toast
-            System.Diagnostics.Debug.WriteLine($"📢 Appel ShowForecastUpdatedAsync pour: {forecast.Id}");
             await _notificationService.ShowForecastUpdatedAsync(forecast);
         }
 
         private async void OnForecastDeleted (object? sender, int id)
         {
-            System.Diagnostics.Debug.WriteLine($"🔔 SignalR: OnForecastDeleted appelé - ID: {id}");
+            // SignalR: OnForecastDeleted appelé
 
             // Déduplication: vérifier si on a déjà traité cette notification récemment
             var notificationKey = $"deleted_{id}_{DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond}";
             if (!_processedNotifications.Add(notificationKey))
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Notification dupliquée ignorée: {notificationKey}");
+                // Notification dupliquée ignorée
                 return; // Notification déjà traitée
             }
 
@@ -218,19 +218,17 @@ namespace mobile.PageModels
                 var forecast = Forecasts.FirstOrDefault(f => f.Id == id);
                 if (forecast != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"🗑️ Suppression du forecast {id} de la liste (Count avant: {Forecasts.Count})");
+                    // Suppression du forecast de la liste
                     Forecasts.Remove(forecast);
                     ForecastsCount = Forecasts.Count;
-                    System.Diagnostics.Debug.WriteLine($"✅ Forecast supprimé (Count après: {Forecasts.Count})");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"⚠️ Forecast {id} introuvable dans la liste");
+                    // Forecast introuvable dans la liste
                 }
             });
 
             // Afficher une notification toast
-            System.Diagnostics.Debug.WriteLine($"📢 Appel ShowForecastDeletedAsync pour: {id}");
             await _notificationService.ShowForecastDeletedAsync(id);
         }
 

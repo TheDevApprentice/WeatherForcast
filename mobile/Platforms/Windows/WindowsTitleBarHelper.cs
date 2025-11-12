@@ -71,7 +71,9 @@ namespace mobile.Platforms.Windows
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ Erreur lors de l'application du thème titlebar: {ex.Message}");
+#if DEBUG
+                Shell.Current.DisplayAlert("Debug WindowsTitleBarHelper", $"❌ Erreur lors de l'application du thème titlebar: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 

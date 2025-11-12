@@ -44,7 +44,7 @@ namespace mobile.Services.External
                 IsConnected = true
             });
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Connected (stub) - UserId: {userId}");
+            // Connexion au serveur de messagerie réussie (stub)
             return true;
         }
 
@@ -64,7 +64,7 @@ namespace mobile.Services.External
                 IsConnected = false
             });
 
-            System.Diagnostics.Debug.WriteLine("[MessengerService] Disconnected (stub)");
+            // Déconnexion du serveur de messagerie (stub)
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace mobile.Services.External
 
                 await Task.Delay(50); // Simuler l'envoi réseau
 
-                System.Diagnostics.Debug.WriteLine($"[MessengerService] Message sent to server (stub) - ConversationId: {conversationId}");
+                // Message envoyé au serveur (stub)
 
                 // Simuler une réponse automatique pour la conversation Support
                 if (conversationId == "support")
@@ -97,7 +97,7 @@ namespace mobile.Services.External
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"[MessengerService] Message queued locally (offline) - ConversationId: {conversationId}");
+                // Message mis en queue localement (offline)
                 // TODO: Ajouter à une queue pour envoi ultérieur quand la connexion sera rétablie
             }
 
@@ -117,7 +117,7 @@ namespace mobile.Services.External
 
             await Task.Delay(10);
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Message marked as read (stub) - MessageId: {messageId}");
+            // Message marqué comme lu (stub)
         }
 
         /// <summary>
@@ -133,11 +133,11 @@ namespace mobile.Services.External
 
                 await Task.Delay(10);
 
-                System.Diagnostics.Debug.WriteLine($"[MessengerService] Conversation marked as read on server (stub) - ConversationId: {conversationId}");
+                // Conversation marquée comme lue sur le serveur (stub)
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"[MessengerService] Mark as read queued (offline) - ConversationId: {conversationId}");
+                // Marquage comme lu mis en queue (offline)
             }
 
             await Task.CompletedTask;
@@ -156,7 +156,7 @@ namespace mobile.Services.External
 
             await Task.Delay(10);
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Typing indicator sent (stub) - ConversationId: {conversationId}");
+            // Indicateur de saisie envoyé (stub)
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace mobile.Services.External
             conversation.Id = Guid.NewGuid().ToString();
             conversation.CreatedAt = DateTime.Now;
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Conversation created on server (stub) - Id: {conversation.Id}");
+            // Conversation créée sur le serveur (stub)
 
             return conversation;
         }
@@ -193,7 +193,7 @@ namespace mobile.Services.External
 
             await Task.Delay(100);
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Message history requested from server (stub)");
+            // Historique des messages demandé au serveur (stub)
 
             // Retourner une liste vide pour le moment (le serveur n'est pas implémenté)
             return new List<Message>();
@@ -212,7 +212,7 @@ namespace mobile.Services.External
 
             await Task.Delay(100);
 
-            System.Diagnostics.Debug.WriteLine($"[MessengerService] Conversations requested from server (stub)");
+            // Conversations demandées au serveur (stub)
 
             // Retourner une liste vide pour le moment (le serveur n'est pas implémenté)
             return new List<Conversation>();
@@ -252,7 +252,7 @@ namespace mobile.Services.External
                 Message = supportMessage
             });
 
-            System.Diagnostics.Debug.WriteLine("[MessengerService] Support response simulated");
+            // Réponse du support simulée
         }
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using mobile.Services.Stores;
 using mobile.Services.Theme;
 
@@ -6,7 +5,6 @@ namespace mobile
 {
     public partial class MainWindow : Window
     {
-        private readonly ILogger<MainWindow>? _logger;
         private IThemeService? _themeService;
         private INotificationStore? _notificationStore;
         private IConversationStore? _conversationStore;
@@ -19,13 +17,12 @@ namespace mobile
         {
             InitializeComponent();
 
+            _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
+            _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
+            _conversationStore = Handler?.MauiContext?.Services.GetService<IConversationStore>();
+
             try
             {
-                _logger = Handler?.MauiContext?.Services.GetService<ILogger<MainWindow>>();
-                _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
-                _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
-                _conversationStore = Handler?.MauiContext?.Services.GetService<IConversationStore>();
-
                 // S'abonner aux changements de thème
                 if (_themeService != null)
                 {
@@ -60,11 +57,13 @@ namespace mobile
                 try
                 {
                     Platforms.Windows.WindowsTitleBarHelper.ApplyTheme(winUIWindow);
-                    _logger?.LogInformation("✅ Thème titlebar appliqué");
+                    // Thème titlebar appliqué
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "❌ Erreur application thème titlebar");
+#if DEBUG
+                    Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur application thème titlebar: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 }
             }
 #endif
@@ -80,11 +79,13 @@ namespace mobile
                     // Petit délai pour s'assurer que les ressources sont mises à jour
                     await Task.Delay(100);
                     Platforms.Windows.WindowsTitleBarHelper.ApplyTheme(winUIWindow);
-                    _logger?.LogInformation("✅ Thème titlebar mis à jour: {Theme}", newTheme);
+                    // Thème titlebar mis à jour
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "❌ Erreur mise à jour thème titlebar");
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur mise à jour thème titlebar: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 }
             }
 #endif
@@ -107,7 +108,7 @@ namespace mobile
             // Appliquer l'état authentifié sur tous les boutons du TitleBar
             SetTitleBarAuthState(true);
 
-            _logger?.LogInformation("✅ Bouton Account affiché pour: {Name} ({Initials})", $"{firstName} {lastName}", initials);
+            // Bouton Account affiché
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace mobile
             }
             // Appliquer l'état non authentifié sur tous les boutons du TitleBar
             SetTitleBarAuthState(false);
-            _logger?.LogInformation("🧹 Bouton Account masqué");
+            // Bouton Account masqué
         }
 
         /// <summary>
@@ -170,12 +171,13 @@ namespace mobile
                 {
                     people.IsVisible = false;
                 }
-
-                _logger?.LogInformation("🔒 Éléments de la title bar masqués (splash screen)");
+                // Éléments de la title bar masqués (splash screen)
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors du masquage des éléments de la title bar");
+#if DEBUG
+                Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors du masquage des éléments de la title bar: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -214,11 +216,13 @@ namespace mobile
                     }
                 }
 
-                _logger?.LogInformation("✅ Éléments de la title bar affichés (auth: {IsAuth})", isAuthenticated);
+                // Éléments de la title bar affichés
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors de l'affichage des éléments de la title bar");
+#if DEBUG
+                Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de l'affichage des éléments de la title bar: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -274,7 +278,9 @@ namespace mobile
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Erreur SetTitleBarAuthState");
+#if DEBUG
+                Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur SetTitleBarAuthState: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -285,7 +291,7 @@ namespace mobile
         {
             try
             {
-                _logger?.LogInformation("👥 Bouton People cliqué (non connecté)");
+                // Bouton People cliqué (non connecté)
                 if (this.Page is Shell shell)
                 {
                     await shell.GoToAsync("///login");
@@ -293,7 +299,9 @@ namespace mobile
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors du clic sur People");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors du clic sur People: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -302,7 +310,7 @@ namespace mobile
         {
             try
             {
-                _logger?.LogInformation("🔔 Bouton Notifications cliqué");
+                // Bouton Notifications cliqué
 
                 // Ouvrir le centre de notifications en modal
                 if (this.Page != null)
@@ -331,7 +339,9 @@ namespace mobile
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors de l'affichage du centre de notifications");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de l'affichage du centre de notifications: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -358,7 +368,7 @@ namespace mobile
                     if (_notificationStore != null)
                     {
                         var unreadCount = _notificationStore.UnreadCount;
-                        _logger?.LogInformation("🔔 Mise à jour badge: {Count} notifications non lues", unreadCount);
+                        // Mise à jour badge notifications
 
                         // Trouver les éléments par nom si pas encore initialisés
                         var badge = NotificationBadge ?? this.FindByName<Border>("NotificationBadge");
@@ -368,17 +378,19 @@ namespace mobile
                         {
                             badge.IsVisible = unreadCount > 0;
                             badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
-                            _logger?.LogInformation("✅ Badge mis à jour: visible={Visible}, text={Text}", badge.IsVisible, badgeText.Text);
+                            // Badge mis à jour
                         }
                         else
                         {
-                            _logger?.LogWarning("⚠️ Badge ou BadgeText introuvable");
+                            // Badge ou BadgeText introuvable
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "❌ Erreur lors de la mise à jour du badge");
+#if DEBUG
+                    Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de la mise à jour du badge notifications: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 }
             });
         }
@@ -392,7 +404,7 @@ namespace mobile
             {
                 try
                 {
-                    _logger?.LogInformation("💬 Bouton Messages cliqué");
+                    // Bouton Messages cliqué
                     // Ouvrir le centre de messages en modal
                     if (this.Page != null)
                     {
@@ -420,7 +432,9 @@ namespace mobile
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "❌ Erreur lors du clic sur Messages");
+#if DEBUG
+                    await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors du clic sur Messages: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 }
             });
         }
@@ -449,7 +463,7 @@ namespace mobile
                     if (_conversationStore != null)
                     {
                         var unreadCount = _conversationStore.TotalUnreadCount;
-                        _logger?.LogInformation("🔔 Mise à jour badge: {Count} messages non lus", unreadCount);
+                        // Mise à jour badge messages
 
                         // Trouver les éléments par nom si pas encore initialisés
                         var badge = MessageBadge ?? this.FindByName<Border>("MessageBadge");
@@ -459,17 +473,19 @@ namespace mobile
                         {
                             badge.IsVisible = unreadCount > 0;
                             badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
-                            _logger?.LogInformation("✅ Badge mis à jour: visible={Visible}, text={Text}", badge.IsVisible, badgeText.Text);
+                            // Badge mis à jour
                         }
                         else
                         {
-                            _logger?.LogWarning("⚠️ Badge ou BadgeText introuvable");
+                            // Badge ou BadgeText introuvable
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "❌ Erreur lors de la mise à jour du badge");
+#if DEBUG
+                    Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de la mise à jour du badge messages: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 }
             });
         }
@@ -482,7 +498,7 @@ namespace mobile
         {
             try
             {
-                _logger?.LogInformation("⚙️ Bouton Settings cliqué");
+                // Bouton Settings cliqué
 
                 if (this.Page != null)
                 {
@@ -493,7 +509,7 @@ namespace mobile
                     if (existingParameterPage != null && parameterCenterPage == null)
                     {
                         // Un modal est déjà ouvert depuis ailleurs (ProfilePage), le fermer
-                        _logger?.LogInformation("⚠️ ParameterCenterPage déjà ouvert depuis ailleurs, fermeture");
+                        // ParameterCenterPage déjà ouvert depuis ailleurs, fermeture
                         await this.Page.Navigation.PopModalAsync(animated: true);
                         return;
                     }
@@ -525,7 +541,9 @@ namespace mobile
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors du clic sur Settings");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors du clic sur Settings: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -537,7 +555,7 @@ namespace mobile
         {
             try
             {
-                _logger?.LogInformation("👤 Bouton Account cliqué - Navigation vers ProfilePage");
+                // Bouton Account cliqué - Navigation vers ProfilePage
 
                 if (this.Page is Shell shell)
                 {
@@ -547,12 +565,14 @@ namespace mobile
                     // Naviguer vers la page de profil
                     await shell.GoToAsync("///profile");
 
-                    _logger?.LogInformation("✅ Navigation vers ProfilePage réussie");
+                    // Navigation vers ProfilePage réussie
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "❌ Erreur lors de la navigation vers ProfilePage");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de la navigation vers ProfilePage: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 

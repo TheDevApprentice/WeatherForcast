@@ -12,15 +12,12 @@ namespace mobile.Services.Internal
     {
         private const string AuthStateKey = "auth_state";
         private readonly ISecureStorageService _secureStorage;
-        private readonly ILogger<AuthenticationStateService> _logger;
         private AuthenticationState? _cachedState;
 
         public AuthenticationStateService (
-            ISecureStorageService secureStorage,
-            ILogger<AuthenticationStateService> logger)
+            ISecureStorageService secureStorage)
         {
             _secureStorage = secureStorage;
-            _logger = logger;
         }
 
         /// <summary>
@@ -57,13 +54,8 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la récupération de l'état d'authentification");
-                // Alerte active même en Release pour debug publish
 #if DEBUG
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur GetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur GetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
                 _cachedState = AuthenticationState.Unauthenticated();
                 return _cachedState;
@@ -83,18 +75,11 @@ namespace mobile.Services.Internal
                 // Sérialiser et sauvegarder
                 var json = JsonSerializer.Serialize(state);
                 await SecureStorage.SetAsync(AuthStateKey, json);
-
-                _logger.LogInformation("État d'authentification sauvegardé: {IsAuth}", state.IsAuthenticated);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de la sauvegarde de l'état d'authentification");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur SetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur SetStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
             }
         }
@@ -109,18 +94,11 @@ namespace mobile.Services.Internal
                 _cachedState = null;
                 SecureStorage.Remove(AuthStateKey);
                 await Task.CompletedTask;
-
-                _logger.LogInformation("État d'authentification effacé");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erreur lors de l'effacement de l'état d'authentification");
 #if DEBUG
-                // Alerte active même en Release pour debug publish
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur ClearStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
-                });
+                await Shell.Current.DisplayAlert("Debug AuthState", $"Erreur ClearStateAsync: {ex.Message}\n{ex.GetType().Name}", "OK");
 #endif
             }
         }

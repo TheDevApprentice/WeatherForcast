@@ -14,7 +14,7 @@ namespace mobile.Controls
         private const string SUPPORT_CONVERSATION_ID = "support";
 
         // Constructeur par défaut pour le XAML designer
-        public SupportChatPopup() : this(
+        public SupportChatPopup () : this(
             Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>()!)
         {
         }
@@ -68,11 +68,9 @@ namespace mobile.Controls
                 ChatWindow.StrokeShape = new RoundRectangle { CornerRadius = 0 };
             }
             
-            // Log pour debug
-            System.Diagnostics.Debug.WriteLine($"📱 {DeviceHelper.GetDeviceInfo()} - Layout: {(useDesktopLayout ? "Desktop-like" : "Mobile")}");
+            // Layout appliqué selon le type d'appareil et l'orientation
 #else
             // Sur Desktop (Windows/MacCatalyst) : ne rien faire, le XAML gère tout avec OnPlatform
-            System.Diagnostics.Debug.WriteLine($"🖥️ Desktop platform - Layout handled by XAML OnPlatform");
 #endif
         }
 
@@ -262,7 +260,7 @@ namespace mobile.Controls
             {
                 // En cas d'échec, restaurer le texte
                 MessageEntry.Text = messageText;
-                System.Diagnostics.Debug.WriteLine("❌ Échec de l'envoi du message");
+                // Échec de l'envoi du message
             }
         }
 
@@ -282,7 +280,7 @@ namespace mobile.Controls
 
         private void OnFaqTapped (object? sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🔍 FAQ tapped - sender type: " + sender?.GetType().Name);
+            // FAQ tapped
 
             string? question = null;
 
@@ -290,7 +288,7 @@ namespace mobile.Controls
             if (e is TappedEventArgs tappedArgs && tappedArgs.Parameter is string param)
             {
                 question = param;
-                System.Diagnostics.Debug.WriteLine($"✅ Question from TappedEventArgs: {question}");
+                // Question récupérée depuis TappedEventArgs
             }
             else if (sender is BindableObject bindable)
             {
@@ -302,7 +300,7 @@ namespace mobile.Controls
                         if (recognizer is TapGestureRecognizer tapRecognizer)
                         {
                             question = tapRecognizer.CommandParameter as string;
-                            System.Diagnostics.Debug.WriteLine($"✅ Question from TapGestureRecognizer: {question}");
+                            // Question récupérée depuis TapGestureRecognizer
                             break;
                         }
                     }
@@ -311,11 +309,11 @@ namespace mobile.Controls
 
             if (string.IsNullOrEmpty(question))
             {
-                System.Diagnostics.Debug.WriteLine("❌ Question is null or empty");
+                // Question est null ou vide
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"📝 Processing FAQ: {question}");
+            // Traitement de la FAQ
 
             // Réponses automatiques pour chaque FAQ
             var responses = new Dictionary<string, string>
@@ -332,7 +330,7 @@ namespace mobile.Controls
 
             if (responses.TryGetValue(question, out var answer))
             {
-                System.Diagnostics.Debug.WriteLine($"✅ Found answer for: {question}");
+                // Réponse trouvée pour la FAQ
 
                 // Créer un message automatique du support
                 var supportMessage = new Message
@@ -350,7 +348,7 @@ namespace mobile.Controls
                 // Marquer immédiatement comme lu car le popup est ouvert
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    System.Diagnostics.Debug.WriteLine("💬 FAQ answer added to conversation");
+                    // Réponse FAQ ajoutée à la conversation
 
                     // Petit délai pour laisser le message s'ajouter
                     await Task.Delay(50);
@@ -365,7 +363,7 @@ namespace mobile.Controls
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"❌ No answer found for: {question}");
+                // Aucune réponse trouvée pour cette FAQ
             }
         }
     }

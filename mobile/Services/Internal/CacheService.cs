@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using mobile.Models.Cache;
 using mobile.Services.Internal.Interfaces;
 using SQLite;
@@ -11,7 +10,6 @@ namespace mobile.Services.Internal
     /// </summary>
     public class CacheService : ICacheService
     {
-        private readonly ILogger<CacheService> _logger;
         private SQLiteAsyncConnection? _database;
         private readonly SemaphoreSlim _initLock = new(1, 1);
         private bool _isInitialized = false;
@@ -19,9 +17,8 @@ namespace mobile.Services.Internal
         // Durée de validité par défaut du cache (1 heure)
         private static readonly TimeSpan DefaultCacheValidity = TimeSpan.FromHours(1);
 
-        public CacheService (ILogger<CacheService> logger)
+        public CacheService ()
         {
-            _logger = logger;
         }
 
         #region Initialization
@@ -42,24 +39,18 @@ namespace mobile.Services.Internal
 
                 var dbPath = Path.Combine(FileSystem.AppDataDirectory, "weatherforecast_cache.db");
 
-#if DEBUG
-                _logger.LogDebug("💾 Initialisation du cache SQLite: {Path}", dbPath);
-#endif
-
                 _database = new SQLiteAsyncConnection(dbPath);
 
                 // Créer les tables
                 await _database.CreateTableAsync<CachedForecast>();
 
-#if DEBUG
-                _logger.LogDebug("✅ Cache SQLite initialisé");
-#endif
-
                 _isInitialized = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de l'initialisation du cache SQLite");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de l'initialisation du cache SQLite: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
             finally
@@ -97,14 +88,12 @@ namespace mobile.Services.Internal
                     db.DeleteAll<CachedForecast>();
                     db.InsertAll(cachedForecasts);
                 });
-
-#if DEBUG
-                _logger.LogDebug("💾 {Count} prévisions sauvegardées dans le cache", cachedForecasts.Count);
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la sauvegarde des prévisions dans le cache");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la sauvegarde des prévisions dans le cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 throw;
             }
         }
@@ -126,15 +115,13 @@ namespace mobile.Services.Internal
                     .Select(cf => cf.ToWeatherForecast())
                     .ToList();
 
-#if DEBUG
-                _logger.LogDebug("📥 {Count} prévisions récupérées du cache", forecasts.Count);
-#endif
-
                 return forecasts;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la récupération des prévisions du cache");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la récupération des prévisions du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return new List<WeatherForecast>();
             }
         }
@@ -154,9 +141,6 @@ namespace mobile.Services.Internal
 
                 if (cachedForecast != null)
                 {
-#if DEBUG
-                    _logger.LogDebug("📥 Prévision {Id} récupérée du cache", id);
-#endif
                     return cachedForecast.ToWeatherForecast();
                 }
 
@@ -164,7 +148,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la récupération de la prévision {Id} du cache", id);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la récupération de la prévision du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return null;
             }
         }
@@ -180,14 +166,12 @@ namespace mobile.Services.Internal
             {
                 await _database!.Table<CachedForecast>()
                     .DeleteAsync(f => f.Id == id);
-
-#if DEBUG
-                _logger.LogDebug("🗑️ Prévision {Id} supprimée du cache", id);
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la suppression de la prévision {Id} du cache", id);
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la suppression de la prévision du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -201,14 +185,10 @@ namespace mobile.Services.Internal
             try
             {
                 await _database!.DeleteAllAsync<CachedForecast>();
-
-#if DEBUG
-                _logger.LogDebug("🗑️ Cache des prévisions vidé");
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors du vidage du cache des prévisions");
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors du vidage du cache des prévisions: {ex.Message}\n{ex.GetType().Name}", "OK");
             }
         }
 
@@ -229,26 +209,18 @@ namespace mobile.Services.Internal
 
                 if (cachedForecast == null)
                 {
-#if DEBUG
-                    _logger.LogDebug("⚠️ Aucune prévision en cache");
-#endif
                     return false;
                 }
 
                 var isValid = cachedForecast.CachedAt >= oldestAllowed;
 
-#if DEBUG
-                _logger.LogDebug(isValid
-                    ? "✅ Cache valide (mis en cache il y a {Age})"
-                    : "⚠️ Cache expiré (mis en cache il y a {Age})",
-                    DateTime.UtcNow - cachedForecast.CachedAt);
-#endif
-
                 return isValid;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la vérification de la validité du cache");
+#if DEBUG                
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la vérification de la validité du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return false;
             }
         }
@@ -266,7 +238,7 @@ namespace mobile.Services.Internal
         {
             // Les profils sont actuellement gérés par SavedProfilesService
             // Cette méthode pourrait être implémentée plus tard si on veut migrer vers SQLite
-            _logger.LogWarning("⚠️ SaveProfileAsync n'est pas encore implémenté - utilisez SavedProfilesService");
+
             return Task.CompletedTask;
         }
 
@@ -277,7 +249,6 @@ namespace mobile.Services.Internal
         public Task<List<SavedUserProfile>> GetCachedProfilesAsync ()
         {
             // Les profils sont actuellement gérés par SavedProfilesService
-            _logger.LogWarning("⚠️ GetCachedProfilesAsync n'est pas encore implémenté - utilisez SavedProfilesService");
             return Task.FromResult(new List<SavedUserProfile>());
         }
 
@@ -287,7 +258,6 @@ namespace mobile.Services.Internal
         public Task DeleteCachedProfileAsync (string email)
         {
             // Les profils sont actuellement gérés par SavedProfilesService
-            _logger.LogWarning("⚠️ DeleteCachedProfileAsync n'est pas encore implémenté - utilisez SavedProfilesService");
             return Task.CompletedTask;
         }
 
@@ -297,7 +267,6 @@ namespace mobile.Services.Internal
         public Task ClearProfilesCacheAsync ()
         {
             // Les profils sont actuellement gérés par SavedProfilesService
-            _logger.LogWarning("⚠️ ClearProfilesCacheAsync n'est pas encore implémenté - utilisez SavedProfilesService");
             return Task.CompletedTask;
         }
 
@@ -316,14 +285,12 @@ namespace mobile.Services.Internal
             {
                 await ClearForecastsCacheAsync();
                 await ClearProfilesCacheAsync();
-
-#if DEBUG
-                _logger.LogDebug("🗑️ Tout le cache a été vidé");
-#endif
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors du vidage complet du cache");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors du vidage complet du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
             }
         }
 
@@ -343,11 +310,6 @@ namespace mobile.Services.Internal
                     var fileInfo = new FileInfo(dbPath);
                     var sizeInBytes = fileInfo.Length;
 
-#if DEBUG
-                    _logger.LogDebug("📊 Taille du cache: {Size} octets ({SizeKB} KB)",
-                        sizeInBytes, sizeInBytes / 1024);
-#endif
-
                     return sizeInBytes;
                 }
 
@@ -355,7 +317,9 @@ namespace mobile.Services.Internal
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erreur lors de la récupération de la taille du cache");
+#if DEBUG
+                await Shell.Current.DisplayAlert("Debug CacheService", $"❌ Erreur lors de la récupération de la taille du cache: {ex.Message}\n{ex.GetType().Name}", "OK");
+#endif
                 return 0;
             }
         }
