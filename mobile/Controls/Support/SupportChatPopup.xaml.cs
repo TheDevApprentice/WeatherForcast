@@ -1,6 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
 using mobile.Helpers;
-using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
 
 namespace mobile.Controls
@@ -11,16 +10,21 @@ namespace mobile.Controls
     /// </summary>
     public partial class SupportChatPopup : ContentView
     {
-        private readonly IConversationStore? _conversationStore;
+        private readonly IConversationStore _conversationStore;
         private const string SUPPORT_CONVERSATION_ID = "support";
-        private string _currentUserId = "current-user";
 
-        public SupportChatPopup ()
+        // Constructeur par défaut pour le XAML designer
+        public SupportChatPopup() : this(
+            Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>()!)
+        {
+        }
+
+        // Constructeur avec injection de dépendances
+        public SupportChatPopup(IConversationStore conversationStore)
         {
             InitializeComponent();
 
-            // Récupérer le ConversationStore
-            _conversationStore = Application.Current?.Handler?.MauiContext?.Services.GetService<IConversationStore>();
+            _conversationStore = conversationStore ?? throw new ArgumentNullException(nameof(conversationStore));
             
             // Adapter le layout selon l'appareil et l'orientation
             ApplyResponsiveLayout();
@@ -77,16 +81,8 @@ namespace mobile.Controls
         /// </summary>
         public async Task ShowAsync ()
         {
-            var secureStore = Application.Current?.Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-            if (_conversationStore != null)
-            {
-                if (secureStore != null) {
-                    var userInfo = await secureStore.GetUserInfoFromTokenAsync();
-                    _currentUserId = userInfo.Value.UserId;
-                }
-                // S'abonner aux changements
-                _conversationStore.Conversations.CollectionChanged += OnConversationsChanged;
-            }
+            // S'abonner aux changements
+            _conversationStore.Conversations.CollectionChanged += OnConversationsChanged;
             // Charger les infos de la conversation Support
             LoadConversationInfo();
 
@@ -118,8 +114,6 @@ namespace mobile.Controls
 
         private void LoadConversationInfo ()
         {
-            if (_conversationStore == null) return;
-
             var supportConversation = _conversationStore.GetConversation(SUPPORT_CONVERSATION_ID);
             if (supportConversation == null) return;
 
@@ -130,27 +124,9 @@ namespace mobile.Controls
         /// <summary>
         /// Marque tous les messages de la conversation Support comme lus
         /// </summary>
-        private void MarkSupportMessagesAsRead ()
+        private async void MarkSupportMessagesAsRead ()
         {
-            if (_conversationStore == null) return;
-
-            var supportConversation = _conversationStore.GetConversation(SUPPORT_CONVERSATION_ID);
-            if (supportConversation == null) return;
-
-            // Marquer tous les messages non lus comme lus
-            var hasChanges = false;
-            foreach (var message in supportConversation.Messages.Where(m => !m.IsRead))
-            {
-                message.IsRead = true;
-                hasChanges = true;
-            }
-
-            // Notifier les changements si nécessaire
-            if (hasChanges)
-            {
-                supportConversation.NotifyPropertyChanged(nameof(supportConversation.Messages));
-                System.Diagnostics.Debug.WriteLine($"✅ Messages Support marqués comme lus");
-            }
+            await _conversationStore.MarkConversationAsReadAsync(SUPPORT_CONVERSATION_ID);
         }
 
         /// <summary>
@@ -195,8 +171,6 @@ namespace mobile.Controls
         private void LoadMessages ()
         {
             MessagesList.Children.Clear();
-
-            if (_conversationStore == null) return;
 
             var supportConversation = _conversationStore.GetConversation(SUPPORT_CONVERSATION_ID);
             if (supportConversation == null) return;
@@ -263,7 +237,7 @@ namespace mobile.Controls
             MessageEntry.Text = string.Empty;
 
             // Marquer tous les messages précédents comme lus (l'utilisateur a forcément lu pour envoyer un message)
-            MarkSupportMessagesAsRead();
+            await _conversationStore.MarkConversationAsReadAsync(SUPPORT_CONVERSATION_ID);
 
             // Créer le message
             var message = new Message
@@ -275,48 +249,20 @@ namespace mobile.Controls
                 IsRead = true
             };
 
-            // Ajouter à la conversation (OnConversationsChanged va recharger automatiquement)
-            _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, message);
+            // Envoyer via le store
+            var success = await _conversationStore.SendMessageAsync(SUPPORT_CONVERSATION_ID, message);
 
-            // Scroll vers le bas après un court délai pour laisser le temps au rechargement
-            await Task.Delay(150);
-            await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
-
-            // Simuler une réponse du support après 2 secondes
-            SimulateSupportResponse();
-        }
-
-        private async void SimulateSupportResponse ()
-        {
-            await Task.Delay(2000);
-
-            var responses = new[]
+            if (success)
             {
-                "Merci pour votre message ! Un membre de notre équipe vous répondra dans les plus brefs délais.",
-                "Nous avons bien reçu votre demande. Comment pouvons-nous vous aider ?",
-                "Bonjour ! Je suis là pour vous aider. Pouvez-vous me donner plus de détails ?"
-            };
-
-            var random = new Random();
-            var responseText = responses[random.Next(responses.Length)];
-
-            var supportMessage = new Message
+                // Scroll vers le bas après un court délai pour laisser le temps au rechargement
+                await Task.Delay(150);
+                await MessagesScrollView.ScrollToAsync(0, MessagesList.Height, true);
+            }
+            else
             {
-                Id = Guid.NewGuid().ToString(),
-                Content = responseText,
-                Type = MessageType.Support,
-                Timestamp = DateTime.Now,
-                IsRead = false // Sera marqué comme lu juste après
-            };
-
-            _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
-
-            // Si le popup est toujours visible, marquer comme lu
-            if (this.IsVisible)
-            {
-                await Task.Delay(50);
-                MarkSupportMessagesAsRead();
-                System.Diagnostics.Debug.WriteLine("✅ Réponse simulée marquée comme lue (popup ouvert)");
+                // En cas d'échec, restaurer le texte
+                MessageEntry.Text = messageText;
+                System.Diagnostics.Debug.WriteLine("❌ Échec de l'envoi du message");
             }
         }
 
@@ -395,11 +341,11 @@ namespace mobile.Controls
                     Content = answer,
                     Type = MessageType.Info,
                     Timestamp = DateTime.Now,
-                    IsRead = false // Sera marqué comme lu juste après
+                    IsRead = false
                 };
 
-                // Ajouter à la conversation (OnConversationsChanged va recharger automatiquement)
-                _conversationStore?.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
+                // Ajouter directement au store (pas besoin d'envoyer via le service pour les FAQ)
+                _conversationStore.AddMessageToConversation(SUPPORT_CONVERSATION_ID, supportMessage);
 
                 // Marquer immédiatement comme lu car le popup est ouvert
                 MainThread.BeginInvokeOnMainThread(async () =>
@@ -409,8 +355,8 @@ namespace mobile.Controls
                     // Petit délai pour laisser le message s'ajouter
                     await Task.Delay(50);
 
-                    // Marquer comme lu car l'utilisateur voit le message dans le popup ouvert
-                    MarkSupportMessagesAsRead();
+                    // Marquer comme lu via le store
+                    await _conversationStore.MarkConversationAsReadAsync(SUPPORT_CONVERSATION_ID);
 
                     // Scroll vers le bas
                     await Task.Delay(100);
