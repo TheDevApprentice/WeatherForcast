@@ -9,40 +9,35 @@
     
     <Grid>
         <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
-            
-            <!-- Header avec gradient violet -->
-            <Frame CornerRadius="12" HasShadow="True" Padding="0">
-                <Frame.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
-                        <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Frame.Background>
+            <VerticalStackLayout Padding="20" Spacing="20">
                 
-                <VerticalStackLayout Padding="30" Spacing="10">
-                    <Label Text="☁️" FontSize="48" HorizontalOptions="Center" />
-                    <Label Text="WeatherForecast" 
-                           FontSize="28" 
-                           FontAttributes="Bold"
-                           TextColor="White"
-                           HorizontalOptions="Center" />
-                    <Label Text="{Binding WelcomeMessage}" 
-                           FontSize="16" 
-                           TextColor="White"
-                           Opacity="0.9"
-                           HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </Frame>
-        </VerticalStackLayout>
-    </ScrollView>
-        
-        <!-- Chat Support popup -->
-        <controls:SupportChatPopup/>
-        
-        <!-- Bouton Support flottant -->
-        <controls:SupportButton HorizontalOptions="End"
-                                VerticalOptions="End"
-                                Margin="0,0,20,20"/>
+                <!-- Header avec gradient violet -->
+                <Frame CornerRadius="12" HasShadow="True" Padding="0">
+                    <Frame.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="{StaticResource Primary}" Offset="0.0" />
+                            <GradientStop Color="{StaticResource Secondary}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Frame.Background>
+                    
+                    <VerticalStackLayout Padding="30" Spacing="10">
+                        <Label Text="☁️" FontSize="48" HorizontalOptions="Center" />
+                        <Label Text="WeatherForecast" 
+                            FontSize="28" 
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center" />
+                        <Label Text="{Binding WelcomeMessage}" 
+                            FontSize="16" 
+                            TextColor="White"
+                            Opacity="0.9"
+                            HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+            
+        <!-- Support Overlay (Chat Popup + Button) -->
+        <controls:SupportOverlay Grid.Row="0" Grid.RowSpan="2"/>
     </Grid>
 </ContentPage>
