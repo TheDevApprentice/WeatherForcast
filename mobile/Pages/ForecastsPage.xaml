@@ -10,12 +10,12 @@
 
         <Grid RowDefinitions="Auto,*">
         <!-- Liste des prévisions -->
-        <ScrollView Grid.Row="1">
-            <RefreshView  
+        <RefreshView Grid.Row="1"
                      IsRefreshing="{Binding IsRefreshing}"
                      Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Forecasts}"
-                            Margin="10,2,20,2">
+            <ScrollView>
+                <CollectionView ItemsSource="{Binding Forecasts}"
+                                Margin="10,2,20,2">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="40" Spacing="10" VerticalOptions="Center">
                         <Label Text="🌤️" 
@@ -72,9 +72,10 @@
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+                </CollectionView>
             </ScrollView>
+        </RefreshView>
+        
         <!-- Chat Support popup -->
         <controls:SupportChatPopup Grid.Row="0"
                                    Grid.RowSpan="2"/>
