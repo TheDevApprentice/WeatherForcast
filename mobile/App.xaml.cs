@@ -1,35 +1,26 @@
 using mobile.Pages.Auth;
 using mobile.Services.Internal.Interfaces;
 using mobile.Services.Stores;
-using mobile.Services.Theme;
 
 namespace mobile
 {
     public partial class App : Application
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly INetworkMonitorService _networkMonitor;
         private readonly ICacheService _cacheService;
         private readonly IConversationStore _conversationStore;
-        private readonly IThemeService _themeService;
-        private readonly IOfflineBannerManager _bannerManager;
-
 
         public App (IServiceProvider serviceProvider, 
         INetworkMonitorService networkMonitor, 
         ICacheService cacheService, 
         IConversationStore conversationStore,
-        IThemeService themeService,
         IOfflineBannerManager bannerManager)
         {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
             _cacheService = cacheService;
-            _networkMonitor = networkMonitor;
             _conversationStore = conversationStore;
-            _themeService = themeService;
-            _bannerManager = bannerManager;
 
             // Démarrer la surveillance du réseau
             networkMonitor.StartMonitoring();
@@ -76,14 +67,12 @@ namespace mobile
             Shell shell;
 
 #if ANDROID || IOS
-            // Sur mobile : utiliser AppShellMobile avec TabBar
-            var mobileShell = new AppShellMobile(_bannerManager, _networkMonitor);
-            shell = mobileShell;
+            // Sur mobile : récupérer AppShellMobile via DI
+            shell = _serviceProvider.GetRequiredService<AppShellMobile>();
             // AppShellMobile chargé (TabBar pour mobile)
 #else
-            // Sur desktop : utiliser AppShell avec Flyout
-            var desktopShell = new AppShell(_bannerManager, _themeService, _networkMonitor);
-            shell = desktopShell;
+            // Sur desktop : récupérer AppShell via DI
+            shell = _serviceProvider.GetRequiredService<AppShell>();
             
             // Désactiver le flyout pendant le splash
             shell.FlyoutBehavior = FlyoutBehavior.Disabled;

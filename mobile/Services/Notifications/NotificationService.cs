@@ -1,3 +1,4 @@
+using Microsoft.Maui.Layouts;
 using mobile.Controls;
 using mobile.Services.Notifications.Interfaces;
 using mobile.Services.Stores;
@@ -43,50 +44,87 @@ namespace mobile.Services.Notifications
                 _notificationManager = new NotificationManager();
                 var overlayControl = _notificationManager;
 
+                // Créer un wrapper AbsoluteLayout invisible pour le manager
+                // Cela garantit que le manager ne prend pas d'espace dans le layout
+                var absoluteWrapper = new AbsoluteLayout
+                {
+                    InputTransparent = true,
+                    BackgroundColor = Colors.Transparent,
+                    IsVisible = true
+                };
+                
+                // Ajouter le manager au wrapper en position absolue (remplit tout l'espace)
+                absoluteWrapper.Children.Add(overlayControl);
+                AbsoluteLayout.SetLayoutBounds(overlayControl, new Rect(0, 0, 1, 1));
+                AbsoluteLayout.SetLayoutFlags(overlayControl, AbsoluteLayoutFlags.All);
+
                 // L'ajouter à la page (par-dessus tout en overlay)
                 if (currentPage.Content is Layout layout)
                 {
                     if (layout is Grid grid)
                     {
-                        // Grid: ajouter par-dessus tout (dernier enfant = au-dessus)
-                        grid.Children.Add(overlayControl);
+                        // Grid: ajouter le wrapper AbsoluteLayout par-dessus tout
+                        // Utiliser Row/Column spanning pour ne pas prendre d'espace
+                        grid.Children.Add(absoluteWrapper);
+                        Grid.SetRow(absoluteWrapper, 0);
+                        Grid.SetColumn(absoluteWrapper, 0);
+                        Grid.SetRowSpan(absoluteWrapper, int.MaxValue);
+                        Grid.SetColumnSpan(absoluteWrapper, int.MaxValue);
                     }
                     else if (layout is AbsoluteLayout absoluteLayout)
                     {
-                        // AbsoluteLayout: ajouter par-dessus
-                        absoluteLayout.Children.Add(overlayControl);
+                        // AbsoluteLayout: ajouter le wrapper par-dessus
+                        absoluteLayout.Children.Add(absoluteWrapper);
+                        AbsoluteLayout.SetLayoutBounds(absoluteWrapper, new Rect(0, 0, 1, 1));
+                        AbsoluteLayout.SetLayoutFlags(absoluteWrapper, AbsoluteLayoutFlags.All);
                     }
                     else
                     {
-                        // Autres layouts: wrapper dans un Grid overlay
-                        var wrapper = new Grid();
-                        var parent = layout.Parent;
-
-                        if (parent is ContentPage page)
+                        // Autres layouts: wrapper dans un AbsoluteLayout overlay
+                        var rootAbsolute = new AbsoluteLayout
                         {
-                            page.Content = wrapper;
-                        }
-
-                        wrapper.Children.Add(layout);
-                        wrapper.Children.Add(overlayControl);
+                            BackgroundColor = Colors.Transparent
+                        };
+                        
+                        // Ajouter le contenu existant
+                        rootAbsolute.Children.Add(layout);
+                        AbsoluteLayout.SetLayoutBounds(layout, new Rect(0, 0, 1, 1));
+                        AbsoluteLayout.SetLayoutFlags(layout, AbsoluteLayoutFlags.All);
+                        
+                        // Ajouter le wrapper des notifications par-dessus
+                        rootAbsolute.Children.Add(absoluteWrapper);
+                        AbsoluteLayout.SetLayoutBounds(absoluteWrapper, new Rect(0, 0, 1, 1));
+                        AbsoluteLayout.SetLayoutFlags(absoluteWrapper, AbsoluteLayoutFlags.All);
+                        
+                        // Remplacer le contenu de la page
+                        currentPage.Content = rootAbsolute;
                     }
                 }
                 else
                 {
-                    // Pas de layout: créer un Grid wrapper overlay
-                    var wrapper = new Grid();
+                    // Pas de layout: créer un AbsoluteLayout wrapper overlay
+                    var rootAbsolute = new AbsoluteLayout
+                    {
+                        BackgroundColor = Colors.Transparent
+                    };
+                    
                     var oldContent = currentPage.Content;
-                    currentPage.Content = wrapper;
-
                     if (oldContent != null)
                     {
-                        wrapper.Children.Add(oldContent);
+                        rootAbsolute.Children.Add(oldContent);
+                        AbsoluteLayout.SetLayoutBounds(oldContent, new Rect(0, 0, 1, 1));
+                        AbsoluteLayout.SetLayoutFlags(oldContent, AbsoluteLayoutFlags.All);
                     }
 
-                    wrapper.Children.Add(overlayControl);
+                    // Ajouter le wrapper des notifications par-dessus
+                    rootAbsolute.Children.Add(absoluteWrapper);
+                    AbsoluteLayout.SetLayoutBounds(absoluteWrapper, new Rect(0, 0, 1, 1));
+                    AbsoluteLayout.SetLayoutFlags(absoluteWrapper, AbsoluteLayoutFlags.All);
+                    
+                    currentPage.Content = rootAbsolute;
                 }
 
-                // NotificationManager initialisé sur la page
+                // NotificationManager initialisé sur la page avec positionnement absolu
             });
         }
 
@@ -147,8 +185,12 @@ namespace mobile.Services.Notifications
                     WasDisplayed = false
                 };
 
-                _notificationStore.AddNotification(notification);
-                // Notification ajoutée au store
+                // Thread-safe: ajouter au store sur le thread UI
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    _notificationStore.AddNotification(notification);
+                    // Notification ajoutée au store
+                });
 
                 // Afficher la notification à l'écran (desktop uniquement)
                 await EnsureInitializedAsync();
@@ -156,12 +198,16 @@ namespace mobile.Services.Notifications
                 if (_notificationManager != null)
                 {
                     // NotificationManager disponible, affichage en cours
-                    await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
+                    // Thread-safe: afficher et marquer sur le thread UI
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await _notificationManager.ShowNotificationAsync(title, message, type, durationMs);
 
-                    // Marquer comme affichée et lue
-                    notification.WasDisplayed = true;
-                    _notificationStore.MarkAsRead(notification.Id);
-                    // Notification affichée avec succès et marquée comme lue
+                        // Marquer comme affichée et lue
+                        notification.WasDisplayed = true;
+                        _notificationStore.MarkAsRead(notification.Id);
+                        // Notification affichée avec succès et marquée comme lue
+                    });
                 }
                 else
                 {

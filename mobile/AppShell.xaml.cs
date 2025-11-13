@@ -14,11 +14,21 @@ namespace mobile
         private readonly IOfflineBannerManager _bannerManager;
         private readonly IThemeService _themeService;
         private readonly INetworkMonitorService? _networkMonitor;
+        private readonly ISecureStorageService? _secureStorage;
+        private readonly IAuthenticationStateService? _authStateService;
+        private readonly IApiAuthService? _apiAuthService;
+        private readonly INotificationService? _notificationService;
 
-        public AppShell (IOfflineBannerManager bannerManager, IThemeService themeService, INetworkMonitorService networkMonitor)
+        public AppShell (IOfflineBannerManager bannerManager, IThemeService themeService, INetworkMonitorService networkMonitor,
+            ISecureStorageService secureStorageService, IAuthenticationStateService authenticationStateService, IApiAuthService apiAuthService,
+            INotificationService notificationService)
         {
             _bannerManager = bannerManager;
             _themeService = themeService;
+            _secureStorage = secureStorageService;
+            _authStateService = authenticationStateService;
+            _apiAuthService = apiAuthService;
+            _notificationService = notificationService;
 
             InitializeComponent();
 
@@ -219,32 +229,22 @@ namespace mobile
                 if (!confirm)
                     return;
 
-                // Récupérer les services
-                var secureStorage = Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-                var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
-                var apiAuthService = Handler?.MauiContext?.Services.GetService<IApiAuthService>();
-                var notificationService = Handler?.MauiContext?.Services.GetService<INotificationService>();
+                // Appeler l'API pour déconnecter
+                await _apiAuthService.LogoutAsync();
 
-                if (secureStorage != null && authStateService != null && apiAuthService != null)
-                {
-                    // Appeler l'API pour déconnecter
-                    await apiAuthService.LogoutAsync();
+                // Supprimer les données locales
+                await _secureStorage.ClearAllAsync();
 
-                    // Supprimer les données locales
-                    await secureStorage.ClearAllAsync();
+                // Effacer l'état d'authentification centralisé
+                await _authStateService.ClearStateAsync();
 
-                    // Effacer l'état d'authentification centralisé
-                    await authStateService.ClearStateAsync();
+                // Mettre à jour l'UI
+                UpdateAuthenticationUI(false);
 
-                    // Mettre à jour l'UI
-                    UpdateAuthenticationUI(false);
+                // Rediriger vers la page de connexion
+                await Shell.Current.GoToAsync("///login");
 
-                    // Rediriger vers la page de connexion
-                    await Shell.Current.GoToAsync("///login");
-
-                    if (notificationService != null)
-                        await notificationService.ShowSuccessAsync("Déconnexion réussie");
-                }
+                await _notificationService.ShowSuccessAsync("Déconnexion réussie");
             }
             catch (Exception ex)
             {
@@ -260,16 +260,12 @@ namespace mobile
             bool isOnSplash = args.Current?.Location?.OriginalString?.Contains("splash") ?? false;
 
             // Mettre à jour l'UI à chaque navigation (utilise l'état centralisé)
-            var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
-            if (authStateService != null)
-            {
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    var isAuthenticated = await authStateService.IsAuthenticatedAsync();
+                    var isAuthenticated = await _authStateService.IsAuthenticatedAsync();
                     // Ne pas mettre à jour la title bar pendant le splash
                     UpdateAuthenticationUI(isAuthenticated, updateTitleBar: !isOnSplash);
                 });
-            }
         }
         public static async Task DisplaySnackbarAsync (string message)
         {

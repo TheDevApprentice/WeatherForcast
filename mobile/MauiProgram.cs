@@ -106,6 +106,12 @@ namespace mobile
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
+            // Shells (navigation)
+#if ANDROID || IOS
+            builder.Services.AddSingleton<AppShellMobile>();
+#else
+            builder.Services.AddSingleton<AppShell>();
+#endif
             // Page de démarrage (Splash)
             builder.Services.AddTransient<SplashPage>();
             builder.Services.AddTransient<SplashPageModel>();

@@ -200,93 +200,113 @@ namespace mobile.Services.Stores
 
         /// <summary>
         /// Ajoute ou met à jour une conversation
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void AddOrUpdateConversation (Conversation conversation)
         {
-            var existing = _conversations.FirstOrDefault(c => c.Id == conversation.Id);
-            if (existing != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                var index = _conversations.IndexOf(existing);
-                _conversations[index] = conversation;
-            }
-            else
-            {
-                _conversations.Add(conversation);
-            }
+                var existing = _conversations.FirstOrDefault(c => c.Id == conversation.Id);
+                if (existing != null)
+                {
+                    var index = _conversations.IndexOf(existing);
+                    _conversations[index] = conversation;
+                }
+                else
+                {
+                    _conversations.Add(conversation);
+                }
 
-            SortConversations();
-            OnPropertyChanged(nameof(TotalUnreadCount));
+                SortConversations();
+                OnPropertyChanged(nameof(TotalUnreadCount));
+            });
         }
 
         /// <summary>
         /// Ajoute un message à une conversation
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void AddMessageToConversation (string conversationId, Message message)
         {
-            var conversation = GetConversation(conversationId);
-            if (conversation != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                conversation.Messages.Add(message);
+                var conversation = GetConversation(conversationId);
+                if (conversation != null)
+                {
+                    conversation.Messages.Add(message);
 
-                // Notifier les changements sur la conversation
-                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
+                    // Notifier les changements sur la conversation
+                    conversation.NotifyPropertyChanged(nameof(conversation.Messages));
 
-                SortConversations();
-                OnPropertyChanged(nameof(TotalUnreadCount));
-            }
+                    SortConversations();
+                    OnPropertyChanged(nameof(TotalUnreadCount));
+                }
+            });
         }
 
         /// <summary>
         /// Marque tous les messages d'une conversation comme lus
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void MarkConversationAsRead (string conversationId)
         {
-            var conversation = GetConversation(conversationId);
-            if (conversation != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                foreach (var message in conversation.Messages.Where(m => !m.IsRead))
+                var conversation = GetConversation(conversationId);
+                if (conversation != null)
                 {
-                    message.IsRead = true;
-                }
+                    foreach (var message in conversation.Messages.Where(m => !m.IsRead))
+                    {
+                        message.IsRead = true;
+                    }
 
-                // Notifier les changements sur la conversation
-                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
-                OnPropertyChanged(nameof(TotalUnreadCount));
-            }
+                    // Notifier les changements sur la conversation
+                    conversation.NotifyPropertyChanged(nameof(conversation.Messages));
+                    OnPropertyChanged(nameof(TotalUnreadCount));
+                }
+            });
         }
 
         /// <summary>
         /// Marque toutes les conversations comme lues
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void MarkAllAsRead ()
         {
-            foreach (var conversation in _conversations)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                foreach (var message in conversation.Messages.Where(m => !m.IsRead))
+                foreach (var conversation in _conversations)
                 {
-                    message.IsRead = true;
-                }
+                    foreach (var message in conversation.Messages.Where(m => !m.IsRead))
+                    {
+                        message.IsRead = true;
+                    }
 
-                // Notifier les changements sur chaque conversation
-                conversation.NotifyPropertyChanged(nameof(conversation.Messages));
-            }
-            OnPropertyChanged(nameof(TotalUnreadCount));
+                    // Notifier les changements sur chaque conversation
+                    conversation.NotifyPropertyChanged(nameof(conversation.Messages));
+                }
+                OnPropertyChanged(nameof(TotalUnreadCount));
+            });
         }
 
         /// <summary>
         /// Supprime une conversation (sauf support)
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void RemoveConversation (string conversationId)
         {
             if (conversationId == "support")
                 return; // Ne pas supprimer la conversation de support
 
-            var conversation = GetConversation(conversationId);
-            if (conversation != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                _conversations.Remove(conversation);
-                OnPropertyChanged(nameof(TotalUnreadCount));
-            }
+                var conversation = GetConversation(conversationId);
+                if (conversation != null)
+                {
+                    _conversations.Remove(conversation);
+                    OnPropertyChanged(nameof(TotalUnreadCount));
+                }
+            });
         }
 
         /// <summary>
@@ -322,17 +342,21 @@ namespace mobile.Services.Stores
 
         /// <summary>
         /// Efface toutes les conversations sauf la conversation de support
+        /// Thread-safe: peut être appelé depuis n'importe quel thread
         /// </summary>
         public void ClearAll ()
         {
-            var conversationsToRemove = _conversations
-                .Where(c => c.Id != "support")
-                .ToList();
-
-            foreach (var conversation in conversationsToRemove)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                _conversations.Remove(conversation);
-            }
+                var conversationsToRemove = _conversations
+                    .Where(c => c.Id != "support")
+                    .ToList();
+
+                foreach (var conversation in conversationsToRemove)
+                {
+                    _conversations.Remove(conversation);
+                }
+            });
         }
 
         /// <summary>

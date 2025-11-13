@@ -4,12 +4,12 @@
              x:Class="mobile.Controls.NotificationCard"
              HorizontalOptions="End"
              VerticalOptions="Start"
-             MinimumWidthRequest="300"
-             MaximumWidthRequest="400"
-             Margin="16,8"
+             MinimumWidthRequest="280"
+             MaximumWidthRequest="420"
+             Margin="12,8"
              IsVisible="False"
              Opacity="0"
-             TranslationX="400">
+             TranslationX="450">
     
     <Border x:Name="CardBorder"
             Padding="16,12"

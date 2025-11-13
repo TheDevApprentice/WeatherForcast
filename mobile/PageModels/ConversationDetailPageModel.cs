@@ -133,6 +133,7 @@ namespace mobile.PageModels
 
         /// <summary>
         /// Charge les messages de la conversation
+        /// Thread-safe: met à jour la collection sur le thread UI
         /// </summary>
         [RelayCommand]
         private async Task LoadMessagesAsync()
@@ -144,15 +145,16 @@ namespace mobile.PageModels
             // Ne pas remplacer la collection, mais modifier son contenu
             var orderedMessages = Conversation.Messages.OrderBy(m => m.Timestamp).ToList();
             
-            Messages.Clear();
-            foreach (var message in orderedMessages)
+            await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                Messages.Add(message);
-            }
+                Messages.Clear();
+                foreach (var message in orderedMessages)
+                {
+                    Messages.Add(message);
+                }
 
-            IsEmpty = Messages.Count == 0;
-
-            await Task.CompletedTask;
+                IsEmpty = Messages.Count == 0;
+            });
         }
 
         /// <summary>

@@ -11,14 +11,17 @@
                 AbsoluteLayout.LayoutBounds="0,0,1,1"
                 AbsoluteLayout.LayoutFlags="All">
     
-    <!-- Conteneur des notifications (en haut à droite, position absolue) -->
+    <!-- Conteneur des notifications (en haut à droite, position absolue)
+         ✅ InputTransparent="True" pour laisser passer les clics
+         ✅ Positionnement absolu pour ne pas affecter le layout
+    -->
     <VerticalStackLayout x:Name="NotificationStack"
                          Spacing="8"
                          Padding="0,20,16,0"
                          VerticalOptions="Start"
-                         HorizontalOptions="End"
+                         HorizontalOptions="Start"
                          AbsoluteLayout.LayoutBounds="1,0,AutoSize,AutoSize"
                          AbsoluteLayout.LayoutFlags="PositionProportional"
-                         InputTransparent="False"/>
+                         InputTransparent="True"/>
     
 </AbsoluteLayout>

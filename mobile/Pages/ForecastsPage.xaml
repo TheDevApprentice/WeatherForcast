@@ -7,14 +7,15 @@
              xmlns:controls="clr-namespace:mobile.Controls"
              x:DataType="viewmodels:ForecastsPageModel"
              Shell.NavBarIsVisible="False">
-    
-    <Grid RowDefinitions="Auto,*">
+
+        <Grid RowDefinitions="Auto,*">
         <!-- Liste des prévisions -->
-        <RefreshView Grid.Row="1" 
+        <ScrollView Grid.Row="1">
+            <RefreshView  
                      IsRefreshing="{Binding IsRefreshing}"
                      Command="{Binding RefreshCommand}">
             <CollectionView ItemsSource="{Binding Forecasts}"
-                            Margin="20,0,20,20">
+                            Margin="10,2,20,2">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="40" Spacing="10" VerticalOptions="Center">
                         <Label Text="🌤️" 
@@ -73,7 +74,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
-        
+            </ScrollView>
         <!-- Chat Support popup -->
         <controls:SupportChatPopup Grid.Row="0"
                                    Grid.RowSpan="2"/>
@@ -85,4 +86,5 @@
                                 VerticalOptions="End"
                                 Margin="0,0,20,20"/>
     </Grid>
+        
 </ContentPage>

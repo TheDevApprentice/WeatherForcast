@@ -21,7 +21,7 @@
                             Padding="1,0,0,2.2"
                             FontSize="16"
                             FontFamily="SegoeSemibold"
-                            Margin="0"
+                            Margin="8,0,0,0"
                             TextColor="{DynamicResource TitleBarForeground}"
                             Background="{DynamicResource AccountButtonBackground}"
                             BorderColor="{DynamicResource AccountButtonBorderColor}"
