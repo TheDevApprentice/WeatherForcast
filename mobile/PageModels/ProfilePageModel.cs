@@ -52,7 +52,13 @@ namespace mobile.PageModels
             }
         }
 
+        // Récupérer les services
+        private readonly ISecureStorageService _secureStorage;
+        private readonly IApiAuthService _apiAuthService;
+
         public ProfilePageModel (
+            ISecureStorageService secureStorage,
+            IApiAuthService apiAuthService,
             IAuthenticationStateService authStateService,
             INetworkMonitorService networkMonitor,
             INotificationService notificationService)
@@ -60,6 +66,8 @@ namespace mobile.PageModels
             _authStateService = authStateService;
             _networkMonitor = networkMonitor;
             _notificationService = notificationService;
+            _secureStorage = secureStorage;
+            _apiAuthService = apiAuthService;
 
             // S'abonner aux changements de connectivité
             _networkMonitor.ConnectivityChanged += OnConnectivityChanged;
@@ -187,21 +195,16 @@ namespace mobile.PageModels
 
                 if (confirm)
                 {
-                    // Récupérer les services
-                    var secureStorage = Shell.Current.Handler?.MauiContext?.Services.GetService<ISecureStorageService>();
-                    var authStateService = Shell.Current.Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
-                    var apiAuthService = Shell.Current.Handler?.MauiContext?.Services.GetService<IApiAuthService>();
-
-                    if (secureStorage != null && authStateService != null && apiAuthService != null)
+                    if (_secureStorage != null && _authStateService != null && _apiAuthService != null)
                     {
                         // Appeler l'API pour déconnecter
-                        await apiAuthService.LogoutAsync();
+                        await _apiAuthService.LogoutAsync();
 
                         // Supprimer les données locales
-                        await secureStorage.ClearAllAsync();
+                        await _secureStorage.ClearAllAsync();
 
                         // Effacer l'état d'authentification centralisé
-                        await authStateService.ClearStateAsync();
+                        await _authStateService.ClearStateAsync();
 
                         // Rediriger vers la page de connexion
                         await Shell.Current.GoToAsync("///login");

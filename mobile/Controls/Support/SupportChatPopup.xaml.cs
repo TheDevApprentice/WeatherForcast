@@ -24,7 +24,7 @@ namespace mobile.Controls
         {
             InitializeComponent();
 
-            _conversationStore = conversationStore ?? throw new ArgumentNullException(nameof(conversationStore));
+            _conversationStore = conversationStore;
             
             // Adapter le layout selon l'appareil et l'orientation
             ApplyResponsiveLayout();

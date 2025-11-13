@@ -106,11 +106,13 @@ namespace mobile
             })
             .AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
 
-            // Shells (navigation)
+            // Shells et MainWindow (navigation)
 #if ANDROID || IOS
             builder.Services.AddSingleton<AppShellMobile>();
+            builder.Services.AddSingleton<Window>();
 #else
             builder.Services.AddSingleton<AppShell>();
+            builder.Services.AddSingleton<MainWindow>();
 #endif
             // Page de démarrage (Splash)
             builder.Services.AddTransient<SplashPage>();

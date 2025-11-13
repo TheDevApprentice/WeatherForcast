@@ -8,14 +8,14 @@ namespace mobile.Services.Internal
     /// </summary>
     public class SessionValidationService : ISessionValidationService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IApiAuthService _apiAuthService;
         private readonly ISecureStorageService _secureStorage;
 
         public SessionValidationService (
-            IServiceProvider serviceProvider,
+            IApiAuthService apiAuthService,
             ISecureStorageService secureStorage)
         {
-            _serviceProvider = serviceProvider;
+            _apiAuthService = apiAuthService;
             _secureStorage = secureStorage;
         }
 
@@ -46,12 +46,8 @@ namespace mobile.Services.Internal
 
                 // Token trouvé et valide, validation via API /me
 
-                // Résoudre IApiAuthService via le ServiceProvider (évite le lifetime mismatch)
-                using var scope = _serviceProvider.CreateScope();
-                var apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
-
                 // Appeler l'API /me
-                var currentUser = await apiAuthService.GetCurrentUserAsync();
+                var currentUser = await _apiAuthService.GetCurrentUserAsync();
 
                 if (currentUser != null)
                 {

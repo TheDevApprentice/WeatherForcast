@@ -23,15 +23,11 @@ namespace mobile.Pages
         private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(SplashPageModel.Procedures))
-            {
                 // Recréer les dots si le nombre de procédures change
                 InitializeProgressDots();
-            }
             else if (e.PropertyName == nameof(SplashPageModel.CurrentStepIndex))
-            {
                 // Mettre à jour les dots existants
                 UpdateProgressDots();
-            }
         }
 
         /// <summary>
@@ -113,9 +109,7 @@ namespace mobile.Pages
         private async void OnStartupCompleted(object? sender, bool success)
         {
             if (success)
-            {
                 await NavigateToAppropriatePageAsync();
-            }
         }
 
         private async Task NavigateToAppropriatePageAsync()
@@ -125,46 +119,19 @@ namespace mobile.Pages
 
             // Mettre à jour l'UI du Shell (sans toucher à la title bar)
             if (Shell.Current is AppShell shell)
-            {
                 shell.UpdateAuthenticationUI(isAuthenticated, updateTitleBar: false);
-            }
 
             // Afficher les éléments de la title bar après le splash
 #if WINDOWS || MACCATALYST
             if (Application.Current?.Windows?.Count > 0 && Application.Current.Windows[0] is MainWindow mw)
-            {
                 mw.ShowTitleBarElements(shouldShowTitleBar);
-            }
 #endif
 
             // Naviguer vers la page appropriée
             if (isAuthenticated)
-            {
-#if ANDROID || IOS
-                // Sur mobile : fermer le splash modal, réafficher le TabBar
-                Shell.SetTabBarIsVisible(Shell.Current, true);
-                await Navigation.PopModalAsync(false);
-                // Le TabBar affichera automatiquement le premier onglet (Dashboard)
-#else
-                // Sur desktop : navigation globale
                 await Shell.Current.GoToAsync("///main");
-#endif
-            }
             else
-            {
-#if ANDROID || IOS
-                // Sur mobile : remplacer splash par login (modal)
-                var loginPage = Handler?.MauiContext?.Services.GetService<Auth.LoginPage>();
-                if (loginPage != null)
-                {
-                    await Navigation.PopModalAsync(false); // Fermer splash
-                    await Shell.Current.Navigation.PushModalAsync(loginPage, false); // Ouvrir login
-                }
-#else
-                // Sur desktop : navigation globale
                 await Shell.Current.GoToAsync("///login");
-#endif
-            }
         }
     }
 }

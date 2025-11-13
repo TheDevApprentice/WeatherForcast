@@ -5,21 +5,21 @@ namespace mobile
 {
     public partial class MainWindow : Window
     {
-        private IThemeService? _themeService;
-        private INotificationStore? _notificationStore;
-        private IConversationStore? _conversationStore;
+        private IThemeService _themeService;
+        private INotificationStore _notificationStore;
+        private IConversationStore _conversationStore;
 
         private NotificationCenterPage? notificationCenterPage;
         private MessageCenterPage? messageCenterPage;
         private ParameterCenterPage? parameterCenterPage;
 
-        public MainWindow ()
+        public MainWindow (IThemeService themeService, INotificationStore notificationStore, IConversationStore conversationStore)
         {
             InitializeComponent();
 
-            _themeService = Handler?.MauiContext?.Services.GetService<IThemeService>();
-            _notificationStore = Handler?.MauiContext?.Services.GetService<INotificationStore>();
-            _conversationStore = Handler?.MauiContext?.Services.GetService<IConversationStore>();
+            _themeService = themeService;
+            _notificationStore = notificationStore;
+            _conversationStore = conversationStore;
 
             try
             {

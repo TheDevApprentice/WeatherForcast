@@ -161,12 +161,11 @@ namespace mobile
             // Mettre à jour les informations utilisateur dans le header
             if (isAuthenticated)
             {
-                var authStateService = Handler?.MauiContext?.Services.GetService<IAuthenticationStateService>();
-                if (authStateService != null)
+                if (_authStateService != null)
                 {
                     MainThread.BeginInvokeOnMainThread(async () =>
                     {
-                        var authState = await authStateService.GetStateAsync();
+                        var authState = await _authStateService.GetStateAsync();
 
                         if (authState.IsAuthenticated)
                         {

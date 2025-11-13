@@ -82,52 +82,30 @@ namespace mobile
 #endif
 
 #if WINDOWS || MACCATALYST
-            // Utiliser MainWindow avec TitleBar personnalisée (Windows et Mac)
-            var window = new MainWindow
-            {
-                Page = shell
-            };
+            // Récupérer MainWindow via DI (Windows et Mac)
+            var window = _serviceProvider.GetRequiredService<MainWindow>();
+            window.Page = shell;
 
             // Masquer les éléments de la title bar AVANT la navigation vers le splash
             window.HideTitleBarElements();
             // Éléments de la title bar masqués avant le splash
 #else
-            // Utiliser Window standard (Android, iOS)
-            var window = new Window(shell);
+            // Récupérer Window via DI (Android, iOS)
+            var window = _serviceProvider.GetRequiredService<Window>();
+            window.Page = shell;
 #endif
 
-            // Créer et enregistrer l'overlay global pour les transitions de thème
-            // L'overlay sera créé dans ThemeService lors de la première transition
-            // Pour l'instant, on enregistre null et ThemeService créera l'overlay à la volée
-            // ThemeService prêt pour les transitions de thème
-            // Naviguer vers la page de démarrage (Splash) qui gérera toutes les procédures
             MainThread.BeginInvokeOnMainThread(async () =>
             {
                 try
                 {
                     // Démarrage de l'application
-
-#if ANDROID || IOS
-                    // Sur mobile avec TabBar : masquer le TabBar et afficher Splash en modal
-                    Shell.SetTabBarIsVisible(shell, false);
-                    var splashPage = _serviceProvider.GetRequiredService<SplashPage>();
-                    await shell.Navigation.PushModalAsync(splashPage, false);
-#else
-                    // Sur desktop avec Flyout : navigation globale vers splash
                     await shell.GoToAsync("///splash");
-#endif
                 }
                 catch (Exception ex)
                 {
 #if DEBUG
                     await Shell.Current.DisplayAlert("Debug App", $"❌ Erreur lors de la navigation vers SplashPage: {ex.Message}\n{ex.GetType().Name}", "OK");
-#endif
-                    // En cas d'erreur, rediriger vers login par sécurité
-#if ANDROID || IOS
-                    var loginPage = _serviceProvider.GetRequiredService<LoginPage>();
-                    await shell.Navigation.PushModalAsync(loginPage, false);
-#else
-                    await shell.GoToAsync("///login");
 #endif
                 }
             });

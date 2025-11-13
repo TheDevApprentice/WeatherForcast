@@ -19,6 +19,8 @@ namespace mobile.Services.Internal
         public IReadOnlyList<StartupProcedure> Procedures => _procedures.AsReadOnly();
 
         public StartupService (
+            IApiAuthService apiAuthService,
+            ISessionValidationService sessionValidation,
             IServiceProvider serviceProvider,
             ISecureStorageService secureStorage,
             IAuthenticationStateService authState,
@@ -26,11 +28,11 @@ namespace mobile.Services.Internal
         {
             _secureStorage = secureStorage;
             _authState = authState;
+            _apiAuthService = apiAuthService;
+            _sessionValidation = sessionValidation;
 
             // Résoudre les services via ServiceProvider pour éviter les problèmes de lifetime
             using var scope = serviceProvider.CreateScope();
-            _apiAuthService = scope.ServiceProvider.GetRequiredService<IApiAuthService>();
-            _sessionValidation = scope.ServiceProvider.GetRequiredService<ISessionValidationService>();
 
             // Initialiser la queue de procédures
             _procedures = new List<StartupProcedure>
