@@ -250,16 +250,17 @@ namespace mobile.Services.Internal
 
                     // Session valide : extraire les infos utilisateur du token JWT
                     // Session valide (mode online)
-                    var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
+                    var userId = await _secureStorage.GetUserIdFromTokenAsync();
+                    var userInfo = await _secureStorage.GetUserInfoAsync();
 
-                    if (userInfo.HasValue)
+                    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userInfo.Email) && !string.IsNullOrEmpty(userInfo.FirstName) && !string.IsNullOrEmpty(userInfo.LastName))
                     {
                         // Sauvegarder l'état d'authentification
                         var authState = AuthenticationState.Authenticated(
-                            userInfo.Value.UserId,
-                            userInfo.Value.Email,
-                            userInfo.Value.FirstName,
-                            userInfo.Value.LastName
+                            userId,
+                            userInfo.Email,
+                            userInfo.FirstName,
+                            userInfo.LastName
                         );
 
                         await _authState.SetStateAsync(authState);
