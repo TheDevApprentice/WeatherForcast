@@ -36,6 +36,8 @@
                                             HeightRequest="60"
                                             WidthRequest="60"
                                             VerticalOptions="Center"
+                                            Margin="0"
+                                            Padding="0"
                                             HorizontalOptions="Center"
                                             StrokeThickness="0"
                                             StrokeShape="RoundRectangle 30">
@@ -160,12 +162,15 @@
                     <VerticalStackLayout Spacing="15">
                         
                         <!-- Avatar et nom -->
-                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
                             <Border WidthRequest="80" 
                                     HeightRequest="80"
                                     StrokeThickness="0"
+                                    Margin="0"
+                                    Padding="0"
                                     StrokeShape="RoundRectangle 40"
-                                    HorizontalOptions="Center">
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center">
                                 <Border.Background>
                                     <SolidColorBrush Color="{Binding SelectedProfile.Email, Converter={StaticResource StringToColorConverter}}" />
                                 </Border.Background>
@@ -174,6 +179,8 @@
                                        FontAttributes="Bold"
                                        TextColor="White"
                                        HorizontalOptions="Center"
+                                       VerticalTextAlignment="Center"
+                                       HorizontalTextAlignment="Center"
                                        VerticalOptions="Center" />
                             </Border>
                             
