@@ -2,6 +2,8 @@ using Microsoft.Maui.Layouts;
 using mobile.Controls;
 using mobile.Services.Notifications.Interfaces;
 using mobile.Services.Stores;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 
 namespace mobile.Services.Notifications
 {
@@ -186,13 +188,17 @@ namespace mobile.Services.Notifications
                 };
 
                 // Thread-safe: ajouter au store sur le thread UI
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    _notificationStore.AddNotification(notification);
-                    // Notification ajoutée au store
-                });
+                // await MainThread.InvokeOnMainThreadAsync(() =>
+                // {
+                //     _notificationStore.AddNotification(notification);
+                //     // Notification ajoutée au store
+                // });
 
-                // Afficher la notification à l'écran (desktop uniquement)
+#if ANDROID || IOS
+                // Affichage mobile : Snackbar en bas de l'écran
+                await ShowMobileNotificationAsync(title, message, type, durationMs);
+#else
+                // Afficher la notification à l'écran (desktop : overlay en haut à droite)
                 await EnsureInitializedAsync();
 
                 if (_notificationManager != null)
@@ -213,6 +219,7 @@ namespace mobile.Services.Notifications
                 {
                     // Gestionnaire de notifications non disponible - notification stockée mais non affichée
                 }
+#endif
             }
             catch (Exception ex)
             {
@@ -242,5 +249,50 @@ namespace mobile.Services.Notifications
 
             return window?.Page as ContentPage;
         }
+
+#if ANDROID || IOS
+        /// <summary>
+        /// Affichage des notifications sur mobile via Snackbar (CommunityToolkit)
+        /// </summary>
+        private async Task ShowMobileNotificationAsync (string title, string message, NotificationType type, int durationMs)
+        {
+            var text = string.IsNullOrWhiteSpace(title)
+                ? message
+                : $"{title}\n{message}";
+
+            var options = GetSnackbarOptions(type);
+
+            var snackbar = Snackbar.Make(
+                text,
+                duration: TimeSpan.FromMilliseconds(durationMs),
+                visualOptions: options);
+
+            await snackbar.Show();
+        }
+
+        /// <summary>
+        /// Style du Snackbar selon le type de notification
+        /// </summary>
+        private static SnackbarOptions GetSnackbarOptions (NotificationType type)
+        {
+            var background = type switch
+            {
+                NotificationType.Success => Color.FromArgb("#10B981"), // Vert
+                NotificationType.Error   => Color.FromArgb("#EF4444"), // Rouge
+                NotificationType.Warning => Color.FromArgb("#F59E0B"), // Orange
+                NotificationType.Info    => Color.FromArgb("#3B82F6"), // Bleu
+                _                        => Color.FromArgb("#374151")  // Gris neutre
+            };
+
+            return new SnackbarOptions
+            {
+                BackgroundColor = background,
+                TextColor = Colors.White,
+                CornerRadius = new CornerRadius(12),
+                Font = Microsoft.Maui.Font.SystemFontOfSize(14),
+                ActionButtonFont = Microsoft.Maui.Font.SystemFontOfSize(14)
+            };
+        }
+#endif
     }
 }
