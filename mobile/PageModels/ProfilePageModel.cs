@@ -8,10 +8,6 @@ namespace mobile.PageModels
 {
     public partial class ProfilePageModel : ObservableObject
     {
-        private readonly IAuthenticationStateService _authStateService;
-        private readonly INetworkMonitorService _networkMonitor;
-        INotificationService _notificationService;
-
         [ObservableProperty]
         private string userName = "Utilisateur";
 
@@ -55,6 +51,9 @@ namespace mobile.PageModels
         // Récupérer les services
         private readonly ISecureStorageService _secureStorage;
         private readonly IApiAuthService _apiAuthService;
+        private readonly IAuthenticationStateService _authStateService;
+        private readonly INetworkMonitorService _networkMonitor;
+        private readonly INotificationService _notificationService;
 
         public ProfilePageModel (
             ISecureStorageService secureStorage,

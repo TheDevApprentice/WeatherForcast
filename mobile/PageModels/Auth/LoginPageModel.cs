@@ -125,7 +125,7 @@ namespace mobile.PageModels.Auth
                     var userId = await _secureStorage.GetUserIdFromTokenAsync();
                     var userInfo = await _secureStorage.GetUserInfoAsync();
 
-                    if (!string.IsNullOrEmpty(userId))
+                    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(userInfo.Email) && !string.IsNullOrEmpty(userInfo.FirstName) && !string.IsNullOrEmpty(userInfo.LastName))
                     {
                         // Sauvegarder l'état d'authentification centralisé
                         var authState = AuthenticationState.Authenticated(
