@@ -78,6 +78,10 @@
         </ScrollView>
         
         <!-- Support Overlay (Chat Popup + Button) -->
-        <controls:SupportOverlay Grid.Row="0" Grid.RowSpan="3"/>
+        <controls:SupportOverlay
+            Grid.Row="0" Grid.RowSpan="3"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,0,0" />
     </Grid>
 </ContentPage>

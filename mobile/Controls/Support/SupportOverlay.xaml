@@ -2,26 +2,22 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:mobile.Controls"
-             x:Class="mobile.Controls.SupportOverlay">
-    
-    <!-- Conteneur absolu pour les contrôles de support (chat popup + bouton) -->
-    <!-- InputTransparent="True" permet au scroll de passer à travers -->
-    <Grid RowDefinitions="*" ColumnDefinitions="*" 
-          IsClippedToBounds="False"
-          InputTransparent="False"
-          >
-        <!-- Chat Support popup -->
-        <controls:SupportChatPopup Grid.Row="0"
-                                   Grid.Column="0"
-                                   />
-        
-        <!-- Bouton Support flottant -->
-        <controls:SupportButton Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalOptions="End"
-                                VerticalOptions="End"
-                                Margin="0,0,20,20"
-                                />
+             x:Class="mobile.Controls.SupportOverlay"
+             HorizontalOptions="End"
+             VerticalOptions="End"
+             Padding="0,0,0,0"
+             Margin="0,0,0,0">
+
+    <!-- Petit conteneur local : ne pas étirer sur toute la page -->
+    <Grid>
+
+        <!-- Popup de support : s'affiche au-dessus du contenu de l'overlay -->
+        <controls:SupportChatPopup />
+
+        <!-- Bouton flottant en bas à droite de l'overlay -->
+        <controls:SupportButton
+            HorizontalOptions="End"
+            VerticalOptions="End" />
     </Grid>
-    
+
 </ContentView>

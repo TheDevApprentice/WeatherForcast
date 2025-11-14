@@ -4,7 +4,8 @@
              xmlns:buttons="clr-namespace:mobile.Controls"
              x:Class="mobile.Controls.SupportChatPopup"
              x:Name="Root"
-             Opacity="0">
+             Opacity="0"
+             IsVisible="False">
     <ContentView.Margin>
         <OnPlatform x:TypeArguments="Thickness">
             <On Platform="WinUI, MacCatalyst" Value="0,0,20,20"/>
