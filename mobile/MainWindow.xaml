@@ -67,13 +67,9 @@
                                        Padding="0,0,12,0">
   
                     <!-- Bouton message avec badge -->
-                    <Border Padding="0"
-                            BackgroundColor="Transparent"
-                            StrokeThickness="0">
-                        <Grid HeightRequest="41" 
-                              WidthRequest="41">
                             <!-- Bouton Messages -->
-                            <ImageButton x:Name="MessagesButton"
+                    <ImageButton x:Name="MessagesButton"
+                               Grid.Column="0"
                                HeightRequest="36"
                                WidthRequest="36"
                                BorderWidth="0"
@@ -87,37 +83,9 @@
                                 </ImageButton.Source>
                             </ImageButton>
 
-                            <!-- Badge de compteur -->
-                            <Border x:Name="MessageBadge"
-                                    WidthRequest="10"
-                                    HeightRequest="10"
-                                    Background="#EF4444"
-                                    StrokeShape="Ellipse"
-                                    StrokeThickness="0"
-                                    Stroke="{DynamicResource TitleBarBackground}"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Start"
-                                    Margin="0,3,6,0"
-                                    IsVisible="True">
-                                <Label x:Name="MessageBadgeText"
-                                       Text="0"
-                                       FontSize="10"
-                                       FontAttributes="Bold"
-                                       TextColor="{DynamicResource PrimaryTextColor}" 
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center"
-                                       Margin="0,0,0,1"/>
-                            </Border>
-                        </Grid>
-                    </Border>
-
                     <!-- Bouton Notifications avec badge -->
-                    <Border Padding="0"
-                            BackgroundColor="Transparent"
-                            StrokeThickness="0">
-                        <Grid HeightRequest="41" 
-                              WidthRequest="41">
-                            <ImageButton x:Name="NotificationsButton"
+
+                    <ImageButton x:Name="NotificationsButton"
                                          HeightRequest="36"
                                          WidthRequest="36"
                                          BorderWidth="0"
@@ -130,30 +98,6 @@
                                                      Color="{DynamicResource TitleBarForeground}" />
                                 </ImageButton.Source>
                             </ImageButton>
-                            
-                            <!-- Badge de compteur -->
-                            <Border x:Name="NotificationBadge"
-                                    WidthRequest="10"
-                                    HeightRequest="10"
-                                    Background="#EF4444"
-                                    StrokeShape="Ellipse"
-                                    StrokeThickness="0"
-                                    Stroke="{DynamicResource TitleBarBackground}"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Start"
-                                    Margin="0,-3,-3,0"
-                                    IsVisible="True">
-                                <Label x:Name="NotificationBadgeText"
-                                       Text="1"
-                                       FontSize="10"
-                                       FontAttributes="Bold"
-                                       TextColor="{DynamicResource PrimaryTextColor}"
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center"
-                                       Margin="0,0,0,1"/>
-                            </Border>
-                        </Grid>
-                    </Border>
                     
                     <!-- Bouton Settings -->
                     <ImageButton x:Name="SettingsButton"

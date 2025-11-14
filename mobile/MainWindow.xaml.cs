@@ -33,14 +33,14 @@ namespace mobile
                 if (_notificationStore != null)
                 {
                     _notificationStore.PropertyChanged += OnNotificationStoreChanged;
-                    UpdateNotificationBadge();
+                    //UpdateNotificationBadge();
                 }
 
                 // S'abonner aux changements du store de conversations
                 if (_conversationStore != null)
                 {
                     _conversationStore.PropertyChanged += OnConversationStoreChanged;
-                    UpdateMessageBadge();
+                    //UpdateMessageBadge();
                 }
             }
             catch { }
@@ -155,13 +155,13 @@ namespace mobile
                 var msg = this.FindByName<ImageButton>("MessagesButton");
                 var noti = this.FindByName<ImageButton>("NotificationsButton");
                 var set = this.FindByName<ImageButton>("SettingsButton");
-                var msgBdg = this.FindByName<Border>("MessageBadge");
-                var notiBdg = this.FindByName<Border>("NotificationBadge");
+                //var msgBdg = this.FindByName<Border>("MessageBadge");
+                //var notiBdg = this.FindByName<Border>("NotificationBadge");
 
                 if (msg != null) msg.IsVisible = false;
-                if (msgBdg != null) msgBdg.IsVisible = false;
+                //if (msgBdg != null) msgBdg.IsVisible = false;
                 if (noti != null) noti.IsVisible = false;
-                if (notiBdg != null) notiBdg.IsVisible = false;
+                //if (notiBdg != null) notiBdg.IsVisible = false;
                 if (set != null) set.IsVisible = false;
 
                 // Masquer les boutons Account et People
@@ -235,9 +235,9 @@ namespace mobile
             {
                 // Boutons de droite (Messages, Notifications, Settings)
                 var msg = this.FindByName<ImageButton>("MessagesButton");
-                var msgBdg = this.FindByName<Border>("MessageBadge");
+                //var msgBdg = this.FindByName<Border>("MessageBadge");
                 var noti = this.FindByName<ImageButton>("NotificationsButton");
-                var notiBdg = this.FindByName<Border>("NotificationBadge");
+                //var notiBdg = this.FindByName<Border>("NotificationBadge");
                 var set = this.FindByName<ImageButton>("SettingsButton");
                 // var search = this.FindByName<SearchBar>("TitleSearchBar");
 
@@ -246,21 +246,21 @@ namespace mobile
                     msg.IsVisible = isAuthenticated;
                     msg.IsEnabled = isAuthenticated;
                 }
-                if (msgBdg != null)
-                {
-                    msgBdg.IsVisible = isAuthenticated;
-                    msgBdg.IsEnabled = isAuthenticated;
-                }
+                //if (msgBdg != null)
+                //{
+                //    msgBdg.IsVisible = isAuthenticated;
+                //    msgBdg.IsEnabled = isAuthenticated;
+                //}
                 if (noti != null)
                 {
                     noti.IsVisible = isAuthenticated;
                     noti.IsEnabled = isAuthenticated;
                 }
-                if (notiBdg != null)
-                {
-                    notiBdg.IsVisible = isAuthenticated;
-                    notiBdg.IsEnabled = isAuthenticated;
-                }
+                //if (notiBdg != null)
+                //{
+                //    notiBdg.IsVisible = isAuthenticated;
+                //    notiBdg.IsEnabled = isAuthenticated;
+                //}
                 if (set != null)
                 {
                     set.IsVisible = isAuthenticated;
@@ -352,48 +352,48 @@ namespace mobile
         {
             if (e.PropertyName == nameof(INotificationStore.UnreadCount))
             {
-                UpdateNotificationBadge();
+                //UpdateNotificationBadge();
             }
         }
 
         /// <summary>
         /// Met à jour le badge de compteur de notifications
         /// </summary>
-        private void UpdateNotificationBadge ()
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                try
-                {
-                    if (_notificationStore != null)
-                    {
-                        var unreadCount = _notificationStore.UnreadCount;
-                        // Mise à jour badge notifications
+//        private void UpdateNotificationBadge ()
+//        {
+//            MainThread.BeginInvokeOnMainThread(() =>
+//            {
+//                try
+//                {
+//                    if (_notificationStore != null)
+//                    {
+//                        var unreadCount = _notificationStore.UnreadCount;
+//                        // Mise à jour badge notifications
 
-                        // Trouver les éléments par nom si pas encore initialisés
-                        var badge = NotificationBadge ?? this.FindByName<Border>("NotificationBadge");
-                        var badgeText = NotificationBadgeText ?? this.FindByName<Label>("NotificationBadgeText");
+//                        // Trouver les éléments par nom si pas encore initialisés
+//                        var badge = NotificationBadge ?? this.FindByName<Border>("NotificationBadge");
+//                        var badgeText = NotificationBadgeText ?? this.FindByName<Label>("NotificationBadgeText");
 
-                        if (badge != null && badgeText != null)
-                        {
-                            badge.IsVisible = unreadCount > 0;
-                            badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
-                            // Badge mis à jour
-                        }
-                        else
-                        {
-                            // Badge ou BadgeText introuvable
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-#if DEBUG
-                    Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de la mise à jour du badge notifications: {ex.Message}\n{ex.GetType().Name}", "OK");
-#endif
-                }
-            });
-        }
+//                        if (badge != null && badgeText != null)
+//                        {
+//                            badge.IsVisible = unreadCount > 0;
+//                            badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
+//                            // Badge mis à jour
+//                        }
+//                        else
+//                        {
+//                            // Badge ou BadgeText introuvable
+//                        }
+//                    }
+//                }
+//                catch (Exception ex)
+//                {
+//#if DEBUG
+//                    Shell.Current.DisplayAlert("Debug MainWindow", $"❌ Erreur lors de la mise à jour du badge notifications: {ex.Message}\n{ex.GetType().Name}", "OK");
+//#endif
+//                }
+//            });
+//        }
 
         /// <summary>
         /// Appelé quand on clique sur le bouton Messages
@@ -466,19 +466,19 @@ namespace mobile
                         // Mise à jour badge messages
 
                         // Trouver les éléments par nom si pas encore initialisés
-                        var badge = MessageBadge ?? this.FindByName<Border>("MessageBadge");
-                        var badgeText = MessageBadgeText ?? this.FindByName<Label>("MessageBadgeText");
+                        //var badge = MessageBadge ?? this.FindByName<Border>("MessageBadge");
+                        //var badgeText = MessageBadgeText ?? this.FindByName<Label>("MessageBadgeText");
 
-                        if (badge != null && badgeText != null)
-                        {
-                            badge.IsVisible = unreadCount > 0;
-                            badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
-                            // Badge mis à jour
-                        }
-                        else
-                        {
-                            // Badge ou BadgeText introuvable
-                        }
+                        //if (badge != null && badgeText != null)
+                        //{
+                        //    badge.IsVisible = unreadCount > 0;
+                        //    badgeText.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
+                        //    // Badge mis à jour
+                        //}
+                        //else
+                        //{
+                        //    // Badge ou BadgeText introuvable
+                        //}
                     }
                 }
                 catch (Exception ex)
