@@ -122,16 +122,17 @@ namespace mobile.PageModels.Auth
                     await _secureStorage.SaveUserInfoAsync(response.Email, response.FirstName, response.LastName);
 
                     // Extraire l'ID utilisateur du token JWT
-                    var userInfo = await _secureStorage.GetUserInfoFromTokenAsync();
+                    var userId = await _secureStorage.GetUserIdFromTokenAsync();
+                    var userInfo = await _secureStorage.GetUserInfoAsync();
 
-                    if (userInfo.HasValue)
+                    if (!string.IsNullOrEmpty(userId))
                     {
                         // Sauvegarder l'état d'authentification centralisé
                         var authState = AuthenticationState.Authenticated(
-                            userInfo.Value.UserId,
-                            userInfo.Value.Email,
-                            userInfo.Value.FirstName,
-                            userInfo.Value.LastName
+                            userId,
+                            userInfo.Email,
+                            userInfo.FirstName,
+                            userInfo.LastName
                         );
                         await _authState.SetStateAsync(authState);
 
@@ -140,9 +141,9 @@ namespace mobile.PageModels.Auth
                         {
                             var profile = new SavedUserProfile
                             {
-                                Email = userInfo.Value.Email,
-                                FirstName = userInfo.Value.FirstName,
-                                LastName = userInfo.Value.LastName,
+                                Email = userInfo.Email,
+                                FirstName = userInfo.FirstName,
+                                LastName = userInfo.LastName,
                                 LastLoginDate = DateTime.Now
                             };
                             await _savedProfiles.SaveProfileAsync(profile);
